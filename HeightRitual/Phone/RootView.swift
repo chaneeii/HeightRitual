@@ -70,15 +70,13 @@ private struct MakeStack: View {
                 .navigationTitle("Make mode")
                 // One place decides the tab bar for the whole stack: shown only on this first screen.
                 .toolbar(state.makePath.isEmpty ? .visible : .hidden, for: .tabBar)
-                .screenChrome(subtitle: "Choose a family member and record their height")
+                .screenChrome(statusInContent: true)
                 .navigationDestination(for: NavStep.self) { step in
                     switch step {
                     case .film:
                         FilmView(film: state.filmState)
                     case .height:
-                        PlaceholderScreen(title: "Height", systemImage: "ruler",
-                                          message: "The height step comes with the cut-out (milestone 6).",
-                                          action: "Retake")
+                        HeightView(height: state.heightState)
                     default:
                         EmptyView()
                     }
@@ -98,7 +96,7 @@ private struct MemoryStack: View {
                 .navigationTitle("Memory mode")
                 // One place decides the tab bar for the whole stack: shown only on this first screen.
                 .toolbar(state.memoryPath.isEmpty ? .visible : .hidden, for: .tabBar)
-                .screenChrome(subtitle: "Choose a family member to see how they have grown")
+                .screenChrome(statusInContent: true)
                 .navigationDestination(for: NavStep.self) { step in
                     switch step {
                     case .wall:

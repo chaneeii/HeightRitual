@@ -58,6 +58,12 @@ extension AppState {
         return false
     }
 
+    /// The height step's state shown on M3.
+    var heightState: HeightState {
+        if case .makeHeight(let height) = route { return height }
+        return .editing
+    }
+
     /// The film state shown on M2; ready while M3 is on top of it.
     var filmState: FilmState {
         if case .makeFilm(let film) = route { return film }

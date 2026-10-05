@@ -28,33 +28,26 @@ struct BigButton: View {
                 }
             }
             .font(.headline)
-            .frame(maxWidth: .infinity)
+            // With the system's regular padding this makes about 48 pt.
+            .frame(maxWidth: .infinity, minHeight: 34)
         }
         .tint(tint)
     }
 }
 
-/// Settings button and the status chips, on every Make and Memory screen. An optional subtitle
-/// sits under the title, above the chips.
+/// Settings button on every Make and Memory screen, and the status chips under the title.
+/// Screens with a large title (the first screen of each tab) show the chips in their own content
+/// instead (`statusInContent`): a top inset would cover the large title under iOS 26's glass bar.
 struct ScreenChrome: ViewModifier {
-    var subtitle: LocalizedStringKey?
+    var statusInContent = false
     @Environment(AppState.self) private var state
 
     func body(content: Content) -> some View {
         content
             .safeAreaInset(edge: .top, spacing: 0) {
-                VStack(alignment: .leading, spacing: 0) {
-                    if let subtitle {
-                        Text(subtitle)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal)
-                            .padding(.bottom, 2)
-                    }
+                if !statusInContent {
                     StatusRow()
                 }
-                .background(.bar)
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -69,8 +62,8 @@ struct ScreenChrome: ViewModifier {
 }
 
 extension View {
-    func screenChrome(subtitle: LocalizedStringKey? = nil) -> some View {
-        modifier(ScreenChrome(subtitle: subtitle))
+    func screenChrome(statusInContent: Bool = false) -> some View {
+        modifier(ScreenChrome(statusInContent: statusInContent))
     }
 }
 
@@ -95,7 +88,6 @@ struct StatusRow: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 6)
-        .background(.bar)
     }
 
     private func chip(_ text: String, systemImage: String, active: Bool) -> some View {

@@ -9,10 +9,25 @@ struct MemberGridView: View {
     /// Fills the width: two columns on iPhone, more on iPad.
     private let columns = [GridItem(.adaptive(minimum: 160, maximum: 280), spacing: 12)]
 
+    /// Subtitle and status chips right under the large title, scrolling with the content.
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(mode == .make ? LocalizedStringKey("Choose a family member and record their height")
+                               : "Choose a family member to see how they have grown")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal)
+            StatusRow()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     var body: some View {
         let members = state.store.members
         Group {
             if members.isEmpty && mode == .memory {
+              VStack(spacing: 0) {
+                header
                 ContentUnavailableView {
                     Label("No family members yet", systemImage: "person.2")
                 } description: {
@@ -22,8 +37,10 @@ struct MemberGridView: View {
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
                 }
+              }
             } else {
                 ScrollView {
+                    header
                     if members.isEmpty {
                         Text("Add the first family member")
                             .font(.title3)

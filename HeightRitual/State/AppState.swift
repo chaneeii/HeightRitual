@@ -35,7 +35,7 @@ final class AppState {
         store: Store(),
         settings: SettingsStore(),
         camera: CameraController(),
-        processor: PlaceholderProcessor(),
+        processor: RawClipProcessor(),
         controller: ControllerManager(),
         scheduler: TaskScheduler()
     )

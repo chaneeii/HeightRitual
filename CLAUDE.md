@@ -11,8 +11,9 @@ corrects it, and every past record is projected life-size on the wall. A Bluetoo
 ## Current state
 
 Milestones 1 to 3 are done; milestone 5 (film: camera, foot guide, camera position page) is written
-and installed but not yet checked on a device. M3 (height) and R3 (one record) are placeholders;
-the cut-out is a placeholder (`Capture/CaptureProviding.swift`).
+and installed but not yet checked on a device. M3 (height) works without the cut-out:
+`Capture/RawClipProcessor.swift` keeps the filmed clip as it is and the height starts at the last
+record (no estimate yet). R3 (one record) is a placeholder.
 
 - The phone UI follows Apple's HIG: system TabView (Make / Memory, hidden on pushed screens),
   NavigationStacks drawn from `AppState.route` (`State/Navigation.swift`; the system back button

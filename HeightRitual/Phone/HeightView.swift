@@ -25,6 +25,10 @@ struct HeightView: View {
                     Text("Stand with your heels on the line and film again.")
                 }
                 BigButton(title: "Retake", prominent: true) { state.handle(.cancel) }
+                if state.draft?.clip.rawVideoURL != nil {
+                    // Testing without a person: the clip is kept as filmed, the height set by hand.
+                    BigButton(title: "Use this clip anyway") { state.useClipWithoutPerson() }
+                }
 
             case .editing:
                 editing
@@ -42,7 +46,10 @@ struct HeightView: View {
         let unit = state.settings.unit
         let mm = state.draft?.heightMM
 
-        if let url = state.draft?.clip.videoURL {
+        if let poster = state.draft?.clip.posterURL, let image = UIImage(contentsOfFile: poster.path) {
+            ReferencePhoto(image: image, clip: state.draft?.clip, heightMM: mm, camera: state.settings.camera)
+                .frame(maxHeight: .infinity)
+        } else if let url = state.draft?.clip.rawVideoURL ?? state.draft?.clip.videoURL {
             LoopingVideo(url: url)
                 .aspectRatio(FootGuide.frameAspect, contentMode: .fit)
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -93,5 +100,43 @@ struct HeightView: View {
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(.bordered)
+    }
+}
+
+/// The still from the reference half second with two lines: where the head top was found
+/// (dotted) and where the height in the field is (dashed, follows - and +; needs the camera position).
+private struct ReferencePhoto: View {
+    let image: UIImage
+    let clip: ProcessedClip?
+    let heightMM: Int?
+    let camera: CameraPosition?
+
+    var body: some View {
+        Image(uiImage: image)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .overlay {
+                GeometryReader { geo in
+                    let h = geo.size.height
+                    if let head = clip?.headY {
+                        line(at: head * h, width: geo.size.width, color: .white, dash: [3, 4])
+                    }
+                    if let camera, let mm = heightMM, camera.floorY > camera.y100 {
+                        let y = camera.floorY - Double(mm) / 1000 * (camera.floorY - camera.y100)
+                        line(at: y * h, width: geo.size.width, color: Color(red: 0.96, green: 0.50, blue: 0.42), dash: [10, 6])
+                    }
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .accessibilityLabel("Photo from the clip with the head top marked")
+    }
+
+    private func line(at y: CGFloat, width: CGFloat, color: Color, dash: [CGFloat]) -> some View {
+        Path { path in
+            path.move(to: CGPoint(x: 0, y: y))
+            path.addLine(to: CGPoint(x: width, y: y))
+        }
+        .stroke(color, style: StrokeStyle(lineWidth: 2, dash: dash))
+        .shadow(color: .black.opacity(0.6), radius: 1)
     }
 }

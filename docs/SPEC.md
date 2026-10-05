@@ -431,3 +431,12 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
   Cancel / Back), Settings as a sheet with grouped lists, A1 as a sheet from M1. Light, dark or
   system appearance is a setting; the wall image is always black. The wall copy has a full-screen
   button. The grid title is "Choose a family member".
+- Changed 6 Oct (team):
+  - First start shows three welcome pages (what it is, Make, Memory) before setup; "Set up later"
+    skips setup, which stays reachable from the banner and Settings.
+  - Each record keeps the clip as filmed besides the cut-out. Memory has a Show background button:
+    off shows only the person (default), on shows the clip as filmed. About twice the storage.
+  - M3 shows a still from the reference half second with the found head top (dotted) and the height
+    in the field (dashed, needs the camera position). "Nobody found" also offers "Use this clip
+    anyway", which keeps the clip as filmed with the height set by hand (testing without a person).
+  - The cut-out writes no sound yet; the clip as filmed keeps it.

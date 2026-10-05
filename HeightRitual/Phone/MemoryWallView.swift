@@ -18,11 +18,21 @@ struct MemoryWallView: View {
                     Text("Switch to Make to film one.")
                 }
             } else {
-                Picker("Play", selection: autoPlayBinding) {
-                    Text("Auto play").tag(true)
-                    Text("Manual").tag(false)
+                HStack(spacing: 8) {
+                    Picker("Play", selection: autoPlayBinding) {
+                        Text("Auto play").tag(true)
+                        Text("Manual").tag(false)
+                    }
+                    .pickerStyle(.segmented)
+                    // Clips as filmed, or only the person (SPEC: cut-out by default).
+                    Toggle(isOn: Binding(get: { state.settings.showBackground },
+                                         set: { state.setShowBackground($0) })) {
+                        Label("Background", systemImage: "photo")
+                    }
+                    .toggleStyle(.button)
+                    .labelStyle(.iconOnly)
+                    .accessibilityLabel("Show background")
                 }
-                .pickerStyle(.segmented)
 
                 WallCopy()
                     .frame(maxHeight: .infinity)

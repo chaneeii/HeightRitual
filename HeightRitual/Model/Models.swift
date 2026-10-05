@@ -40,6 +40,14 @@ struct GrowthRecord: Identifiable, Codable, Hashable {
     /// Body height / clip height, and feet above the clip's bottom edge / clip height.
     var bodyRatio: Double?
     var floorRatio: Double?
+    /// The clip as filmed, with its background, and the same layout numbers for it.
+    var rawVideoFile: String?
+    var rawBodyRatio: Double?
+    var rawFloorRatio: Double?
+    /// Width / height of the cut-out and of the raw clip; clip length in seconds.
+    var clipAspect: Double?
+    var rawAspect: Double?
+    var duration: Double?
 }
 
 enum Palette {

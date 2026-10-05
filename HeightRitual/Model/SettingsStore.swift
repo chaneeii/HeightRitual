@@ -99,6 +99,8 @@ final class SettingsStore {
     var unit: HeightUnit { didSet { save(unit, "unit") } }
     var soundOn: Bool { didSet { save(soundOn, "soundOn") } }
     var autoPlay: Bool { didSet { save(autoPlay, "autoPlay") } }
+    /// Memory shows clips as filmed, with their background, instead of the cut-out.
+    var showBackground: Bool { didSet { save(showBackground, "showBackground") } }
     var appearance: Appearance { didSet { save(appearance, "appearance") } }
     var language: AppLanguage {
         didSet {
@@ -123,6 +125,7 @@ final class SettingsStore {
         unit = load("unit") ?? .cm
         soundOn = load("soundOn") ?? false
         autoPlay = load("autoPlay") ?? false
+        showBackground = load("showBackground") ?? false
         appearance = load("appearance") ?? .system
         let language: AppLanguage = load("language") ?? .system
         self.language = language

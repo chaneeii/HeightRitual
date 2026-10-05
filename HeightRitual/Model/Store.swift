@@ -109,6 +109,12 @@ final class Store {
             record.hasSound = clip.hasSound
             record.bodyRatio = clip.bodyRatio
             record.floorRatio = clip.floorRatio
+            record.rawVideoFile = moveIntoMedia(clip.rawVideoURL, name: "\(record.id.uuidString)-raw.mov")
+            record.rawBodyRatio = clip.rawBodyRatio
+            record.rawFloorRatio = clip.rawFloorRatio
+            record.clipAspect = clip.clipAspect
+            record.rawAspect = clip.rawAspect
+            record.duration = clip.duration
         }
         records.append(record)
         save()
@@ -171,7 +177,7 @@ final class Store {
     }
 
     private func removeMedia(of record: GrowthRecord) {
-        for file in [record.videoFile, record.posterFile].compactMap({ $0 }) {
+        for file in [record.videoFile, record.posterFile, record.rawVideoFile].compactMap({ $0 }) {
             try? FileManager.default.removeItem(at: mediaDirectory.appendingPathComponent(file))
         }
     }

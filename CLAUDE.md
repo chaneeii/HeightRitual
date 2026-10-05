@@ -10,10 +10,11 @@ corrects it, and every past record is projected life-size on the wall. A Bluetoo
 
 ## Current state
 
-Milestones 1 to 3 are done; milestone 5 (film: camera, foot guide, camera position page) is written
-and installed but not yet checked on a device. M3 (height) works without the cut-out:
-`Capture/RawClipProcessor.swift` keeps the filmed clip as it is and the height starts at the last
-record (no estimate yet). R3 (one record) is a placeholder.
+All milestones are written. Checked in the simulator: 1 to 3, the Make flow up to Save, the
+welcome pages. Written but NOT yet run on a device: M4 projector scene (with an AppDelegate
+fallback for risk 1), M5 camera, M6 `Capture/VideoCutout.swift` (Vision segmentation, alpha HEVC,
+head-top estimate), M7 `Playback/WallPlayer.swift` (clip on the wall and in the wall copy), the
+controller light. P1 live foot check and the camera position auto-detect are not built.
 
 - The phone UI follows Apple's HIG: system TabView (Make / Memory, hidden on pushed screens),
   NavigationStacks drawn from `AppState.route` (`State/Navigation.swift`; the system back button
@@ -22,7 +23,7 @@ record (no estimate yet). R3 (one record) is a placeholder.
 - English, Korean, Simplified Chinese, Swedish (`Resources/*.xcstrings`), chosen in Settings.
   Strings built in code go through `L(_:)` so they follow that choice.
 - The controller connects on a device; buttons-only firmware in `Firmware/controller_buttons/`.
-- 48 unit tests in `HeightRitualTests/` pass in the simulator (scheme runs them in English).
+- 53 unit tests in `HeightRitualTests/` pass in the simulator (scheme runs them in English).
 
 ## Commands
 

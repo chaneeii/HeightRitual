@@ -1,3 +1,4 @@
+import AVFoundation
 import SwiftUI
 
 /// The wall image. On the projector it fills the screen and is rotated for a projector on its
@@ -11,7 +12,9 @@ struct WallView: View {
             let calibration = state.settings.wall
             let logical = calibration.logicalSize(for: state.wallSize)
             let scale = isExternal ? 1 : min(geo.size.width / logical.width, geo.size.height / logical.height)
-            WallCanvas(model: state.wallModel)
+            let model = state.wallModel
+            WallCanvas(model: model)
+                .overlay { WallClipOverlay(model: model, player: state.wallPlayer.player) }
                 .frame(width: logical.width, height: logical.height)
                 .rotationEffect(.degrees(isExternal ? Double(calibration.rotation) : 0))
                 .scaleEffect(scale)
@@ -83,7 +86,7 @@ struct WallCanvas: View {
         let size = font(g)
 
         // 1. Life-size figure, feet on the floor line. Cut off at the top when taller than the picture.
-        if let figure = model.figure {
+        if let figure = model.figure, !figure.hasClip {
             drawOutline(ctx, g, heightCM: Double(figure.heightMM) / 10, centerX: figureX)
         }
 
@@ -242,5 +245,53 @@ struct WallCanvas: View {
         ctx.draw(status, at: CGPoint(x: 16, y: 24), anchor: .leading)
         ctx.stroke(Path(CGRect(origin: .zero, size: g.size).insetBy(dx: 1, dy: 1)),
                    with: .color(.white.opacity(0.5)), lineWidth: 2)
+    }
+}
+
+/// The selected record's clip, life-size: the standing feet on the floor line, the body as tall as
+/// the record's height (SPEC 9: drawn height = heightCM * ptPerCM / bodyRatio).
+private struct WallClipOverlay: View {
+    let model: WallModel
+    let player: AVPlayer
+
+    var body: some View {
+        GeometryReader { geo in
+            if let figure = model.figure, figure.hasClip {
+                let g = WallGeometry(size: geo.size, calibration: model.calibration)
+                let bodyPt = g.length(cm: Double(figure.heightMM) / 10)
+                // Without layout numbers (clip kept without a person) the frame is the body.
+                let clipHeight = bodyPt / CGFloat(figure.bodyRatio ?? 0.85)
+                let clipWidth = clipHeight * CGFloat(figure.aspect ?? 9.0 / 16.0)
+                let bottom = g.y(cm: 0) + CGFloat(figure.floorRatio ?? 0.05) * clipHeight
+                PlayerLayerView(player: player)
+                    .frame(width: clipWidth, height: clipHeight)
+                    .position(x: g.centerX - g.length(cm: 8), y: bottom - clipHeight / 2)
+            }
+        }
+        .allowsHitTesting(false)
+    }
+}
+
+/// An AVPlayerLayer on a clear background, so the cut-out's transparent parts show the wall.
+struct PlayerLayerView: UIViewRepresentable {
+    let player: AVPlayer
+
+    func makeUIView(context: Context) -> LayerView {
+        let view = LayerView()
+        view.playerLayer.player = player
+        view.playerLayer.videoGravity = .resizeAspect
+        view.playerLayer.pixelBufferAttributes = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
+        view.backgroundColor = .clear
+        view.isOpaque = false
+        return view
+    }
+
+    func updateUIView(_ view: LayerView, context: Context) {
+        if view.playerLayer.player !== player { view.playerLayer.player = player }
+    }
+
+    final class LayerView: UIView {
+        override class var layerClass: AnyClass { AVPlayerLayer.self }
+        var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
     }
 }

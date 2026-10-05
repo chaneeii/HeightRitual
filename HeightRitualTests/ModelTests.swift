@@ -113,4 +113,81 @@ final class ModelTests: XCTestCase {
         XCTAssertEqual(Calibration(rotation: 90).logicalSize(for: CGSize(width: 1920, height: 1080)),
                        CGSize(width: 1080, height: 1920))
     }
+
+    // Nobody found: Retake, or keep the clip as filmed for testing.
+    func testNobodyFoundCanKeepTheClip() throws {
+        let h = Harness()
+        h.filmAndStop()
+        let raw = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
+        try Data([1]).write(to: raw)
+        h.state.finishProcessing(ProcessedClip(rawVideoURL: raw, duration: 5, personFound: false))
+        XCTAssertEqual(h.state.route, .makeHeight(.noPerson))
+        h.state.useClipWithoutPerson()
+        XCTAssertEqual(h.state.route, .makeHeight(.editing))
+        XCTAssertEqual(h.state.draft?.heightMM, 1210, "starts at the last height")
+        h.state.handle(.confirm)
+        let saved = try XCTUnwrap(h.state.store.records(for: h.nora.id).last)
+        XCTAssertNotNil(saved.rawVideoFile)
+        XCTAssertNil(saved.videoFile)
+        XCTAssertEqual(saved.duration, 5)
+        XCTAssertNotNil(h.state.clipURL(saved), "Memory plays the clip as filmed")
+    }
+
+    func testBackgroundChoosesTheClip() throws {
+        let h = Harness()
+        let store = h.state.store
+        let cut = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
+        let raw = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
+        try Data([1]).write(to: cut)
+        try Data([2]).write(to: raw)
+        let record = store.addRecord(memberID: h.nora.id, heightMM: 1250, source: .estimated,
+                                     clip: ProcessedClip(videoURL: cut, bodyRatio: 0.9, floorRatio: 0.02,
+                                                         rawVideoURL: raw, rawBodyRatio: 0.5, rawFloorRatio: 0.1,
+                                                         clipAspect: 0.4, rawAspect: 0.5625, duration: 4.2))
+        XCTAssertEqual(h.state.clipURL(record)?.lastPathComponent, record.videoFile, "cut-out by default")
+        h.state.setShowBackground(true)
+        XCTAssertEqual(h.state.clipURL(record)?.lastPathComponent, record.rawVideoFile)
+
+        h.openMemoryWall()
+        let figure = try XCTUnwrap(h.state.wallModel.figure)
+        XCTAssertTrue(figure.hasClip)
+        XCTAssertEqual(figure.bodyRatio, 0.5, "raw clip's layout numbers with the background on")
+        h.state.setShowBackground(false)
+        XCTAssertEqual(h.state.wallModel.figure?.bodyRatio, 0.9)
+    }
+
+    func testAutoPlayUsesClipLength() throws {
+        let h = Harness()
+        let cut = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
+        try Data([1]).write(to: cut)
+        h.state.store.addRecord(memberID: h.nora.id, heightMM: 1250, source: .edited,
+                                clip: ProcessedClip(videoURL: cut, duration: 4))
+        h.openMemoryWall()
+        h.state.handle(.autoPlayToggle)
+        h.scheduler.advance(AppState.stillSeconds * 6)   // the six sample records
+        XCTAssertEqual(h.state.recordIndex, 6, "the filmed record")
+        h.scheduler.advance(3.9)
+        XCTAssertEqual(h.state.recordIndex, 6, "shown for its clip's length")
+        h.scheduler.advance(0.2)
+        XCTAssertEqual(h.state.recordIndex, 0)
+    }
+
+    // R3 (SPEC 12, R4): correct one record's height, then delete it.
+    func testRecordDetail() {
+        let h = Harness()
+        h.openMemoryWall()
+        let record = h.state.selectedRecord!
+        h.state.openRecord(record.id)
+        XCTAssertEqual(h.state.route, .record(record.id))
+        h.state.stepHeight(of: record.id, by: 1, coarse: false)
+        XCTAssertEqual(h.state.store.record(record.id)?.heightMM, 1215)
+        XCTAssertEqual(h.state.store.record(record.id)?.heightSource, .edited)
+        h.state.handle(.cancel)
+        XCTAssertEqual(h.state.route, .memoryWall)
+        h.state.openRecord(record.id)
+        h.state.deleteRecord(record.id)
+        XCTAssertNil(h.state.store.record(record.id))
+        XCTAssertEqual(h.state.route, .memoryWall)
+        XCTAssertEqual(h.state.currentRecords.count, 5)
+    }
 }

@@ -423,6 +423,28 @@
         }
       }
     },
+    "Background": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "배경"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bakgrund"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "背景"
+          }
+        }
+      }
+    },
     "Before fitting to the wall": {
       "extractionState": "stale",
       "localizations": {
@@ -763,6 +785,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择照片"
+          }
+        }
+      }
+    },
+    "Choose who it is, stand with your heels on the line and film five seconds. Check the height and save.": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "누구인지 고르고, 뒤꿈치를 선에 맞춰 서서 5초 동안 찍어요. 키를 확인하고 저장해요."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Välj vem det är, stå med hälarna på linjen och filma fem sekunder. Kontrollera längden och spara."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择是谁，脚跟踩线站好，拍摄五秒钟。检查身高后保存。"
           }
         }
       }
@@ -1178,6 +1222,50 @@
         }
       }
     },
+    "Delete record": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기록 삭제"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta bort mätningen"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除记录"
+          }
+        }
+      }
+    },
+    "Delete this record?": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 기록을 삭제할까요?"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta bort den här mätningen?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除这条记录？"
+          }
+        }
+      }
+    },
     "Done": {
       "extractionState": "stale",
       "localizations": {
@@ -1285,6 +1373,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "此手机上的所有家人、记录和视频将被 Nora 和 Leo 替换。"
+          }
+        }
+      }
+    },
+    "Every record comes back on the wall at its real height. Step through them with the knob, or let them play from the first to the newest.": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 기록이 실제 키 그대로 벽에 다시 나타나요. 노브로 하나씩 넘기거나, 처음부터 최근까지 자동으로 재생해요."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varje mätning kommer tillbaka på väggen i verklig längd. Bläddra med ratten eller låt dem spelas från den första till den senaste."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每条记录都会以真实身高回到墙上。用旋钮逐条浏览，或从第一条自动播放到最新一条。"
+          }
+        }
+      }
+    },
+    "Families mark a child's height on a wall. Here every mark is a short film, shown life-size at the real height, and it moves with you when you move.": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가족들은 벽에 아이의 키를 표시해 왔어요. 여기서는 모든 표시가 짧은 영상이 되어 실제 키 그대로 실물 크기로 보여요. 이사를 가도 함께 가요."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Familjer märker barnens längd på en vägg. Här är varje märke en kort film i verklig storlek och längd, och den följer med när ni flyttar."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "家人们会在墙上标记孩子的身高。在这里，每个标记都是一段短片，以真实身高按实物大小显示，搬家时也能随身带走。"
           }
         }
       }
@@ -1813,6 +1945,28 @@
         }
       }
     },
+    "Height Ritual": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Height Ritual"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Height Ritual"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Height Ritual"
+          }
+        }
+      }
+    },
     "Height Ritual needs the camera to film the clip.": {
       "localizations": {
         "ko": {
@@ -2305,6 +2459,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "下一步"
+          }
+        }
+      }
+    },
+    "No clip": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "영상 없음"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inget klipp"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有视频"
           }
         }
       }
@@ -2832,6 +3008,28 @@
         }
       }
     },
+    "Photo from the clip with the head top marked": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "머리 끝이 표시된 영상 속 사진"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bild ur klippet med huvudets topp markerad"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "视频截图，已标出头顶"
+          }
+        }
+      }
+    },
     "Picture": {
       "extractionState": "stale",
       "localizations": {
@@ -3312,6 +3510,28 @@
         }
       }
     },
+    "Sample records have no clip; the wall shows a soft outline.": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "샘플 기록에는 영상이 없어요. 벽에는 사람 모양 실루엣이 보여요."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exempelmätningar har inget klipp; väggen visar en mjuk kontur."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "示例记录没有视频，墙上显示人形轮廓。"
+          }
+        }
+      }
+    },
     "Save": {
       "extractionState": "stale",
       "localizations": {
@@ -3472,6 +3692,50 @@
         }
       }
     },
+    "Set up later": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "나중에 설치"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ställ in senare"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "稍后设置"
+          }
+        }
+      }
+    },
+    "Set up the wall": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "벽 설치 시작"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ställ in väggen"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始设置墙面"
+          }
+        }
+      }
+    },
     "Set zoom to 100 percent.": {
       "extractionState": "stale",
       "localizations": {
@@ -3569,6 +3833,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "安装设置，第 %1$lld 步，共 %2$lld 步"
+          }
+        }
+      }
+    },
+    "Show background": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "배경 보기"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visa bakgrund"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示背景"
           }
         }
       }
@@ -3954,6 +4240,28 @@
         }
       }
     },
+    "The clip is deleted too. This cannot be undone.": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "영상도 함께 지워져요. 되돌릴 수 없어요."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klippet tas också bort. Det går inte att ångra."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "视频也会被删除。此操作无法撤销。"
+          }
+        }
+      }
+    },
     "The controller connects by itself when it is switched on. Every control also works with the buttons on this phone.": {
       "localizations": {
         "ko": {
@@ -4273,6 +4581,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "使用盒子上的任意控件。此页面打开时，控制只会列在这里。"
+          }
+        }
+      }
+    },
+    "Use this clip anyway": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "그래도 이 영상 쓰기"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Använd klippet ändå"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仍然使用此视频"
           }
         }
       }

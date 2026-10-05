@@ -99,41 +99,12 @@ private struct MemoryStack: View {
                     switch step {
                     case .wall:
                         MemoryWallView()
-                    case .record:
-                        PlaceholderScreen(title: "Record", systemImage: "person.crop.rectangle",
-                                          message: "Changing or deleting one record comes with clip playback (milestone 7).",
-                                          action: nil)
+                    case .record(let id):
+                        RecordDetailView(recordID: id)
                     default:
                         EmptyView()
                     }
                 }
         }
-    }
-}
-
-/// Stand-in until the screen is built. The action sends Cancel / Back, as the controller would.
-private struct PlaceholderScreen: View {
-    let title: LocalizedStringKey
-    let systemImage: String
-    let message: LocalizedStringKey
-    let action: LocalizedStringKey?
-    @Environment(AppState.self) private var state
-
-    var body: some View {
-        ContentUnavailableView {
-            Label("Not built yet", systemImage: systemImage)
-        } description: {
-            Text(message)
-        } actions: {
-            if let action {
-                Button(action) { state.handle(.cancel) }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-            }
-        }
-        .navigationTitle(title)
-        .navigationBarTitleDisplayMode(.inline)
-        .tabBarFromRoute()
-        .screenChrome()
     }
 }

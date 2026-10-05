@@ -16,9 +16,11 @@ enum SettingsPage: Equatable {
     case list, family, placement, fitToWall, cameraPosition, units, controller, permissions
 }
 
-/// First-start wizard: S5, S1, S2, S3 in order.
+/// First-start wizard: what the app is, then S5, S1, S2, S3 in order.
 enum WizardStep: Int, CaseIterable {
-    case permissions, placement, fitToWall, cameraPosition
+    case welcome, permissions, placement, fitToWall, cameraPosition
+
+    static let setupSteps = allCases.filter { $0 != .welcome }
 }
 
 /// The value the knob changes on the fit to wall page (S2).

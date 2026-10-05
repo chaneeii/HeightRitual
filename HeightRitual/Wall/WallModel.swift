@@ -28,9 +28,13 @@ struct WallModel: Equatable {
 
     struct Figure: Equatable {
         var heightMM: Int
-        /// Clip and poster arrive in milestone 7; until then every figure is a soft outline.
         var posterFile: String?
+        /// With a clip, the wall player's picture stands here; without, a soft outline.
+        var hasClip = false
         var bodyRatio: Double?
+        var floorRatio: Double?
+        /// Clip width / height.
+        var aspect: Double?
     }
 
     var kind: Kind = .idle
@@ -73,7 +77,12 @@ extension AppState {
             model.accent = Palette.color(currentMember?.colorIndex ?? 0)
             model.marks = marks(of: memberID, selecting: recordIndex)
             if let record = selectedRecord, let member = currentMember {
-                model.figure = .init(heightMM: record.heightMM, posterFile: record.posterFile, bodyRatio: record.bodyRatio)
+                let raw = settings.showBackground && record.rawVideoFile != nil || record.videoFile == nil
+                model.figure = .init(heightMM: record.heightMM, posterFile: record.posterFile,
+                                     hasClip: clipURL(record) != nil,
+                                     bodyRatio: raw ? record.rawBodyRatio : record.bodyRatio,
+                                     floorRatio: raw ? record.rawFloorRatio : record.floorRatio,
+                                     aspect: raw ? (record.rawAspect ?? 9.0 / 16.0) : record.clipAspect)
                 model.caption = "\(member.name), \(record.date.monthYear), \(HeightFormatter.text(record.heightMM, unit: unit))"
             } else {
                 model.headline = L("No records yet")
@@ -81,7 +90,7 @@ extension AppState {
         }
 
         switch route {
-        case .memberEdit, .wizard(.permissions):
+        case .memberEdit, .wizard(.welcome), .wizard(.permissions):
             model.kind = .idle
 
         case .settings(.placement), .wizard(.placement):

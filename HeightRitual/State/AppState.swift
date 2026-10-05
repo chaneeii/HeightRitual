@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import UIKit
 
 /// A record being made: the cut-out clip and the height field on M3.
 struct MakeDraft: Equatable {
@@ -35,7 +36,7 @@ final class AppState {
         store: Store(),
         settings: SettingsStore(),
         camera: CameraController(),
-        processor: RawClipProcessor(),
+        processor: VideoCutout(),
         controller: ControllerManager(),
         scheduler: TaskScheduler()
     )
@@ -61,7 +62,11 @@ final class AppState {
     private(set) var recordIndex = 0
     private(set) var isAutoPlaying = false
     /// Goes up each time the selected clip should start again from the beginning.
-    private(set) var replayCount = 0
+    private(set) var replayCount = 0 {
+        didSet { playSelectedClip() }
+    }
+    /// Clips on the wall and in the phone's wall copy.
+    @ObservationIgnored let wallPlayer = WallPlayer()
     private(set) var draft: MakeDraft?
     /// Short message such as "Not saved", cleared after two seconds.
     private(set) var notice: String?
@@ -98,7 +103,7 @@ final class AppState {
             route = .memoryWho
             mode = .memory
         } else {
-            route = .wizard(.permissions)
+            route = .wizard(.welcome)
         }
 
         controller.onEvent = { [weak self] event in self?.handle(event) }
@@ -277,6 +282,8 @@ final class AppState {
         if previous == .memoryWall && next != .memoryWall {
             isAutoPlaying = false
         }
+        let onWall: (Route) -> Bool = { if case .record = $0 { return true }; return $0 == .memoryWall }
+        if onWall(previous) && !onWall(next) { wallPlayer.stop() }
 
         switch next {
         case .makeWho, .memoryWho:
@@ -406,6 +413,12 @@ final class AppState {
         let start = HeightEstimator.initialDraft(estimateMM: clip.estimatedMM,
                                                  lastMM: memberID.flatMap(store.lastRecord)?.heightMM)
         draft = MakeDraft(clip: clip, heightMM: start.mm, fromEstimate: start.fromEstimate)
+        go(to: .makeHeight(clip.personFound ? .editing : .noPerson))
+    }
+
+    /// "Nobody found": keep the clip as filmed anyway (testing without a person in front of the wall).
+    func useClipWithoutPerson() {
+        guard route == .makeHeight(.noPerson), draft != nil else { return }
         go(to: .makeHeight(.editing))
     }
 
@@ -423,7 +436,7 @@ final class AppState {
             hadClip = true
         }
         if let clip = draft?.clip {
-            for url in [clip.videoURL, clip.posterURL].compactMap({ $0 }) {
+            for url in [clip.videoURL, clip.posterURL, clip.rawVideoURL].compactMap({ $0 }) {
                 try? FileManager.default.removeItem(at: url)
             }
             hadClip = true
@@ -454,6 +467,7 @@ final class AppState {
         replayCount += 1
         light.recording = .saved
         controller.setLight(light)
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 
     // MARK: Memory wall (R2)
@@ -502,9 +516,28 @@ final class AppState {
         settings.autoPlay = false
     }
 
-    /// Clip length; the real duration comes from the file in milestone 7.
+    /// How long auto play shows a record: its clip's length, or a short still for sample records.
     private func clipSeconds(_ record: GrowthRecord) -> Double {
-        record.videoFile == nil ? Self.stillSeconds : Double(Self.filmSeconds)
+        if let duration = record.duration, duration > 0 { return duration }
+        return record.videoFile == nil && record.rawVideoFile == nil ? Self.stillSeconds : Double(Self.filmSeconds)
+    }
+
+    /// The clip file for a record: the cut-out, or the clip as filmed with Show background.
+    func clipURL(_ record: GrowthRecord) -> URL? {
+        let file = settings.showBackground ? (record.rawVideoFile ?? record.videoFile)
+                                           : (record.videoFile ?? record.rawVideoFile)
+        return store.mediaURL(file)
+    }
+
+    func setShowBackground(_ on: Bool) {
+        settings.showBackground = on
+        replayCount += 1
+    }
+
+    private func playSelectedClip() {
+        let onWall: Bool = { if case .record = route { return true }; return route == .memoryWall }()
+        guard onWall, let record = selectedRecord else { return }
+        wallPlayer.play(clipURL(record), sound: settings.soundOn && record.hasSound)
     }
 
     // MARK: One record (R3)
@@ -519,10 +552,17 @@ final class AppState {
         store.updateHeight(of: id, heightMM: HeightFormatter.clamp(mm))
     }
 
+    /// R3: - and + on one record's height, in the unit's steps.
+    func stepHeight(of id: UUID, by steps: Int, coarse: Bool) {
+        guard let record = store.record(id) else { return }
+        changeHeight(of: id, to: HeightFormatter.step(record.heightMM, by: steps, unit: settings.unit, coarse: coarse))
+    }
+
     func deleteRecord(_ id: UUID) {
         store.deleteRecord(id)
         recordIndex = min(recordIndex, max(0, currentRecords.count - 1))
         go(to: .memoryWall)
+        replayCount += 1
     }
 
     // MARK: Members (A1)
@@ -681,8 +721,15 @@ final class AppState {
 
     // MARK: Wizard (W)
 
+    /// From the "Finish setup" banner: straight to the setup steps.
     func startWizard() {
         go(to: .wizard(.permissions))
+    }
+
+    /// "Set up later" on the welcome pages: setup stays reachable from the banner and Settings.
+    func skipWizard() {
+        settings.wizardDone = true
+        go(to: .memoryWho)
     }
 
     /// Next and Skip both move on; every step can be reopened from Settings.

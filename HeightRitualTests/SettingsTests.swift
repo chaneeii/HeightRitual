@@ -65,6 +65,9 @@ final class SettingsTests: XCTestCase {
     func testWizard() {
         let h = Harness(setupDone: false)
         let s = h.state
+        XCTAssertEqual(s.route, .wizard(.welcome), "what the app is, before any setup")
+        XCTAssertEqual(s.wallModel.kind, .idle)
+        s.wizardNext()
         XCTAssertEqual(s.route, .wizard(.permissions))
         XCTAssertEqual(s.wallModel.kind, .idle)
         s.wizardNext()
@@ -224,5 +227,14 @@ final class SettingsTests: XCTestCase {
         SettingsStore(defaults: defaults).appearance = .light
         XCTAssertEqual(SettingsStore(defaults: defaults).appearance, .light)
         defaults.removePersistentDomain(forName: suite)
+    }
+
+    func testSetUpLater() {
+        let h = Harness(setupDone: false)
+        h.state.skipWizard()
+        XCTAssertEqual(h.state.route, .memoryWho)
+        XCTAssertTrue(h.state.settings.wizardDone)
+        h.state.startWizard()
+        XCTAssertEqual(h.state.route, .wizard(.permissions), "the banner goes straight to the setup steps")
     }
 }

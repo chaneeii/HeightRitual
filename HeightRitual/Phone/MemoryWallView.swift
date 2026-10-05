@@ -23,7 +23,6 @@ struct MemoryWallView: View {
                     Text("Manual").tag(false)
                 }
                 .pickerStyle(.segmented)
-                .controlSize(.large)
 
                 WallCopy()
                     .frame(maxHeight: .infinity)
@@ -46,8 +45,7 @@ struct MemoryWallView: View {
         .readableColumn()
         .navigationTitle(state.currentMember?.name ?? L("Memory"))
         .navigationBarTitleDisplayMode(.inline)
-        // Watching the wall is one task on its own: no tab bar, as while filming.
-        .toolbar(.hidden, for: .tabBar)
+        .tabBarFromRoute()
         .screenChrome()
     }
 

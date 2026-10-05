@@ -58,6 +58,18 @@ extension AppState {
         return false
     }
 
+    /// Make / Memory tab bar: only while choosing a family member.
+    var showsTabBar: Bool {
+        func isWho(_ r: Route) -> Bool { r == .makeWho || r == .memoryWho }
+        switch route {
+        case .makeWho, .memoryWho: return true
+        // Under a sheet: as on the screen the sheet was opened from.
+        case .settings: return isWho(settingsReturn)
+        case .memberEdit: return memberEditInSettings ? isWho(settingsReturn) : isWho(memberEditReturn)
+        default: return false
+        }
+    }
+
     /// The height step's state shown on M3.
     var heightState: HeightState {
         if case .makeHeight(let height) = route { return height }

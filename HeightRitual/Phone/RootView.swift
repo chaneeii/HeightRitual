@@ -68,8 +68,7 @@ private struct MakeStack: View {
                                       set: { state.popped(state.makePath.count - $0.count) })) {
             MemberGridView(mode: .make)
                 .navigationTitle("Make mode")
-                // One place decides the tab bar for the whole stack: shown only on this first screen.
-                .toolbar(state.makePath.isEmpty ? .visible : .hidden, for: .tabBar)
+                .tabBarFromRoute()
                 .screenChrome(statusInContent: true)
                 .navigationDestination(for: NavStep.self) { step in
                     switch step {
@@ -94,8 +93,7 @@ private struct MemoryStack: View {
                                       set: { state.popped(state.memoryPath.count - $0.count) })) {
             MemberGridView(mode: .memory)
                 .navigationTitle("Memory mode")
-                // One place decides the tab bar for the whole stack: shown only on this first screen.
-                .toolbar(state.memoryPath.isEmpty ? .visible : .hidden, for: .tabBar)
+                .tabBarFromRoute()
                 .screenChrome(statusInContent: true)
                 .navigationDestination(for: NavStep.self) { step in
                     switch step {
@@ -135,7 +133,7 @@ private struct PlaceholderScreen: View {
         }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.hidden, for: .tabBar)
+        .tabBarFromRoute()
         .screenChrome()
     }
 }

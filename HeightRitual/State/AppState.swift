@@ -82,7 +82,7 @@ final class AppState {
     @ObservationIgnored private var timer: ScheduledTask?
     @ObservationIgnored private var noticeTimer: ScheduledTask?
     @ObservationIgnored private var processingTask: Task<Void, Never>?
-    @ObservationIgnored private var settingsReturn: Route = .memoryWho
+    @ObservationIgnored private(set) var settingsReturn: Route = .memoryWho
     @ObservationIgnored private(set) var memberEditReturn: Route = .memoryWho
 
     init(store: Store, settings: SettingsStore, camera: CameraProviding, processor: ClipProcessing,

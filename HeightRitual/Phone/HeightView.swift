@@ -34,7 +34,7 @@ struct HeightView: View {
         .readableColumn()
         .navigationTitle(state.currentMember?.name ?? L("Height"))
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.hidden, for: .tabBar)
+        .tabBarFromRoute()
         .screenChrome()
     }
 

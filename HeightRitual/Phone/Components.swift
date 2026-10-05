@@ -61,7 +61,20 @@ struct ScreenChrome: ViewModifier {
     }
 }
 
+/// The tab bar shows only on the first screen of each tab (choose a family member).
+/// Every screen asks the same question of the route, so screens left behind in the other tab
+/// (after Save switches to Memory) cannot keep the bar hidden.
+struct TabBarFromRoute: ViewModifier {
+    @Environment(AppState.self) private var state
+
+    func body(content: Content) -> some View {
+        content.toolbar(state.showsTabBar ? .visible : .hidden, for: .tabBar)
+    }
+}
+
 extension View {
+    func tabBarFromRoute() -> some View { modifier(TabBarFromRoute()) }
+
     func screenChrome(statusInContent: Bool = false) -> some View {
         modifier(ScreenChrome(statusInContent: statusInContent))
     }

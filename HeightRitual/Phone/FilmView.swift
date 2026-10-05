@@ -46,8 +46,7 @@ struct FilmView: View {
         .navigationBarTitleDisplayMode(.inline)
         // Countdown and filming end with Stop, not by leaving the screen.
         .navigationBarBackButtonHidden(film != .ready)
-        // Filming is one task on its own: no tab bar (Make / Memory) while it runs.
-        .toolbar(.hidden, for: .tabBar)
+        .tabBarFromRoute()
         .screenChrome()
     }
 

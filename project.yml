@@ -1,0 +1,55 @@
+# Generates HeightRitual.xcodeproj. Run:  brew install xcodegen && xcodegen
+name: HeightRitual
+options:
+  bundleIdPrefix: se.kth.dm2601
+  developmentLanguage: en
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+targets:
+  HeightRitual:
+    type: application
+    platform: iOS
+    sources:
+      - path: HeightRitual
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: se.kth.dm2601.heightritual
+        PRODUCT_NAME: HeightRitual
+        MARKETING_VERSION: "0.1"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: HeightRitual/Info.plist
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: NO
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 562Z37RH3N
+  HeightRitualTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: HeightRitualTests
+    dependencies:
+      - target: HeightRitual
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: se.kth.dm2601.heightritual.tests
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/HeightRitual.app/HeightRitual"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+schemes:
+  HeightRitual:
+    build:
+      targets:
+        HeightRitual: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      # Tests compare English text and month names, whatever the Mac's language is.
+      language: en
+      region: US
+      targets:
+        - HeightRitualTests

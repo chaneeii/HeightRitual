@@ -1,0 +1,85 @@
+import XCTest
+@testable import HeightRitual
+
+/// What the wall shows per screen (SPEC 5, wall column).
+@MainActor
+final class WallModelTests: XCTestCase {
+
+    func testSettingsShowFaintRuler() {
+        let h = Harness()
+        h.state.openSettings()
+        XCTAssertEqual(h.state.wallModel.kind, .idle)
+    }
+
+    func testWhoShowsHighlightedMember() {
+        let h = Harness()
+        h.state.handle(.mode(.memory))
+        h.state.handle(.right)
+        let wall = h.state.wallModel
+        XCTAssertEqual(wall.headline, "Leo")
+        XCTAssertEqual(wall.marks.count, 4)
+        XCTAssertFalse(wall.marks.contains { $0.selected })
+    }
+
+    func testMemoryWallMarksFigureAndCaption() {
+        let h = Harness()
+        h.openMemoryWall()
+        var wall = h.state.wallModel
+        XCTAssertEqual(wall.kind, .marks)
+        XCTAssertEqual(wall.marks.count, 6, "a mark for every record")
+        XCTAssertEqual(wall.marks.filter(\.selected).map(\.heightMM), [1210])
+        XCTAssertEqual(wall.figure?.heightMM, 1210)
+        XCTAssertNil(wall.figure?.posterFile, "sample records are soft outlines")
+        XCTAssertEqual(wall.caption, "Nora, Aug 2025, 121.0 cm")
+
+        h.state.handle(.knob(-5))
+        wall = h.state.wallModel
+        XCTAssertEqual(wall.figure?.heightMM, 870)
+        XCTAssertEqual(wall.caption, "Nora, Aug 2020, 87.0 cm")
+
+        h.state.settings.unit = .ftin
+        XCTAssertEqual(h.state.wallModel.caption, "Nora, Aug 2020, 2 ft 10 1/4 in", "the wall follows the unit")
+    }
+
+    func testMemoryWallWithoutRecords() {
+        let h = Harness()
+        h.state.store.addMember(name: "Ada")
+        h.state.handle(.mode(.memory))
+        h.state.handle(.knob(2))
+        h.state.handle(.confirm)
+        XCTAssertEqual(h.state.route, .memoryWall)
+        XCTAssertEqual(h.state.wallModel.headline, "No records yet")
+        XCTAssertNil(h.state.wallModel.figure)
+        h.state.handle(.autoPlayToggle)
+        XCTAssertFalse(h.state.isAutoPlaying, "nothing to play")
+    }
+
+    func testFilmGuideAndDarkCountdown() {
+        let h = Harness()
+        h.openFilm()
+        var wall = h.state.wallModel
+        XCTAssertEqual(wall.kind, .footGuide)
+        XCTAssertEqual(wall.guideMM, 1310, "last height plus 10 cm")
+        h.state.handle(.record)
+        wall = h.state.wallModel
+        XCTAssertEqual(wall.kind, .dark)
+        XCTAssertEqual(wall.bigNumber, 3)
+    }
+
+    func testHeightLineFollowsTheNumber() {
+        let h = Harness()
+        h.openHeight(estimateMM: 1250)
+        XCTAssertEqual(h.state.wallModel.liveMM, 1250)
+        h.state.handle(.knob(1))
+        XCTAssertEqual(h.state.wallModel.liveMM, 1255)
+        XCTAssertEqual(h.state.wallModel.figure?.heightMM, 1255)
+    }
+
+    func testFitToWallShowsRuler() {
+        let h = Harness()
+        h.state.openSettings()
+        h.state.openSettingsPage(.fitToWall)
+        XCTAssertEqual(h.state.wallModel.kind, .ruler)
+        XCTAssertEqual(h.state.wallModel.fitValue, .floor)
+    }
+}

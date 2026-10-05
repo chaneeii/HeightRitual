@@ -1,0 +1,141 @@
+import SwiftUI
+
+/// Everything the wall image needs for one frame, as a value taken from AppState.
+/// Positions are in real centimetres (millimetres for heights); `WallGeometry` turns them into points.
+struct WallModel: Equatable {
+    enum Kind: Equatable {
+        /// Faint ruler: Home and screens that leave the wall unchanged.
+        case idle
+        /// Pencil marks, a life-size figure, captions.
+        case marks
+        /// M2 ready: foot marks and the outline where to stand.
+        case footGuide
+        /// Countdown and filming: dark, only the number.
+        case dark
+        /// S2: centimetre ruler for fitting to a tape on the wall.
+        case ruler
+        /// S1: white frame along the picture's edge.
+        case frame
+        /// S3: two bright lines at 0 and 100 cm for the camera position.
+        case cameraLines
+    }
+
+    struct Mark: Equatable {
+        var label: String
+        var heightMM: Int
+        var selected: Bool
+    }
+
+    struct Figure: Equatable {
+        var heightMM: Int
+        /// Clip and poster arrive in milestone 7; until then every figure is a soft outline.
+        var posterFile: String?
+        var bodyRatio: Double?
+    }
+
+    var kind: Kind = .idle
+    var calibration = Calibration()
+    var accent: Color = Palette.color(0)
+    var marks: [Mark] = []
+    var figure: Figure?
+    var caption: String?
+    /// Large name or message near the top of the picture.
+    var headline: String?
+    /// Dashed coral line of a record being made.
+    var liveMM: Int?
+    var liveLabel: String?
+    /// Countdown number or seconds left while filming.
+    var bigNumber: Int?
+    /// Height of the standing outline on the foot guide.
+    var guideMM: Int?
+    var fitValue: FitValue?
+    var unit: HeightUnit = .cm
+}
+
+extension AppState {
+    var wallModel: WallModel {
+        var model = WallModel()
+        model.calibration = settings.wall
+        model.unit = settings.unit
+        let unit = settings.unit
+
+        func marks(of memberID: UUID?, selecting index: Int?) -> [WallModel.Mark] {
+            guard let memberID else { return [] }
+            return store.records(for: memberID).enumerated().map { i, record in
+                WallModel.Mark(label: "\(record.date.monthYear)   \(HeightFormatter.text(record.heightMM, unit: unit))",
+                               heightMM: record.heightMM,
+                               selected: i == index)
+            }
+        }
+
+        func showMemoryWall() {
+            model.kind = .marks
+            model.accent = Palette.color(currentMember?.colorIndex ?? 0)
+            model.marks = marks(of: memberID, selecting: recordIndex)
+            if let record = selectedRecord, let member = currentMember {
+                model.figure = .init(heightMM: record.heightMM, posterFile: record.posterFile, bodyRatio: record.bodyRatio)
+                model.caption = "\(member.name), \(record.date.monthYear), \(HeightFormatter.text(record.heightMM, unit: unit))"
+            } else {
+                model.headline = L("No records yet")
+            }
+        }
+
+        switch route {
+        case .memberEdit, .wizard(.permissions):
+            model.kind = .idle
+
+        case .settings(.placement), .wizard(.placement):
+            model.kind = .frame
+
+        case .settings(.fitToWall), .wizard(.fitToWall):
+            model.kind = .ruler
+            model.fitValue = fitValue
+
+        case .settings(.cameraPosition), .wizard(.cameraPosition):
+            model.kind = .cameraLines
+
+        case .settings:
+            model.kind = .idle
+
+        case .makeWho, .memoryWho:
+            model.kind = .marks
+            let members = store.members
+            if members.indices.contains(highlight) {
+                let member = members[highlight]
+                model.accent = Palette.color(member.colorIndex)
+                model.headline = member.name
+                model.marks = marks(of: member.id, selecting: nil)
+            } else {
+                model.headline = members.isEmpty ? L("Add the first family member")
+                                                 : L("New family member")
+            }
+
+        case .makeFilm(.ready):
+            model.kind = .footGuide
+            model.accent = Palette.color(currentMember?.colorIndex ?? 0)
+            model.guideMM = FootGuide.outlineMM(lastMM: memberID.flatMap(store.lastRecord)?.heightMM)
+
+        case .makeFilm(.countdown(let n)):
+            model.kind = .dark
+            model.bigNumber = n
+
+        case .makeFilm(.filming(let left)):
+            model.kind = .dark
+            model.bigNumber = left
+
+        case .makeHeight(let state):
+            model.kind = .marks
+            model.accent = Palette.color(currentMember?.colorIndex ?? 0)
+            model.marks = marks(of: memberID, selecting: nil)
+            if state == .editing, let mm = draft?.heightMM {
+                model.liveMM = mm
+                model.liveLabel = L("Now") + "  " + HeightFormatter.text(mm, unit: unit)
+                model.figure = .init(heightMM: mm, posterFile: nil, bodyRatio: draft?.clip.bodyRatio)
+            }
+
+        case .memoryWall, .record:
+            showMemoryWall()
+        }
+        return model
+    }
+}

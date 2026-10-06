@@ -190,4 +190,26 @@ final class ModelTests: XCTestCase {
         XCTAssertEqual(h.state.route, .memoryWall)
         XCTAssertEqual(h.state.currentRecords.count, 5)
     }
+
+    func testChangeRecordDate() {
+        let h = Harness()
+        h.openMemoryWall()
+        let newest = h.state.selectedRecord!
+        let early = Calendar(identifier: .gregorian).date(from: DateComponents(year: 2019, month: 5, day: 1))!
+        h.state.changeDate(of: newest.id, to: early)
+        XCTAssertEqual(h.state.currentRecords.first?.id, newest.id, "now the oldest")
+        XCTAssertEqual(h.state.selectedRecord?.id, newest.id, "still selected")
+        h.state.changeDate(of: newest.id, to: .now.addingTimeInterval(86_400 * 30))
+        XCTAssertLessThanOrEqual(h.state.store.record(newest.id)!.date, .now, "no dates in the future")
+    }
+
+    func testMarksAboveAClipWithItsBackground() throws {
+        let h = Harness()
+        let raw = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
+        try Data([1]).write(to: raw)
+        h.state.store.addRecord(memberID: h.nora.id, heightMM: 1250, source: .edited,
+                                clip: ProcessedClip(rawVideoURL: raw, personFound: false))
+        h.openMemoryWall()
+        XCTAssertEqual(h.state.wallModel.figure?.opaque, true, "only the clip as filmed exists")
+    }
 }

@@ -35,6 +35,8 @@ struct WallModel: Equatable {
         var floorRatio: Double?
         /// Clip width / height.
         var aspect: Double?
+        /// The clip as filmed is opaque: marks and captions are drawn again on top of it.
+        var opaque = false
     }
 
     var kind: Kind = .idle
@@ -82,7 +84,8 @@ extension AppState {
                                      hasClip: clipURL(record) != nil,
                                      bodyRatio: raw ? record.rawBodyRatio : record.bodyRatio,
                                      floorRatio: raw ? record.rawFloorRatio : record.floorRatio,
-                                     aspect: raw ? (record.rawAspect ?? 9.0 / 16.0) : record.clipAspect)
+                                     aspect: raw ? (record.rawAspect ?? 9.0 / 16.0) : record.clipAspect,
+                                     opaque: raw)
                 model.caption = "\(member.name), \(record.date.monthYear), \(HeightFormatter.text(record.heightMM, unit: unit))"
             } else {
                 model.headline = L("No records yet")

@@ -28,18 +28,35 @@ struct RootView: View {
     }
 }
 
+/// One NavigationStack around the Make / Memory TabView: screens pushed from either tab cover the
+/// whole TabView, tab bar included, and popping brings it back. No tab bar hiding is needed, so it
+/// cannot get stuck hidden (as it did with a stack per tab on iOS 26).
 private struct MainTabs: View {
     @Environment(AppState.self) private var state
 
     var body: some View {
-        TabView(selection: Binding(get: { state.mode ?? .memory },
-                                   set: { state.handle(.mode($0)) })) {
-            MakeStack()
-                .tabItem { Label("Make", systemImage: "record.circle") }
-                .tag(Mode.make)
-            MemoryStack()
-                .tabItem { Label("Memory", systemImage: "clock.arrow.circlepath") }
-                .tag(Mode.memory)
+        NavigationStack(path: Binding(get: { state.navigationPath },
+                                      set: { state.popped(state.navigationPath.count - $0.count) })) {
+            TabView(selection: Binding(get: { state.mode ?? .memory },
+                                       set: { state.handle(.mode($0)) })) {
+                MemberGridView(mode: .make)
+                    .tabItem { Label("Make", systemImage: "record.circle") }
+                    .tag(Mode.make)
+                MemberGridView(mode: .memory)
+                    .tabItem { Label("Memory", systemImage: "clock.arrow.circlepath") }
+                    .tag(Mode.memory)
+            }
+            .navigationTitle(state.mode == .make ? LocalizedStringKey("Make mode") : "Memory mode")
+            .screenChrome(statusInContent: true)
+            .navigationDestination(for: NavStep.self) { step in
+                switch step {
+                case .film: FilmView(film: state.filmState)
+                case .height: HeightView(height: state.heightState)
+                case .wall: MemoryWallView()
+                case .record(let id): RecordDetailView(recordID: id)
+                default: EmptyView()
+                }
+            }
         }
         .sheet(isPresented: Binding(get: { state.showsSettings },
                                     set: { if !$0 { state.dismissSettings() } })) {
@@ -56,55 +73,5 @@ private struct MainTabs: View {
     private var memberSheetID: UUID? {
         if case .memberEdit(let id) = state.route { return id }
         return nil
-    }
-}
-
-/// M1 -> M2 -> M3.
-private struct MakeStack: View {
-    @Environment(AppState.self) private var state
-
-    var body: some View {
-        NavigationStack(path: Binding(get: { state.makePath },
-                                      set: { state.popped(state.makePath.count - $0.count) })) {
-            MemberGridView(mode: .make)
-                .navigationTitle("Make mode")
-                .tabBarFromRoute()
-                .screenChrome(statusInContent: true)
-                .navigationDestination(for: NavStep.self) { step in
-                    switch step {
-                    case .film:
-                        FilmView(film: state.filmState)
-                    case .height:
-                        HeightView(height: state.heightState)
-                    default:
-                        EmptyView()
-                    }
-                }
-        }
-    }
-}
-
-/// R1 -> R2 -> R3.
-private struct MemoryStack: View {
-    @Environment(AppState.self) private var state
-
-    var body: some View {
-        NavigationStack(path: Binding(get: { state.memoryPath },
-                                      set: { state.popped(state.memoryPath.count - $0.count) })) {
-            MemberGridView(mode: .memory)
-                .navigationTitle("Memory mode")
-                .tabBarFromRoute()
-                .screenChrome(statusInContent: true)
-                .navigationDestination(for: NavStep.self) { step in
-                    switch step {
-                    case .wall:
-                        MemoryWallView()
-                    case .record(let id):
-                        RecordDetailView(recordID: id)
-                    default:
-                        EmptyView()
-                    }
-                }
-        }
     }
 }

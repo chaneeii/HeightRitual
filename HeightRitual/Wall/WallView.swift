@@ -15,6 +15,13 @@ struct WallView: View {
             let model = state.wallModel
             WallCanvas(model: model)
                 .overlay { WallClipOverlay(model: model, player: state.wallPlayer.player) }
+                .overlay {
+                    // Layers (SPEC 10): wall, marks, clip. A clip with its background would hide
+                    // the marks, so they are drawn once more above it.
+                    if model.figure?.hasClip == true, model.figure?.opaque == true {
+                        WallCanvas(model: model, marksOnly: true).allowsHitTesting(false)
+                    }
+                }
                 .frame(width: logical.width, height: logical.height)
                 .rotationEffect(.degrees(isExternal ? Double(calibration.rotation) : 0))
                 .scaleEffect(scale)
@@ -48,6 +55,8 @@ struct WallGeometry {
 
 struct WallCanvas: View {
     let model: WallModel
+    /// Only marks and captions on a clear background, for the layer above an opaque clip.
+    var marksOnly = false
 
     /// Warm off-white, like pencil on a wall (SPEC 10).
     static let pencil = Color(red: 0.93, green: 0.87, blue: 0.76)
@@ -57,6 +66,10 @@ struct WallCanvas: View {
     var body: some View {
         Canvas { ctx, size in
             let g = WallGeometry(size: size, calibration: model.calibration)
+            if marksOnly {
+                drawMarks(ctx, g)
+                return
+            }
             ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(.black))
             switch model.kind {
             case .idle: drawRuler(ctx, g, faint: true)
@@ -86,7 +99,7 @@ struct WallCanvas: View {
         let size = font(g)
 
         // 1. Life-size figure, feet on the floor line. Cut off at the top when taller than the picture.
-        if let figure = model.figure, !figure.hasClip {
+        if !marksOnly, let figure = model.figure, !figure.hasClip {
             drawOutline(ctx, g, heightCM: Double(figure.heightMM) / 10, centerX: figureX)
         }
 

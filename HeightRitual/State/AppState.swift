@@ -558,6 +558,12 @@ final class AppState {
         changeHeight(of: id, to: HeightFormatter.step(record.heightMM, by: steps, unit: settings.unit, coarse: coarse))
     }
 
+    /// R3: a record's date. Records are ordered by date, so the selection follows the record.
+    func changeDate(of id: UUID, to date: Date) {
+        store.updateDate(of: id, to: min(date, .now))
+        if let index = currentRecords.firstIndex(where: { $0.id == id }) { recordIndex = index }
+    }
+
     func deleteRecord(_ id: UUID) {
         store.deleteRecord(id)
         recordIndex = min(recordIndex, max(0, currentRecords.count - 1))

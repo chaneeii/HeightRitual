@@ -55,7 +55,6 @@ struct MemoryWallView: View {
         .readableColumn()
         .navigationTitle(state.currentMember?.name ?? L("Memory"))
         .navigationBarTitleDisplayMode(.inline)
-        .tabBarFromRoute()
         .screenChrome()
     }
 

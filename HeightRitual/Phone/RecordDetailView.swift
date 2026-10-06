@@ -48,6 +48,11 @@ struct RecordDetailView: View {
                     .foregroundStyle(.secondary)
             }
 
+            DatePicker("Date", selection: Binding(get: { record.date },
+                                                  set: { state.changeDate(of: record.id, to: $0) }),
+                       in: ...Date.now, displayedComponents: .date)
+                .environment(\.locale, AppLanguage.current.locale)
+
             HStack(spacing: 8) {
                 step(unit == .cm ? "-1" : "-1 in") { state.stepHeight(of: record.id, by: -1, coarse: true) }
                 step(unit == .cm ? "-0.5" : "-1/4") { state.stepHeight(of: record.id, by: -1, coarse: false) }
@@ -66,7 +71,6 @@ struct RecordDetailView: View {
         .readableColumn()
         .navigationTitle(record.date.monthYear)
         .navigationBarTitleDisplayMode(.inline)
-        .tabBarFromRoute()
         .screenChrome()
     }
 

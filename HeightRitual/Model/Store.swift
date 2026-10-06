@@ -128,6 +128,12 @@ final class Store {
         save()
     }
 
+    func updateDate(of id: UUID, to date: Date) {
+        guard let index = records.firstIndex(where: { $0.id == id }) else { return }
+        records[index].date = date
+        save()
+    }
+
     func deleteRecord(_ id: UUID) {
         guard let record = record(id) else { return }
         removeMedia(of: record)

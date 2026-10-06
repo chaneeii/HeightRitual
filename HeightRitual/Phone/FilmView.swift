@@ -46,7 +46,6 @@ struct FilmView: View {
         .navigationBarTitleDisplayMode(.inline)
         // Countdown and filming end with Stop, not by leaving the screen.
         .navigationBarBackButtonHidden(film != .ready)
-        .tabBarFromRoute()
         .screenChrome()
     }
 

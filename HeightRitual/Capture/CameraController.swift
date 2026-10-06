@@ -22,17 +22,30 @@ final class CameraController: NSObject, CameraProviding {
         return status == .denied || status == .restricted
     }
 
+    /// The session starts after the screen's push has run: starting it takes the session's lock
+    /// for up to a second, and the push must not wait on it (see `CameraPreview`).
+    nonisolated static let startDelay = 0.35
+
+    /// Whether a screen wants the preview now. The delayed start checks it, so leaving the film
+    /// screen within the delay does not leave the camera running behind other screens.
+    private var wantsPreview = false
+
     func startPreview() {
+        wantsPreview = true
         Task {
             guard await Self.authorize(.video) else { return }
+            try? await Task.sleep(for: .seconds(Self.startDelay))
+            guard wantsPreview else { return }
             queue.async { [self] in
                 if !configured { configure() }
+                turnPreviewUpright()
                 if !session.isRunning { session.startRunning() }
             }
         }
     }
 
     func stopPreview() {
+        wantsPreview = false
         queue.async { [self] in
             if session.isRunning { session.stopRunning() }
         }
@@ -117,6 +130,14 @@ final class CameraController: NSObject, CameraProviding {
         }
         session.commitConfiguration()
         configured = true
+    }
+
+    /// The preview layer's connection exists only once the camera input is added, so it is turned
+    /// upright here, on the session queue, rather than by the view on the main thread.
+    private nonisolated func turnPreviewUpright() {
+        for connection in session.connections where connection.videoPreviewLayer != nil {
+            if connection.isVideoRotationAngleSupported(90) { connection.videoRotationAngle = 90 }
+        }
     }
 
     private nonisolated func setAudio(_ on: Bool) {

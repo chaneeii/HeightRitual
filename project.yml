@@ -40,6 +40,19 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/HeightRitual.app/HeightRitual"
         BUNDLE_LOADER: "$(TEST_HOST)"
+  HeightRitualUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: HeightRitualUITests
+    dependencies:
+      - target: HeightRitual
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.chanheejeong.heightritual.uitests
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: HeightRitual
 schemes:
   HeightRitual:
     build:
@@ -54,3 +67,4 @@ schemes:
       region: US
       targets:
         - HeightRitualTests
+        - HeightRitualUITests

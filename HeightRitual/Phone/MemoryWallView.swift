@@ -25,7 +25,8 @@ struct MemoryWallView: View {
                     }
                     .pickerStyle(.segmented)
                     // Clips as filmed, or only the person (SPEC: cut-out by default).
-                    Toggle(isOn: Binding(get: { state.settings.showBackground },
+                    let showBackground = state.settings.showBackground   // tracked in body
+                    Toggle(isOn: Binding(get: { showBackground },
                                          set: { state.setShowBackground($0) })) {
                         Label("Background", systemImage: "photo")
                     }
@@ -59,7 +60,8 @@ struct MemoryWallView: View {
     }
 
     private var autoPlayBinding: Binding<Bool> {
-        Binding(get: { state.isAutoPlaying },
+        let playing = state.isAutoPlaying   // read when body builds the picker: tracked
+        return Binding(get: { playing },
                 set: { if $0 != state.isAutoPlaying { state.handle(.autoPlayToggle) } })
     }
 

@@ -9,7 +9,7 @@ struct FamilyPage: View {
             Section {
                 ForEach(state.store.members) { member in
                     let count = state.store.records(for: member.id).count
-                    NavigationLink(value: NavStep.member(member.id)) {
+                    NavigationLink(value: SettingsStep.member(member.id)) {
                         LabeledContent {
                             Text(count == 1 ? L("1 record") : L("\(count) records"))
                         } label: {
@@ -29,7 +29,7 @@ struct FamilyPage: View {
                 }
             }
             Section {
-                NavigationLink(value: NavStep.member(nil)) {
+                NavigationLink(value: SettingsStep.member(nil)) {
                     Label("Add family member", systemImage: "plus")
                 }
             }

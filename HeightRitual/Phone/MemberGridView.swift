@@ -9,9 +9,14 @@ struct MemberGridView: View {
     /// Fills the width: two columns on iPhone, more on iPad.
     private let columns = [GridItem(.adaptive(minimum: 160, maximum: 280), spacing: 12)]
 
-    /// Subtitle and status chips right under the large title, scrolling with the content.
+    /// Title, subtitle and status chips, scrolling with the content. Each tab draws its own title,
+    /// so switching tabs does not swap one shared navigation title (that flickered).
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
+            Text(mode == .make ? LocalizedStringKey("Make mode") : "Memory mode")
+                .font(.largeTitle.weight(.bold))
+                .accessibilityAddTraits(.isHeader)
+                .padding(.horizontal)
             Text(mode == .make ? LocalizedStringKey("Choose a family member and record their height")
                                : "Choose a family member to see how they have grown")
                 .font(.subheadline)

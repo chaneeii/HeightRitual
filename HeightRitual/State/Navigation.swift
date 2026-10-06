@@ -7,6 +7,12 @@ enum NavStep: Hashable {
     case height                  // M3
     case wall                    // R2
     case record(UUID)            // R3
+}
+
+/// One pushed page inside the Settings sheet. A type of its own: the sheet's NavigationStack and
+/// the main one registering destinations for the same type broke the main stack's pushes after
+/// the sheet closed (found by the UI stress test on iOS 26).
+enum SettingsStep: Hashable {
     case page(SettingsPage)      // S1 to S6
     case member(UUID?)           // A1 inside Settings > Family
 }
@@ -30,7 +36,7 @@ extension AppState {
         }
     }
 
-    var settingsPath: [NavStep] {
+    var settingsPath: [SettingsStep] {
         switch route {
         case .settings(.list): return []
         case .settings(let page): return [.page(page)]
@@ -82,13 +88,12 @@ extension AppState {
     }
 
     /// Settings uses NavigationLinks, so its path also grows.
-    func setSettingsPath(_ path: [NavStep]) {
+    func setSettingsPath(_ path: [SettingsStep]) {
         let current = settingsPath
         if path.count > current.count, let last = path.last {
             switch last {
             case .page(let page): openSettingsPage(page)
             case .member(let id): openMemberEdit(id)
-            default: break
             }
         } else if path.count < current.count {
             if case .memberEdit = route { closeMemberEdit() }

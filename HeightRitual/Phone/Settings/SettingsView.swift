@@ -6,7 +6,8 @@ struct SettingsSheet: View {
     @Environment(AppState.self) private var state
 
     var body: some View {
-        NavigationStack(path: Binding(get: { state.settingsPath }, set: { state.setSettingsPath($0) })) {
+        let path = state.settingsPath    // read in body: tracked by Observation
+        NavigationStack(path: Binding(get: { path }, set: { state.setSettingsPath($0) })) {
             SettingsList()
                 .navigationTitle("Settings")
                 .toolbar {
@@ -14,14 +15,12 @@ struct SettingsSheet: View {
                         Button("Done") { state.dismissSettings() }
                     }
                 }
-                .navigationDestination(for: NavStep.self) { step in
+                .navigationDestination(for: SettingsStep.self) { step in
                     switch step {
                     case .page(let page):
                         SettingsPageView(page: page)
                     case .member(let id):
                         MemberEditView(memberID: id, inSheet: false)
-                    default:
-                        EmptyView()
                     }
                 }
         }
@@ -153,7 +152,7 @@ private struct SettingsList: View {
     /// A row with its title, one line on what it is for, and the current value.
     private func link(_ page: SettingsPage, _ title: LocalizedStringKey, detail: LocalizedStringKey, systemImage: String,
                       value: String? = nil) -> some View {
-        NavigationLink(value: NavStep.page(page)) {
+        NavigationLink(value: SettingsStep.page(page)) {
             LabeledContent {
                 if let value { Text(value) }
             } label: {

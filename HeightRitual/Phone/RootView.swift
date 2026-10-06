@@ -25,6 +25,15 @@ struct RootView: View {
             }
         }
         .animation(.default, value: state.notice)
+        .overlay(alignment: .bottomLeading) {
+            // UI tests read the route here to check the screen and AppState agree.
+            if ProcessInfo.processInfo.arguments.contains("-UITestRoute") {
+                Text(verbatim: "\(state.route)")
+                    .font(.system(size: 1))
+                    .opacity(0.01)
+                    .accessibilityIdentifier("route-debug")
+            }
+        }
     }
 }
 
@@ -35,9 +44,17 @@ private struct MainTabs: View {
     @Environment(AppState.self) private var state
 
     var body: some View {
-        NavigationStack(path: Binding(get: { state.navigationPath },
-                                      set: { state.popped(state.navigationPath.count - $0.count) })) {
-            TabView(selection: Binding(get: { state.mode ?? .memory },
+        // Read here, in body, so Observation re-renders this view whenever they change. Values read
+        // only inside a Binding's closure are not tracked: the route could move on while the stack
+        // stayed put (a push lost, the tab bar left hidden), until something else redrew the view.
+        let path = state.navigationPath
+        let selectedTab = state.mode ?? .memory
+        let showsSettings = state.showsSettings
+        let showsMemberSheet = state.showsMemberSheet
+
+        NavigationStack(path: Binding(get: { path },
+                                      set: { state.popped(path.count - $0.count) })) {
+            TabView(selection: Binding(get: { selectedTab },
                                        set: { state.handle(.mode($0)) })) {
                 MemberGridView(mode: .make)
                     .tabItem { Label("Make", systemImage: "record.circle") }
@@ -46,27 +63,33 @@ private struct MainTabs: View {
                     .tabItem { Label("Memory", systemImage: "clock.arrow.circlepath") }
                     .tag(Mode.memory)
             }
-            .navigationTitle(state.mode == .make ? LocalizedStringKey("Make mode") : "Memory mode")
+            // The tabs draw their own large titles (a shared title flickered when switching tabs);
+            // the bar keeps only the Settings button.
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
             .screenChrome(statusInContent: true)
             .navigationDestination(for: NavStep.self) { step in
-                switch step {
-                case .film: FilmView(film: state.filmState)
-                case .height: HeightView(height: state.heightState)
-                case .wall: MemoryWallView()
-                case .record(let id): RecordDetailView(recordID: id)
-                default: EmptyView()
-                }
+                destination(step)
             }
         }
-        .sheet(isPresented: Binding(get: { state.showsSettings },
+        .sheet(isPresented: Binding(get: { showsSettings },
                                     set: { if !$0 { state.dismissSettings() } })) {
             SettingsSheet()
         }
-        .sheet(isPresented: Binding(get: { state.showsMemberSheet },
+        .sheet(isPresented: Binding(get: { showsMemberSheet },
                                     set: { if !$0 { state.dismissMemberSheet() } })) {
             NavigationStack {
                 MemberEditView(memberID: memberSheetID, inSheet: true)
             }
+        }
+    }
+
+    @ViewBuilder private func destination(_ step: NavStep) -> some View {
+        switch step {
+        case .film: FilmView(film: state.filmState)
+        case .height: HeightView(height: state.heightState)
+        case .wall: MemoryWallView()
+        case .record(let id): RecordDetailView(recordID: id)
         }
     }
 

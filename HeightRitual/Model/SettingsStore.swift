@@ -67,6 +67,24 @@ struct Calibration: Codable, Equatable {
         rotation == 0 ? screen : CGSize(width: screen.height, height: screen.width)
     }
 
+    /// Only a portrait strip of the picture is used: 9:16, the picture's full height, so the
+    /// centimetres it reaches stay the same. The rest of a wide picture stays black, and the phone
+    /// shows exactly this strip.
+    static let stripAspect = 9.0 / 16.0
+
+    /// The strip's size in projector points, upright.
+    func stripSize(for screen: CGSize) -> CGSize {
+        let picture = logicalSize(for: screen)
+        return CGSize(width: min(picture.width, picture.height * Self.stripAspect), height: picture.height)
+    }
+
+    /// How far the strip sits right of the picture's centre. Left and right moves the strip while
+    /// there is room in the picture; what is left over moves the drawing inside the strip.
+    func stripOffset(for screen: CGSize) -> Double {
+        let room = Double(logicalSize(for: screen).width - stripSize(for: screen).width) / 2
+        return min(max(shiftPt, -room), room)
+    }
+
     /// `y(cm) = imageHeight - floorPt - cm * ptPerCM`
     func y(cm: Double, imageHeight: Double) -> Double {
         imageHeight - floorPt - cm * ptPerCM

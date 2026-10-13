@@ -189,6 +189,8 @@ xcodegen                     # generates HeightRitual.xcodeproj from project.yml
 open HeightRitual.xcodeproj
 ```
 
+New to Xcode, git or Claude? Start with [docs/ONBOARDING.md](docs/ONBOARDING.md) (Korean).
+
 Set your own team in `project.yml` (`DEVELOPMENT_TEAM`) before running on a device.
 "Load sample family" in Settings fills Memory with Nora and Leo, so the app can be tried without
 filming anyone.

@@ -1,196 +1,172 @@
-# 처음 합류하는 팀원 가이드
+# Getting started on Height Ritual
 
-Xcode, iOS 개발, GitHub, Claude를 모두 처음 써보는 사람을 위한 문서야.
-코드를 직접 다 이해할 필요는 없어. **Claude가 코드를 쓰고, 너는 무엇을 만들지 정하고 결과를 확인하는 사람**이야.
+A step-by-step guide for teammates who have never used Xcode, iOS development, GitHub or Claude.
+You do not need to understand all the code. **Claude writes the code. You decide what to build and
+check the result with your own eyes.**
+
+There is also a version of this guide with English, Swedish and Korean, shared as a web page by Chanhee.
+
+- Our GitHub repository: https://github.com/chaneeii/HeightRitual
 
 ---
 
-## 0. 큰 그림 먼저
+## How work flows
 
+1. You ask Claude for a change, in plain words.
+2. Claude edits the code in the project folder on your Mac.
+3. You run the app in Xcode and check it in the simulator.
+4. Claude puts the change on GitHub as a pull request (PR).
+5. Chanhee reviews it and merges it into `main`.
+
+Three rules:
+
+1. **Never push to `main` directly.** Always: new branch, PR, Chanhee reviews, merge.
+2. **One thing at a time.** Finish one change, open a PR, then start the next.
+3. **Don't say "done" until you have seen it in the simulator.** The camera, the Bluetooth
+   controller and the projector do not work in the simulator. If a change touches them, write
+   "not tested on a device" in the PR.
+
+---
+
+## Part 1. Install the apps (once, about 1 to 2 hours)
+
+You need a Mac with at least 40 GB of free disk space.
+
+### Step 1. Install Xcode
+- Open https://apps.apple.com/app/xcode/id497799835 and click **Get** (or search "Xcode" in the Mac App Store).
+- It is large. Start this first and do the other steps while it downloads.
+- Open Xcode once. Accept the license, and when it asks which platforms to download, choose **iOS**.
+
+### Step 2. Make a GitHub account
+- Sign up at https://github.com/signup.
+- Send your username to Chanhee.
+- Chanhee invites you. Accept it at https://github.com/chaneeii/HeightRitual/invitations (or from the email).
+
+### Step 3. Install Claude
+- Download the desktop app from https://claude.ai/download and sign in.
+- You will use the **Code** tab. Claude Code needs a paid Claude plan (Pro or Max).
+
+## Part 2. Set up Terminal (once)
+
+Open **Terminal**: press `⌘ Space`, type `Terminal`, press Return.
+Paste each command below and press Return.
+
+### Step 4. Install Homebrew
+Homebrew installs developer tools. Copy the install command from https://brew.sh and paste it into Terminal.
+It asks for your Mac password; nothing appears while you type, that is normal.
+When it finishes, it prints **Next steps** with two or three commands. Run those too.
+
+### Step 5. Install xcodegen and the GitHub tool
+
+```bash
+brew install xcodegen gh
 ```
-  너 ──말로 요청──▶ Claude ──코드 수정──▶ 내 Mac의 프로젝트 폴더
-                                              │
-                         Xcode로 실행해서 눈으로 확인 ◀┘
-                                              │
-                    괜찮으면 Claude가 GitHub에 "PR"로 올림
-                                              │
-                         찬희가 보고 합침(merge) ◀┘
+
+### Step 6. Log in to GitHub
+
+```bash
+gh auth login --web --git-protocol https
 ```
 
-- **Xcode**: iOS 앱을 실행해보는 프로그램. 우리는 주로 "▶ 버튼 눌러서 시뮬레이터로 보기"만 쓴다.
-- **GitHub**: 팀의 코드 원본이 있는 곳. 각자 Mac에 복사본을 두고 작업한 뒤, 바뀐 부분을 올린다.
-- **Claude Code**: 이 폴더를 열어놓고 한국어로 말하면 코드를 고치고, 빌드하고, GitHub 작업까지 해주는 AI.
+A code appears in Terminal and a browser page opens. Enter the code there and allow access.
+If Terminal asks whether to authenticate Git with your GitHub credentials, answer **Yes**.
 
-### 꼭 기억할 규칙 세 가지
+## Part 3. Get the project (once)
 
-1. **`main`에 직접 올리지 않는다.** 항상 새 브랜치 → PR → 찬희 리뷰 → 합치기.
-2. **한 번에 하나만.** "버튼 색 바꾸기" 하나 끝내고 PR, 그 다음 일.
-3. **시뮬레이터에서 직접 눈으로 확인하기 전에는 "됐다"고 하지 않는다.**
-   카메라, 블루투스 컨트롤러, 프로젝터는 시뮬레이터에서 안 돌아가니까, 그 부분을 건드렸으면
-   PR에 "기기에서 확인 안 함"이라고 적는다.
+### Step 7. Clone the repository
+"Clone" means copying the project from GitHub to your Mac.
 
----
+```bash
+git clone https://github.com/chaneeii/HeightRitual.git ~/HeightRitual
+```
 
-## 1. 준비물 설치 (처음 한 번, 1~2시간)
+### Step 8. Make the Xcode project and open it
 
-Mac이 필요해. Xcode는 Mac에서만 돌아가.
+```bash
+cd ~/HeightRitual && xcodegen && open HeightRitual.xcodeproj
+```
 
-| 순서 | 할 일 | 어디서 |
-|---|---|---|
-| 1 | **Xcode** 설치 (용량이 커서 오래 걸림, 미리 시작해두기) | Mac App Store에서 "Xcode" 검색 |
-| 2 | Xcode를 한 번 실행 → 추가 구성요소 설치 → **iOS 시뮬레이터** 받기 | Xcode 첫 실행 화면에서 iOS 체크 |
-| 3 | **GitHub 계정** 만들기 → 아이디를 찬희에게 알려주기 | https://github.com |
-| 4 | 찬희가 보낸 **초대 수락** (이메일 또는 GitHub 알림) | GitHub |
-| 5 | **Claude 데스크톱 앱** 설치 후 로그인 | https://claude.ai/download |
-| 6 | **Homebrew** 설치 (Mac용 프로그램 설치 도구) | https://brew.sh 의 한 줄 명령을 터미널에 붙여넣기 |
-| 7 | **xcodegen** 설치 | 터미널에 `brew install xcodegen` |
+### Step 9. Run the app
+1. At the top centre of the Xcode window, click the device name and choose a simulator such as **iPhone 16 Pro**.
+2. Click **▶** at the top left, or press `⌘R`.
+3. A phone window opens with the app. Your mouse click is a finger tap.
+4. Stop with **■**, or `⌘.`
 
-> 6, 7번이 어려우면 건너뛰고, 나중에 Claude에게 "xcodegen 설치해줘"라고 해도 돼.
+Tips:
+- To see the Memory screen without filming anyone: Settings → **Load sample family**.
+- Simulator dark mode: `⇧⌘A`. Screenshot: `⌘S`.
 
----
+### Step 10. Open the project in Claude
+In the Claude app, open the **Code** tab, start a new session and choose the `~/HeightRitual` folder.
+Always open this folder when you work on the project. Try this first:
 
-## 2. 프로젝트 내 Mac으로 가져오기 (처음 한 번)
-
-Claude 데스크톱 앱의 **Code** 탭에서 새 세션을 열고 이렇게 말하면 된다:
-
-> GitHub의 https://github.com/chaneeii/HeightRitual 저장소를 내 Mac의 `~/HeightRitual` 폴더로
-> 가져와줘(clone). 그 다음 xcodegen 돌려서 Xcode 프로젝트 만들고, 시뮬레이터용으로 빌드되는지 확인해줘.
-> 나는 git이랑 Xcode 처음이니까 하는 일을 쉽게 설명해줘.
-
-중간에 GitHub 로그인을 요구하면 브라우저 창이 뜨니까 거기서 로그인하면 된다.
-비밀번호나 토큰을 Claude 채팅창에 붙여넣지 말 것.
-
-이후로는 Claude 세션을 열 때 항상 **`~/HeightRitual` 폴더**를 선택해서 연다.
+> Explain the structure of this project as if I have never done iOS development.
+> Show me which files make up one screen.
 
 ---
 
-## 3. 앱 실행해보기 (Xcode)
+## Part 4. Every task
 
-1. Finder에서 `~/HeightRitual/HeightRitual.xcodeproj`를 더블클릭 → Xcode가 열린다.
-2. 창 맨 위 가운데에 기기 이름이 보이는 곳을 클릭 → **iPhone 16** 같은 시뮬레이터를 고른다.
-3. 왼쪽 위 **▶ (Run)** 버튼 클릭, 또는 `⌘R`.
-4. 잠시 후 아이폰 모양 창이 뜨고 앱이 실행된다. 마우스 클릭이 손가락 터치다.
-5. 끝낼 때는 ■ (Stop) 버튼, 또는 `⌘.`
-
-**알아두면 좋은 것**
-- 빌드가 실패하면 Xcode 왼쪽에 빨간 ⛔ 표시가 뜬다. 그 메시지를 그대로 복사해서 Claude에게
-  "이 에러 고쳐줘"라고 붙여넣으면 된다.
-- 촬영 없이 Memory 화면을 보고 싶으면 Settings → **Load sample family**를 누르면 예시 가족(Nora, Leo)이 채워진다.
-- 언어/다크모드 확인: 앱 안의 Settings에서 바꿀 수 있다. 시뮬레이터 자체 다크모드는 `⇧⌘A`.
-- **"Signing" 관련 에러**는 시뮬레이터에선 보통 안 나온다. 실제 아이폰에 설치하려고 할 때만 나오는데,
-  그건 찬희랑 같이 하자. (팀 계정 설정이 필요함)
-- Xcode에서 직접 코드를 고칠 필요는 없다. 고치는 건 Claude에게.
+1. **Start a branch.** *"Get the latest main and make a new branch called feature/memory-empty-state."*
+   A branch is your own working copy. `main` stays safe whatever you do.
+2. **Ask for the change.** Say what, where, and what success looks like.
+   - Too vague: *"Make the memory screen nicer."*
+   - Good: *"When Memory has no records, the screen is empty. Add a short message and a button that goes to the Make tab."*
+   - Drag a screenshot into the chat when you talk about a screen.
+3. **Check it.** Press ▶ in Xcode and try it. If something is off, say so with a screenshot.
+   You can also ask: *"Run the tests and tell me if they pass."*
+4. **Open a PR.** *"Commit this, push it and open a pull request. Describe what changed and what you checked in the simulator."*
+   Send the PR link to Chanhee. If Chanhee leaves comments, show them to Claude and fix them.
+5. **After the merge.** *"Switch back to main and get the latest."* Then start again at 1.
 
 ---
 
-## 4. 매일 작업하는 순서
+## Part 5. Running on a real iPhone
 
-### ① 시작: 최신 코드 받고 새 브랜치 만들기
+- **The simulator needs no certificates, profiles or Apple account.** Most of your work happens there.
+- You cannot sign builds with Chanhee's Apple team. It is an individual developer account, and those cannot share signing with other people.
+- If you need the app on a phone:
+  - Ask Chanhee to install it on a test phone, or to send you a TestFlight build.
+  - Or use your own free Apple ID: Xcode → Settings → Accounts → add your Apple ID. Then copy
+    `Config/Local.xcconfig.example` to `Config/Local.xcconfig` and put in your Team ID and a bundle ID of your own.
+    That file is ignored by git, so it never reaches the repository. Apps installed this way stop opening after 7 days; install again.
+- If Keychain Access or Certificate Assistant shows an error, you do not need it. Xcode handles certificates itself.
 
-> main 최신으로 받아오고, `feature/memory-empty-state` 같은 새 브랜치 만들어줘.
+---
 
-브랜치 = "내 작업용 복사 공간". 망쳐도 main은 안전하다.
+## Part 6. Working with Claude
 
-### ② 요청하기
+- **Ask anything.** "What is a branch?", "What does this file do?", "Explain what you just did."
+- **Plan before big changes.** "Don't change anything yet. Show me your plan first."
+- **Stop it when it goes the wrong way.** Interrupt and say what you want instead.
+- **Undo.** "Undo all the changes you just made." Easy before a commit.
+- Claude asks before running some commands. If you don't know what one does, ask "What does this do?" first.
+- If you see a push to `main`, deleting many files, or `--force`, say no and ask Chanhee.
+- The project rules are in `CLAUDE.md`. Claude reads them; you don't have to memorise them.
 
-좋은 요청에는 **무엇을 / 어디서 / 어떻게 되면 성공인지**가 들어간다.
+---
 
-| 안 좋은 예 | 좋은 예 |
+## When you are stuck
+
+| Situation | What to do |
 |---|---|
-| 메모리 화면 좀 예쁘게 해줘 | Memory 탭에서 기록이 하나도 없을 때 빈 화면만 나와. "아직 기록이 없어요" 같은 안내 문구랑 Make 탭으로 가는 버튼을 넣어줘. 문구는 4개 언어 다 추가해줘. |
-| 버그 고쳐줘 | Make 탭에서 사람 선택하고 Cancel 누르면 앱이 처음 화면으로 안 돌아가. 원래는 사람 선택 화면으로 돌아가야 해. |
+| Build error (red mark in Xcode) | Copy the message, paste it to Claude: "Fix this error." |
+| Simulator acts strange | Xcode menu Product → Clean Build Folder (`⇧⌘K`), then ▶ again |
+| Claude says "conflict" | Someone changed the same lines. "Resolve the conflict and explain what you picked." |
+| You think you broke something | Before a commit: "Undo all changes." After a commit: tell Chanhee. `main` is safe. |
+| Stuck for more than 30 minutes | Message Chanhee with a screenshot. |
 
-화면 얘기를 할 땐 **스크린샷을 채팅창에 끌어다 놓으면** 훨씬 정확하다.
-(시뮬레이터에서 `⌘S`로 스크린샷 저장)
+## Words
 
-### ③ 확인하기
-
-Claude가 "다 했다"고 하면:
-
-1. Xcode에서 **▶** 다시 눌러서 직접 눌러보기.
-2. 이상하면 그대로 말하기: "버튼이 화면 밖으로 잘려" + 스크린샷.
-3. 괜찮으면 다음 단계.
-
-Claude에게 이것도 요청할 수 있다:
-> 테스트 돌려서 다 통과하는지 확인해줘.
-
-### ④ 올리기 (PR)
-
-> 지금 바뀐 거 커밋하고 GitHub에 올려서 PR 만들어줘. 설명에 뭘 바꿨는지, 시뮬레이터에서 뭘 확인했는지 적어줘.
-
-**PR(Pull Request)** = "내 브랜치 내용을 main에 합쳐도 될까요?" 하는 요청서.
-Claude가 PR 링크를 주면 찬희에게 공유한다. 찬희가 코멘트를 달면 그 코멘트를 Claude에게 보여주고 고치면 된다.
-
-### ⑤ 합쳐진 뒤
-
-> main으로 돌아가서 최신으로 받아줘.
-
-그리고 ①부터 다시.
-
----
-
-## 5. Claude랑 일할 때 팁
-
-- **모르면 물어보면 된다.** "브랜치가 뭐야?", "이 파일은 뭐 하는 거야?", "방금 한 거 쉽게 설명해줘".
-- **크게 시키기 전에 계획부터.** "바로 고치지 말고, 어떻게 할지 계획만 먼저 보여줘."
-- **이상한 방향으로 가면 바로 멈춰.** 채팅창에서 중단하고 "그거 말고 ~~"라고 말하면 된다.
-- **되돌리고 싶으면:** "방금 바꾼 거 전부 취소해줘" (커밋 전이면 쉽게 되돌릴 수 있다).
-- Claude가 무언가를 실행하려고 할 때 **허락을 묻는 창**이 뜬다. 뭘 하는지 모르겠으면 "이거 뭐 하는 거야?"
-  하고 물어본 뒤 허락해도 된다. 특히 `main`에 push, 파일 대량 삭제, `--force` 같은 단어가 보이면 일단 거절하고 찬희에게 물어보기.
-- 프로젝트 규칙은 `CLAUDE.md`에 있고 Claude가 알아서 읽는다. 너는 외우지 않아도 된다.
-
----
-
-## 6. 이 프로젝트에서 하지 말 것
-
-Claude가 대부분 알아서 지키지만, 혹시 이런 걸 하려고 하면 멈춰달라고 하자.
-
-- `HeightRitual.xcodeproj` 안을 직접 고치기 → 이건 `project.yml`에서 자동으로 만들어지는 파일이다.
-  파일을 추가/삭제했으면 `xcodegen`을 다시 돌린다.
-- 외부 라이브러리(패키지) 추가, 인터넷 통신 코드 추가 → 이 앱은 일부러 둘 다 안 쓴다.
-- 가족 영상/사진을 기기 밖으로 보내는 기능.
-- 화면 문구를 영어로만 추가하기 → 한국어/중국어/스웨덴어 번역도 같이 넣어야 한다.
-- `Firmware/` (컨트롤러 펌웨어) 건드리기 → 찬희랑 먼저 얘기하기.
-
----
-
-## 7. 어디부터 볼까 (첫 주 추천)
-
-1. **README.md** 읽기: 이 앱이 뭔지, 화면이 어떻게 생겼는지.
-2. 시뮬레이터에서 앱을 처음부터 끝까지 눌러보기: 첫 실행 마법사 → Make → Memory → Settings.
-3. Claude에게 물어보기:
-   > 이 프로젝트 구조를 iOS 처음 하는 사람한테 설명하듯이 알려줘. 화면 하나가 어떤 파일들로 이뤄져 있는지 예시 하나로 보여줘.
-4. **첫 작업은 작은 걸로:** 문구 하나 바꾸기, 간격 조정하기 같은 것. 브랜치 → 요청 → 확인 → PR 흐름을 한 번 끝까지 해보는 게 목표.
-
-화면이 뭘 해야 하는지는 `docs/SPEC.md`가 정답이다. 헷갈리면 Claude에게
-"SPEC에서 이 화면은 어떻게 하라고 돼 있어?"라고 물어보면 된다.
-
----
-
-## 8. 막혔을 때
-
-| 상황 | 이렇게 |
+| Word | Meaning |
 |---|---|
-| 빌드 에러 | 에러 메시지를 복사해서 Claude에게 "이 에러 고쳐줘" |
-| 시뮬레이터가 안 뜨거나 이상함 | Xcode 메뉴 Product → Clean Build Folder (`⇧⌘K`) 후 다시 ▶ |
-| "conflict(충돌)"이라는 말이 나옴 | 다른 사람이 같은 곳을 고친 것. Claude에게 "충돌 해결해줘, 어떤 걸 골랐는지 설명해줘" |
-| 내가 뭘 망친 것 같음 | 커밋 전이면 "변경사항 전부 취소해줘". 커밋 후면 찬희에게 연락. main은 안전하다. |
-| 30분 넘게 같은 문제 | 혼자 끙끙대지 말고 찬희에게 스크린샷이랑 같이 물어보기 |
-
----
-
-## 용어 사전
-
-| 용어 | 뜻 |
-|---|---|
-| 저장소 (repository, repo) | 프로젝트 폴더 + 모든 변경 기록 |
-| clone | GitHub의 저장소를 내 Mac으로 처음 복사해오기 |
-| 브랜치 (branch) | 작업용 갈래. `main`은 공식 버전 |
-| 커밋 (commit) | "여기까지 저장" 하는 스냅샷 하나 |
-| push / pull | 내 커밋을 GitHub에 올리기 / GitHub의 새 커밋을 받아오기 |
-| PR (Pull Request) | 내 브랜치를 main에 합쳐달라는 요청서. 여기서 리뷰한다 |
-| merge | 브랜치를 합치기 |
-| 빌드 (build) | 코드를 실행 가능한 앱으로 만드는 과정 |
-| 시뮬레이터 | Mac 안에서 돌아가는 가짜 아이폰 |
-| SwiftUI | 우리가 화면을 만드는 방식 (Apple 공식) |
-| xcodegen | `project.yml`을 보고 Xcode 프로젝트 파일을 만들어주는 도구 |
+| Repository (repo) | The project folder plus its full history |
+| Clone | Copy a repository from GitHub to your Mac |
+| Branch | A separate line of work. `main` is the official version |
+| Commit | A saved snapshot of changes |
+| Push / pull | Send your commits to GitHub / get new commits from GitHub |
+| Pull request (PR) | A request to merge your branch into `main`. Reviews happen here |
+| Merge | Combine a branch into another |
+| Build | Turn the code into an app that can run |
+| Simulator | A pretend iPhone running on your Mac |
+| xcodegen | Makes the Xcode project file from `project.yml` |

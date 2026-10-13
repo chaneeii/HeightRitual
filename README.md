@@ -191,7 +191,8 @@ open HeightRitual.xcodeproj
 
 New to Xcode, git or Claude? Start with [docs/ONBOARDING.md](docs/ONBOARDING.md) (Korean).
 
-Set your own team in `project.yml` (`DEVELOPMENT_TEAM`) before running on a device.
+To run on a device with your own Apple team, copy `Config/Local.xcconfig.example` to
+`Config/Local.xcconfig` and set your team and bundle ID. That file is ignored by git.
 "Load sample family" in Settings fills Memory with Nora and Leo, so the app can be tried without
 filming anyone.
 

@@ -415,7 +415,9 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
   R3 shows the memory wall with that record.
 - Until a projector is connected, the phone's wall copy assumes a 1920 x 1080 picture.
 - R2 always shows the selected record (date, height, growth) under the wall copy; tapping it opens R3.
-- Choosing "On its side" on S1 also sets the S2 rotation to 90 degrees (unless -90 was chosen);
+- The projector lies on its side by default: S1 starts on "On its side" and the S2 rotation on
+  -90 degrees, so the wall image is turned from the first start.
+- Choosing "On its side" on S1 also sets the S2 rotation to -90 degrees (unless 90 was chosen);
   "Upright" sets it to 0.
 - The Settings button is hidden during the wizard; the wizard is left only by Next, Skip or Finish.
 - Bluetooth permission is asked when "Allow" is pressed on S5, not at launch.

@@ -60,7 +60,8 @@ struct Calibration: Codable, Equatable {
     /// Moves the drawing left or right, in points.
     var shiftPt: Double = 0
     /// 0 when the projector stands normally; 90 or -90 when it lies on its side.
-    var rotation: Int = 0
+    /// The prototype's projector lies on its side, turned to the left, so that is the default.
+    var rotation: Int = -90
 
     /// The projected image size after rotation, in the wall's own up and down direction.
     func logicalSize(for screen: CGSize) -> CGSize {
@@ -107,7 +108,7 @@ struct CameraPosition: Codable, Equatable {
 /// Projector placement inputs (SPEC 7, S1).
 struct ProjectorSetup: Codable, Equatable {
     var throwRatio: Double = 0.8
-    var onItsSide = false
+    var onItsSide = true
 }
 
 /// Values in the settings list, kept in UserDefaults. Setup values survive "Delete everything".

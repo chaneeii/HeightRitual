@@ -685,7 +685,7 @@ final class AppState {
     func setProjectorOnItsSide(_ onItsSide: Bool) {
         settings.projector.onItsSide = onItsSide
         if onItsSide && settings.wall.rotation == 0 {
-            settings.wall.rotation = 90
+            settings.wall.rotation = -90
         } else if !onItsSide {
             settings.wall.rotation = 0
         }

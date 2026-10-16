@@ -117,10 +117,11 @@ final class ModelTests: XCTestCase {
     /// Only a full-height 9:16 strip is used; Left and right moves it within a wide picture.
     func testPortraitStrip() {
         let screen = CGSize(width: 1920, height: 1080)
-        XCTAssertEqual(Calibration().stripSize(for: screen), CGSize(width: 607.5, height: 1080))
+        XCTAssertEqual(Calibration(rotation: 0).stripSize(for: screen), CGSize(width: 607.5, height: 1080))
         XCTAssertEqual(Calibration(rotation: 90).stripSize(for: screen), CGSize(width: 1080, height: 1920))
-        XCTAssertEqual(Calibration(shiftPt: 100).stripOffset(for: screen), 100)
-        XCTAssertEqual(Calibration(shiftPt: 2000).stripOffset(for: screen), 656.25)
+        XCTAssertEqual(Calibration(rotation: -90).stripSize(for: screen), CGSize(width: 1080, height: 1920))
+        XCTAssertEqual(Calibration(shiftPt: 100, rotation: 0).stripOffset(for: screen), 100)
+        XCTAssertEqual(Calibration(shiftPt: 2000, rotation: 0).stripOffset(for: screen), 656.25)
         XCTAssertEqual(Calibration(shiftPt: 50, rotation: 90).stripOffset(for: screen), 0)
     }
 

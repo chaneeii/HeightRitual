@@ -43,6 +43,7 @@ struct SettingsPageView: View {
         switch page {
         case .list: return "Settings"
         case .family: return "Family"
+        case .setupGuide: return "Setup guide"
         case .fitToWall: return "Fit to wall"
         case .cameraPosition: return "Camera position"
         case .units: return "Units"
@@ -55,6 +56,7 @@ struct SettingsPageView: View {
         switch page {
         case .list: SettingsList()
         case .family: FamilyPage()
+        case .setupGuide: SetupGuidePage()
         case .fitToWall: FitToWallPage()
         case .cameraPosition: CameraPositionPage()
         case .units: UnitsPage()
@@ -86,6 +88,8 @@ private struct SettingsList: View {
             }
             .listRowBackground(SettingsStyle.row)
             Section {
+                link(.setupGuide, "Setup guide", detail: "Where to put the projector and the phone",
+                     systemImage: "book")
                 link(.fitToWall, "Fit to wall", detail: "Make projected centimetres match a tape measure",
                      systemImage: "ruler")
                 link(.cameraPosition, "Camera position", detail: "Where the floor and 100 cm are in the camera picture",

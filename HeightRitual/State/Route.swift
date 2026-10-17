@@ -13,7 +13,7 @@ enum HeightState: Equatable {
 }
 
 enum SettingsPage: Equatable {
-    case list, family, fitToWall, cameraPosition, units, controller, permissions
+    case list, family, setupGuide, fitToWall, cameraPosition, units, controller, permissions
 }
 
 /// First-start wizard: what the app is, then S5, S2, S3 in order.

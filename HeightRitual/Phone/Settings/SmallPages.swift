@@ -134,3 +134,87 @@ struct LanguagePicker: View {
         }
     }
 }
+
+/// Settings > Setup guide: where the projector and the phone stand, as two pictures with the
+/// same steps written out below, readable at phone size. Tapping a picture shows it full size.
+struct SetupGuidePage: View {
+    private struct Step: Identifiable {
+        let id: String
+        let title: LocalizedStringKey
+        let text: LocalizedStringKey
+        let picture: String
+        let description: LocalizedStringKey
+    }
+
+    private let steps = [
+        Step(id: "projector", title: "1. Place the projector",
+             text: "Put the projector 2.5 m from the wall, with the centre of the lens 0.97 m above the floor. The bottom edge of the picture should touch the floor.",
+             picture: "SetupGuideProjector",
+             description: "The projector on a stand 2.5 m from the wall, lens around 0.97 m above the floor. A child stands against the wall in the light."),
+        Step(id: "camera", title: "2. Place the phone next to it",
+             text: "Put the phone right next to the projector, also 2.5 m from the wall and about 0.97 m above the floor. Stand it upright with the rear camera facing the wall. The parent stands behind them with the controller.",
+             picture: "SetupGuideCamera",
+             description: "Seen from above and from the side: the phone on a tripod next to the projector, 2.5 m from the wall, camera about 0.97 m above the floor. A parent stands behind them with the controller."),
+    ]
+    @State private var enlarged: String?
+
+    var body: some View {
+        Form {
+            ForEach(steps) { step in
+                Section {
+                    Button {
+                        enlarged = step.picture
+                    } label: {
+                        Image(step.picture)
+                            .resizable()
+                            .scaledToFit()
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text(step.description))
+                    .accessibilityHint("Shows the picture full size")
+                    Text(step.text)
+                } header: {
+                    Text(step.title)
+                } footer: {
+                    Label("Tap the picture to see it full size", systemImage: "arrow.up.left.and.arrow.down.right")
+                }
+            }
+        }
+        .fullScreenCover(item: Binding(get: { enlarged.map(EnlargedPicture.init) },
+                                       set: { enlarged = $0?.id })) { picture in
+            EnlargedPictureView(name: picture.id)
+        }
+    }
+}
+
+private struct EnlargedPicture: Identifiable {
+    let id: String
+}
+
+/// One setup picture at twice the screen width, panned with the finger; Done closes it.
+private struct EnlargedPictureView: View {
+    let name: String
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            GeometryReader { geo in
+                ScrollView([.horizontal, .vertical]) {
+                    Image(name)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: geo.size.width * 2.4)
+                }
+                .defaultScrollAnchor(.center)
+            }
+            .background(Color(red: 0.965, green: 0.969, blue: 0.976))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+}

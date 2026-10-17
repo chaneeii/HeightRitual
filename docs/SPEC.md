@@ -113,7 +113,7 @@ Each step can be reopened from Settings.
 | R2 | Memory: wall | Segmented control "Auto play / Manual" at the top. Copy of the wall. Manual: Previous, Next, Replay. Auto play: Stop. No Record: filming is only in Make | Marks for all records; the selected record's clip life-size; caption "Nora, Aug 2025, 121.0 cm". Auto play: each record in order |
 | R3 | One record | Clip, date, height, growth since the record before. Change height, Delete | Unchanged |
 | A1 | Add or edit member | Name, colour, Delete member | Unchanged |
-| S | Settings | List: Family, Fit to wall, Camera position, Units, Sound, Controller, Permissions, Sample family, Delete everything | Unchanged |
+| S | Settings | List: Family, Setup guide, Fit to wall, Camera position, Units, Sound, Controller, Permissions, Sample family, Delete everything | Unchanged |
 | S2 | Fit to wall | Three sliders (floor line, size, left/right), fine-step toggle, rotation, "Top of picture: 176 cm" | Centimetre ruler: 0, 100, 150 highlighted, dashed line at 170 |
 | S3 | Camera position | Camera preview with two draggable lines: floor and 100 cm. Text: put them on the projected lines | Two bright lines at 0 and 100 cm |
 | S4 | Units | cm or feet and inches | Unchanged |
@@ -208,6 +208,13 @@ Debounce (25 ms) is done in the firmware. The app ignores an identical non-knob 
 IDs 12 (Playback) and 21 (Push) from earlier versions are no longer used.
 
 ## 7. Setup
+
+### Setup guide
+
+Two pictures with the steps written below them: the projector lens 2.5 m from the wall and 0.97 m
+above the floor; the phone right next to it at the same distance and height, rear camera facing the
+wall, the parent behind them with the controller. Tapping a picture shows it full size with Done.
+Sources: `docs/setup-guide/`.
 
 ### S1 Projector placement (removed)
 

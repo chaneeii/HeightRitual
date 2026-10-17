@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1000" width="1800" height="1000">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=Nunito:wght@500;700;800&amp;display=block');
+    text { font-family: 'Nunito', 'Arial Rounded MT Bold', sans-serif; font-weight: 600; }
+    text[font-weight="600"] { font-weight: 800; }
+    text[font-weight="700"] { font-family: 'Fredoka', 'Arial Rounded MT Bold', sans-serif; font-weight: 600; letter-spacing: 0.5px; }
+  </style>
+  <defs>
+    <!-- people, 100 units tall, feet at 0, facing right; clothes colour from currentColor -->
+    <g id="adult">
+      <rect x="-7" y="-46" width="13" height="46" rx="5" fill="currentColor"/>
+      <rect x="-7" y="-46" width="13" height="46" rx="5" fill="#000" opacity="0.18"/>
+      <rect x="-8" y="-5" width="19" height="5" rx="2.5" fill="#3A3A48"/>
+      <rect x="-10.0" y="-84" width="20" height="40" rx="8" fill="currentColor"/>
+      <rect x="-3" y="-81" width="7" height="34.0" rx="3.5" fill="#000" opacity="0.15"/>
+      <circle cx="0" cy="-92.5" r="7.5" fill="#F6CFA8"/>
+      <path d="M-7.5,-94.00 A7.5,7.5 0 0 1 6.00,-97.00 L1.12,-95.50 Z" fill="#5B4636"/>
+      <circle cx="3.75" cy="-93.25" r="1.05" fill="#1B2230"/>
+      <path d="M2.40,-89.35 Q4.65,-87.85 6.30,-90.25" fill="none" stroke="#1B2230" stroke-width="0.90" stroke-linecap="round"/>
+    </g>
+    <g id="parent">
+      <rect x="-7" y="-46" width="13" height="46" rx="5" fill="currentColor"/>
+      <rect x="-7" y="-46" width="13" height="46" rx="5" fill="#000" opacity="0.18"/>
+      <rect x="-8" y="-5" width="19" height="5" rx="2.5" fill="#3A3A48"/>
+      <rect x="-10" y="-84" width="20" height="40" rx="8" fill="currentColor"/>
+      <rect x="-3" y="-81" width="7" height="21" rx="3.5" fill="#000" opacity="0.15"/>
+      <line x1="0.5" y1="-62" x2="11" y2="-66" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
+      <line x1="0.5" y1="-62" x2="11" y2="-66" stroke="#000" stroke-opacity="0.15" stroke-width="7" stroke-linecap="round"/>
+      <g transform="translate(19,0) scale(-1,1) translate(-19,0)">
+        <rect x="10" y="-75" width="18" height="13" rx="2.6" fill="#F1F1F1" stroke="#BDBDBD" stroke-width="0.6"/>
+        <rect x="12" y="-73.4" width="3.4" height="3.4" rx="0.8" fill="#CFCFCF"/>
+        <circle cx="25" cy="-71.7" r="1.8" fill="#CFCFCF"/>
+        <line x1="24.2" y1="-70.9" x2="25.8" y2="-72.5" stroke="#F1F1F1" stroke-width="0.6" stroke-linecap="round"/>
+        <path d="M12.2,-66 L14.8,-67.8 L14.8,-64.2 Z" fill="#CFCFCF" stroke="#CFCFCF" stroke-width="0.5" stroke-linejoin="round"/>
+        <circle cx="19" cy="-66" r="1.9" fill="#CFCFCF"/>
+        <path d="M25.8,-66 L23.2,-67.8 L23.2,-64.2 Z" fill="#CFCFCF" stroke="#CFCFCF" stroke-width="0.5" stroke-linejoin="round"/>
+      </g>
+      <circle cx="11" cy="-66" r="2.8" fill="#F6CFA8"/>
+      <circle cx="0" cy="-92.5" r="7.5" fill="#F6CFA8"/>
+      <path d="M-7.5,-94 A7.5,7.5 0 0 1 6,-97 L1.13,-95.5 Z" fill="#5B4636"/>
+      <circle cx="3.75" cy="-93.25" r="1.05" fill="#1B2230"/>
+      <path d="M2.4,-89.35 Q4.65,-87.85 6.3,-90.25" fill="none" stroke="#1B2230" stroke-width="0.9" stroke-linecap="round"/>
+    </g>
+    <g id="child">
+      <rect x="-7" y="-45" width="13" height="45" rx="5" fill="currentColor"/>
+      <rect x="-7" y="-45" width="13" height="45" rx="5" fill="#000" opacity="0.18"/>
+      <rect x="-8" y="-5" width="19" height="5" rx="2.5" fill="#3A3A48"/>
+      <rect x="-10.0" y="-79" width="20" height="36" rx="8" fill="currentColor"/>
+      <rect x="-3" y="-76" width="7" height="30.6" rx="3.5" fill="#000" opacity="0.15"/>
+      <circle cx="0" cy="-90" r="10" fill="#F6CFA8"/>
+      <path d="M-10,-92.00 A10,10 0 0 1 8.00,-96.00 L1.50,-94.00 Z" fill="#5B4636"/>
+      <circle cx="5.00" cy="-91.00" r="1.40" fill="#1B2230"/>
+      <path d="M3.20,-85.80 Q6.20,-83.80 8.40,-87.00" fill="none" stroke="#1B2230" stroke-width="1.20" stroke-linecap="round"/>
+    </g>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#C2410C"/>
+    </marker>
+  </defs>
+  <rect width="1800" height="1000" fill="#F6F7F9"/>
+
+  <text x="80" y="78" font-size="42" font-weight="700" fill="#1B2230">2  Place the phone next to the projector</text>
+  <text x="80" y="122" font-size="26" fill="#4B5563">Same distance and height as the projector lens. Phone upright, rear camera facing the wall.</text>
+
+  <!-- ===== Seen from above ===== -->
+  <text x="80" y="190" font-size="28" font-weight="700" fill="#1B2230">Seen from above</text>
+  <rect x="200" y="210" width="640" height="30" fill="#D5DAE1"/>
+  <line x1="200" y1="240" x2="840" y2="240" stroke="#8B93A1" stroke-width="3"/>
+  <text x="520" y="232" font-size="22" font-weight="600" fill="#4B5563" text-anchor="middle">Wall</text>
+
+  <!-- projector light -->
+  <polygon points="432,834 290,240 574,240" fill="#FFD24D" opacity="0.35"/>
+  <rect x="290" y="236" width="284" height="6" fill="#E0A800"/>
+  <!-- camera view -->
+  <line x1="522" y1="836" x2="330" y2="240" stroke="#4A7FC1" stroke-width="2.5" stroke-dasharray="10 7"/>
+  <line x1="522" y1="836" x2="714" y2="240" stroke="#4A7FC1" stroke-width="2.5" stroke-dasharray="10 7"/>
+
+  <!-- family against the wall, from above -->
+  <circle cx="452" cy="258" r="12" fill="#E76F51"/>
+  <circle cx="452" cy="258" r="6.5" fill="#F6CFA8"/>
+
+  <!-- parent with the controller, from above -->
+  <rect x="610" y="868" width="34" height="14" rx="4" fill="#F1F1F1" stroke="#BDBDBD" stroke-width="1.5"/>
+  <circle cx="627" cy="905" r="19" fill="#2A9D8F"/>
+  <circle cx="627" cy="907" r="10" fill="#F6CFA8"/>
+  <text x="660" y="898" font-size="21" font-weight="600" fill="#1F6F66">Parent with</text>
+  <text x="660" y="922" font-size="21" font-weight="600" fill="#1F6F66">the controller</text>
+
+  <!-- projector and phone -->
+  <rect x="420" y="826" width="24" height="14" rx="3" fill="#1B2230"/>
+  <rect x="395" y="840" width="74" height="96" rx="8" fill="#2B3547"/>
+  <rect x="502" y="836" width="40" height="10" rx="3" fill="#4A7FC1"/>
+  <circle cx="522" cy="870" r="16" fill="none" stroke="#6B7280" stroke-width="3"/>
+  <text x="432" y="972" font-size="24" font-weight="600" fill="#1B2230" text-anchor="middle">Projector</text>
+  <text x="545" y="972" font-size="24" font-weight="600" fill="#2F5F9E" text-anchor="start">Phone</text>
+
+  <!-- 2.5 m -->
+  <line x1="150" y1="240" x2="200" y2="240" stroke="#C2410C" stroke-width="2" stroke-dasharray="8 6"/>
+  <line x1="150" y1="836" x2="395" y2="836" stroke="#C2410C" stroke-width="2" stroke-dasharray="8 6"/>
+  <line x1="165" y1="246" x2="165" y2="830" stroke="#C2410C" stroke-width="3" stroke-linecap="round" marker-start="url(#a)" marker-end="url(#a)"/>
+  <text x="185" y="545" font-size="40" font-weight="700" fill="#C2410C">2.5 m</text>
+
+  <line x1="900" y1="170" x2="900" y2="970" stroke="#D1D5DB" stroke-width="2"/>
+
+  <!-- ===== Seen from the side ===== -->
+  <text x="950" y="190" font-size="28" font-weight="700" fill="#1B2230">Seen from the side</text>
+  <rect x="960" y="260" width="30" height="600" fill="#D5DAE1"/>
+  <line x1="990" y1="260" x2="990" y2="860" stroke="#8B93A1" stroke-width="3"/>
+  <text x="975" y="250" font-size="22" font-weight="600" fill="#4B5563" text-anchor="middle">Wall</text>
+  <rect x="960" y="860" width="800" height="16" fill="#E4E7EC"/>
+  <line x1="960" y1="860" x2="1760" y2="860" stroke="#5A6270" stroke-width="3"/>
+  <text x="1300" y="850" font-size="22" font-weight="600" fill="#4B5563" text-anchor="middle">Floor</text>
+
+  <!-- camera view -->
+  <line x1="1440" y1="698" x2="990" y2="330" stroke="#4A7FC1" stroke-width="2.5" stroke-dasharray="10 7"/>
+  <line x1="1440" y1="698" x2="990" y2="860" stroke="#4A7FC1" stroke-width="2.5" stroke-dasharray="10 7"/>
+
+  <!-- family against the wall -->
+  <use href="#child" color="#E76F51" transform="translate(1009.8,860) scale(1.980)"/>
+
+  <!-- phone on a tripod -->
+  <line x1="1446" y1="725" x2="1410" y2="860" stroke="#6B7280" stroke-width="4"/>
+  <line x1="1446" y1="725" x2="1482" y2="860" stroke="#6B7280" stroke-width="4"/>
+  <line x1="1446" y1="725" x2="1446" y2="860" stroke="#6B7280" stroke-width="4"/>
+  <rect x="1440" y="670" width="12" height="56" rx="3" fill="#4A7FC1"/>
+  <circle cx="1440" cy="698" r="5" fill="#1B2230"/>
+  <text x="1446" y="650" font-size="24" font-weight="600" fill="#2F5F9E" text-anchor="middle">Phone</text>
+
+  <!-- 0.9 m -->
+  <line x1="1440" y1="698" x2="1545" y2="698" stroke="#C2410C" stroke-width="2" stroke-dasharray="8 6"/>
+  <line x1="1530" y1="704" x2="1530" y2="854" stroke="#C2410C" stroke-width="3" stroke-linecap="round" marker-start="url(#a)" marker-end="url(#a)"/>
+  <text x="1548" y="790" font-size="40" font-weight="700" fill="#C2410C">0.97 m</text>
+  <text x="1548" y="822" font-size="22" fill="#4B5563">to camera</text>
+
+  <!-- 2.5 m -->
+  <line x1="990" y1="876" x2="990" y2="935" stroke="#C2410C" stroke-width="2" stroke-dasharray="8 6"/>
+  <line x1="1440" y1="703" x2="1440" y2="935" stroke="#C2410C" stroke-width="2" stroke-dasharray="8 6"/>
+  <line x1="996" y1="920" x2="1434" y2="920" stroke="#C2410C" stroke-width="3" stroke-linecap="round" marker-start="url(#a)" marker-end="url(#a)"/>
+  <text x="1215" y="905" font-size="40" font-weight="700" fill="#C2410C" text-anchor="middle">2.5 m</text>
+  <text x="1215" y="962" font-size="22" fill="#4B5563" text-anchor="middle">wall to camera</text>
+  <!-- parent with the controller, behind projector and camera -->
+  <use href="#parent" color="#2A9D8F" transform="translate(1720,860) scale(-3.060,3.060)"/>
+</svg>

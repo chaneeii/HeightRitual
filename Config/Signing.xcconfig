@@ -1,0 +1,8 @@
+// Shared signing settings for every target, included from project.yml.
+// To run on your own iPhone with your own Apple team, copy Local.xcconfig.example
+// to Local.xcconfig in this folder. Local.xcconfig is ignored by git.
+
+DEVELOPMENT_TEAM = 562Z37RH3N
+BUNDLE_ID_BASE = com.chanheejeong.heightritual
+
+#include? "Local.xcconfig"

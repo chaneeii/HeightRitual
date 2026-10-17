@@ -19,13 +19,15 @@ final class SettingsTests: XCTestCase {
 
     func testOnItsSideTurnsTheWallImage() {
         let h = Harness()
-        h.state.setProjectorOnItsSide(true)
-        XCTAssertEqual(h.state.settings.wall.rotation, 90)
-        h.state.settings.wall.rotation = -90
-        h.state.setProjectorOnItsSide(true)
-        XCTAssertEqual(h.state.settings.wall.rotation, -90, "a chosen direction is kept")
+        XCTAssertTrue(h.state.settings.projector.onItsSide, "the prototype's projector lies on its side")
+        XCTAssertEqual(h.state.settings.wall.rotation, -90, "turned from the first start")
         h.state.setProjectorOnItsSide(false)
         XCTAssertEqual(h.state.settings.wall.rotation, 0)
+        h.state.setProjectorOnItsSide(true)
+        XCTAssertEqual(h.state.settings.wall.rotation, -90)
+        h.state.settings.wall.rotation = 90
+        h.state.setProjectorOnItsSide(true)
+        XCTAssertEqual(h.state.settings.wall.rotation, 90, "a chosen direction is kept")
     }
 
     // S4: switching units changes every shown height, never a stored one.

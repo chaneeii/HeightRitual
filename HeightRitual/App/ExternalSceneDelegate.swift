@@ -23,6 +23,14 @@ final class ExternalSceneDelegate: UIResponder, UIWindowSceneDelegate {
                willConnectTo session: UISceneSession,
                options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = scene as? UIWindowScene else { return }
+        // iOS shrinks the picture on external screens by default (overscan for old TVs), which
+        // left a black band between the drawing and the floor on the projector. Use every pixel
+        // of the projector's own resolution instead.
+        let screen = windowScene.screen
+        screen.overscanCompensation = .none
+        if let native = screen.preferredMode, screen.availableModes.contains(native) {
+            screen.currentMode = native
+        }
         let window = UIWindow(windowScene: windowScene)
         let host = UIHostingController(rootView: ExternalWall())
         host.view.backgroundColor = .black

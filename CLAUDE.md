@@ -7,6 +7,7 @@ corrects it, and every past record is projected life-size on the wall. A Bluetoo
 - What to build (screens, controls, protocol, data, requirements): `docs/SPEC.md` (v3)
 - How to build it (architecture, file map, milestones, risks): `docs/IMPLEMENTATION.md`
 - Old draft, for reuse only: `reference/v1/` (never compiled, still photo, different flow)
+- New teammates (new to Xcode, git and Claude): `docs/ONBOARDING.md`
 
 ## Current state
 
@@ -54,3 +55,12 @@ Run `xcodegen` after adding, removing or moving source files. The `.xcodeproj` i
   Say so when a change touches them and has not been run on a device. Never claim they work untested.
 - Finish one milestone, build, and report before starting the next.
 - When an open question in SPEC section 15 gets settled, update the spec in the same change.
+
+## Working with a new teammate
+
+Some teammates are new to iOS, Xcode, git and Claude. When the person you are working with seems new:
+
+- Explain each git step in one plain sentence before running it. Reply in their language.
+- Never commit or push to `main`. Work on a branch and open a PR for review.
+- Ask before force-pushing, deleting branches or discarding changes.
+- After a change, tell them exactly what to tap in the simulator to check it.

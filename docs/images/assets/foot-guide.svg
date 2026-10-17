@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="640" viewBox="0 0 360 640">
+  <defs><clipPath id="card"><rect width="360" height="640" rx="18"/></clipPath></defs>
+  <g clip-path="url(#card)">
+    <rect width="360" height="640" fill="#000000"/>
+    <g fill="#7FC98F" fill-opacity="0.8"><rect x="135.46" y="560.86" width="37.12" height="11.14" rx="5.57"/><rect x="187.42" y="560.86" width="37.12" height="11.14" rx="5.57"/></g>
+    <line x1="0" y1="572.0" x2="360" y2="572.0" stroke="#FFFFFF" stroke-opacity="0.9" stroke-width="3"/>
+    <g fill="none" stroke="#7FC98F" stroke-width="2.5" stroke-dasharray="8 5">
+      <ellipse cx="180.00" cy="145.12" rx="37.12" ry="37.12"/><rect x="135.46" y="200.80" width="89.09" height="167.04" rx="22.27"/><rect x="113.18" y="215.65" width="18.56" height="141.06" rx="9.28"/><rect x="228.26" y="215.65" width="18.56" height="141.06" rx="9.28"/><rect x="142.88" y="360.42" width="33.41" height="211.58" rx="7.42"/><rect x="183.71" y="360.42" width="33.41" height="211.58" rx="7.42"/>
+    </g>
+  </g>
+</svg>

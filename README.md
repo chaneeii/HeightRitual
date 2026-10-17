@@ -57,12 +57,12 @@ A projected centimetre has to be a real centimetre. Three steps, guided by a wiz
 flowchart LR
     subgraph Box["Controller box (ESP32)"]
         K["Knob · Record · Cancel<br/>Left · Confirm · Right<br/>Mode switch · Auto play"]
-        L(("Recording<br/>light"))
+        L["Recording light"]
     end
     subgraph Phone["iPhone or iPad on a stand"]
         App["Height Ritual app"]
         Cam["Rear camera"]
-        Store[("Clips and records<br/>on the device only")]
+        Store["Clips and records<br/>on the device only"]
     end
     Proj["Projector"]
     Wall["The wall<br/>floor to 170+ cm"]
@@ -73,7 +73,7 @@ flowchart LR
     App <--> Store
     App -- "USB-C to HDMI<br/>second screen" --> Proj
     Proj -- "life-size picture" --> Wall
-    Wall -. "filmed" .-> Cam
+    Wall -.->|filmed| Cam
 ```
 
 The controller only reports what was used. The app decides what it means on each screen.
@@ -115,7 +115,7 @@ flowchart LR
     B --> D["Head top over the first 0.5 s<br/>+ camera position lines"]
     D --> E["Suggested height"]
     E --> F["Parent corrects<br/>-1 · -0.5 · +0.5 · +1 cm"]
-    C --> G[("Saved record<br/>clip · height · date")]
+    C --> G["Saved record<br/>clip · height · date"]
     F --> G
     G --> H["Played back life-size<br/>at its real height"]
 ```
@@ -189,7 +189,10 @@ xcodegen                     # generates HeightRitual.xcodeproj from project.yml
 open HeightRitual.xcodeproj
 ```
 
-Set your own team in `project.yml` (`DEVELOPMENT_TEAM`) before running on a device.
+New to Xcode, git or Claude? Start with [docs/ONBOARDING.md](docs/ONBOARDING.md) (Korean).
+
+To run on a device with your own Apple team, copy `Config/Local.xcconfig.example` to
+`Config/Local.xcconfig` and set your team and bundle ID. That file is ignored by git.
 "Load sample family" in Settings fills Memory with Nora and Leo, so the app can be tried without
 filming anyone.
 

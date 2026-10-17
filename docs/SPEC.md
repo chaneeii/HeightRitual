@@ -415,7 +415,9 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
   R3 shows the memory wall with that record.
 - Until a projector is connected, the phone's wall copy assumes a 1920 x 1080 picture.
 - R2 always shows the selected record (date, height, growth) under the wall copy; tapping it opens R3.
-- Choosing "On its side" on S1 also sets the S2 rotation to 90 degrees (unless -90 was chosen);
+- The projector lies on its side by default: S1 starts on "On its side" and the S2 rotation on
+  -90 degrees, so the wall image is turned from the first start.
+- Choosing "On its side" on S1 also sets the S2 rotation to -90 degrees (unless 90 was chosen);
   "Upright" sets it to 0.
 - The Settings button is hidden during the wizard; the wizard is left only by Next, Skip or Finish.
 - Bluetooth permission is asked when "Allow" is pressed on S5, not at launch.
@@ -440,3 +442,7 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
     in the field (dashed, needs the camera position). "Nobody found" also offers "Use this clip
     anyway", which keeps the clip as filmed with the height set by hand (testing without a person).
   - The cut-out writes no sound yet; the clip as filmed keeps it.
+  - The wall uses only a portrait strip of the projected picture: 9:16, the picture's full height
+    (so the reach from the floor does not change), black elsewhere. Left and right moves the strip
+    within a wide picture. Every copy of the wall on the phone (R2, M3, S2, full screen) shows
+    exactly that strip, upright, so it reads like the phone itself (decided 12 Oct).

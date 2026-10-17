@@ -1,8 +1,9 @@
 import AVFoundation
 import SwiftUI
 
-/// The wall image. On the projector it fills the screen and is rotated for a projector on its
-/// side; on the phone it is an upright copy scaled to fit.
+/// The wall image, drawn in the 9:16 strip (`Calibration.stripSize`). On the projector the strip
+/// sits in a black picture that is rotated for a projector on its side; on the phone only the
+/// strip is shown, upright and scaled to fit.
 struct WallView: View {
     var isExternal = false
     @Environment(AppState.self) private var state
@@ -10,9 +11,13 @@ struct WallView: View {
     var body: some View {
         GeometryReader { geo in
             let calibration = state.settings.wall
-            let logical = calibration.logicalSize(for: state.wallSize)
-            let scale = isExternal ? 1 : min(geo.size.width / logical.width, geo.size.height / logical.height)
-            let model = state.wallModel
+            let picture = calibration.logicalSize(for: state.wallSize)
+            let strip = calibration.stripSize(for: state.wallSize)
+            let offset = calibration.stripOffset(for: state.wallSize)
+            let outer = isExternal ? picture : strip
+            let scale = isExternal ? 1 : min(geo.size.width / strip.width, geo.size.height / strip.height)
+            // The part of Left and right that moved the strip no longer moves the drawing in it.
+            let model = { var m = state.wallModel; m.calibration.shiftPt -= offset; return m }()
             WallCanvas(model: model)
                 .overlay { WallClipOverlay(model: model, player: state.wallPlayer.player) }
                 .overlay {
@@ -22,7 +27,11 @@ struct WallView: View {
                         WallCanvas(model: model, marksOnly: true).allowsHitTesting(false)
                     }
                 }
-                .frame(width: logical.width, height: logical.height)
+                .frame(width: strip.width, height: strip.height)
+                .clipped()
+                .offset(x: isExternal ? CGFloat(offset) : 0)
+                .frame(width: outer.width, height: outer.height)
+                .background(Color.black)
                 .rotationEffect(.degrees(isExternal ? Double(calibration.rotation) : 0))
                 .scaleEffect(scale)
                 .frame(width: geo.size.width, height: geo.size.height)
@@ -116,14 +125,14 @@ struct WallCanvas: View {
             ctx.draw(text, at: CGPoint(x: labelX, y: y), anchor: .leading)
         }
 
-        // Caption left of the selected mark, clear of the other labels; kept inside the picture
-        // for members taller than its top.
+        // Caption just above the selected mark's left end, inside the narrow strip; kept inside
+        // the picture for members taller than its top.
         if let caption = model.caption, let figure = model.figure {
-            let y = max(g.y(mm: figure.heightMM), size * 1.5)
+            let y = max(g.y(mm: figure.heightMM) - size * 0.9, size * 1.5)
             let text = Text(caption)
                 .font(.system(size: size * 1.1, design: .serif)).italic()
                 .foregroundColor(model.accent)
-            ctx.draw(text, at: CGPoint(x: lineLeft - g.length(cm: 2), y: y), anchor: .trailing)
+            ctx.draw(text, at: CGPoint(x: lineLeft, y: y), anchor: .leading)
         }
 
         // 3. The record being made follows the number on the phone.

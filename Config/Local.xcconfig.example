@@ -1,0 +1,9 @@
+// Copy this file to Config/Local.xcconfig and fill in your own values.
+// Local.xcconfig is ignored by git, so your team never ends up in a commit.
+
+// Your Team ID: Xcode > Settings > Accounts > your Apple ID > the team row.
+// A free Personal Team works for installing on your own iPhone (reinstall every 7 days).
+DEVELOPMENT_TEAM = YOURTEAMID
+
+// A bundle ID that no other team has used, if you are not in the 562Z37RH3N team.
+BUNDLE_ID_BASE = com.yourname.heightritual

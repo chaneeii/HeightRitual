@@ -57,6 +57,24 @@ enum LetterKey: Equatable {
     }
 }
 
+/// The guided first use from Settings (a demo feature): the app's real steps, one control at a
+/// time, with the controller drawn underneath.
+enum TutorialStep: Int, CaseIterable {
+    case welcome = 1      // what Height Ritual is
+    case family           // add someone
+    case name             // pick letters, Save
+    case chooseRecord     // Left / Right to Record, Confirm
+    case film             // five seconds
+    case height           // knob and Left / Right on the dial, Confirm saves
+    case saved            // Back goes back
+    case chooseLookback   // Left / Right to Lookback, Confirm
+    case lookback         // every record, life-size
+    case ready            // Confirm: Home, on the new member
+
+    var previous: TutorialStep? { TutorialStep(rawValue: rawValue - 1) }
+    var next: TutorialStep? { TutorialStep(rawValue: rawValue + 1) }
+}
+
 /// Every screen of the app (SPEC 5). Changed only through `AppState.go(to:)`.
 /// Home is a wheel of member cards; choosing one opens the member menu (Record or Lookback).
 enum Route: Equatable {
@@ -71,6 +89,7 @@ enum Route: Equatable {
     case memberEdit(UUID?)        // A1, nil = new member
     case settings(SettingsPage)   // S, S1 to S6
     case wizard(WizardStep)       // W
+    case tutorial(TutorialStep)   // T: onboarding with the controller
 
     /// The mode a route belongs to; nil for screens outside both modes.
     var mode: Mode? {

@@ -7,19 +7,16 @@ struct AddMemberContent: View {
     let surface: Surface
     @Environment(AppState.self) private var state
 
-    @State private var caretOn = true
-    @State private var dragStart: Int?
-
     var body: some View {
         let w = surface.canvas.width
 
         ZStack(alignment: .topLeading) {
             ScreenHeading(surface: surface, title: title, subtitle: subtitle)
 
-            field
+            NameField(surface: surface)
                 .position(x: w / 2, y: surface.v(320, 414.5))
 
-            keyRow
+            LetterWheel(surface: surface)
                 .frame(width: w, height: surface.v(140, 200))
                 .position(x: w / 2, y: surface.v(573.8, 781.4))
 
@@ -28,13 +25,6 @@ struct AddMemberContent: View {
             }
         }
         .frame(width: surface.canvas.width, height: surface.canvas.height)
-        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: state.letterIndex)
-        .task {
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(0.55))
-                caretOn.toggle()
-            }
-        }
     }
 
     private var title: Text {
@@ -45,12 +35,17 @@ struct AddMemberContent: View {
         surface == .phone ? Text("Swipe to find a letter and tap to add it.\nTap Save when you're done!")
                           : Text("Pick letters with the knob,\nthen choose Save")
     }
+}
 
-    // MARK: Name field
+/// The name being picked, with a blinking caret.
+struct NameField: View {
+    let surface: Surface
+    @Environment(AppState.self) private var state
+    @State private var caretOn = true
 
-    private var field: some View {
+    var body: some View {
         let size = surface.s(CGSize(width: 307, height: 83.6), CGSize(width: 445, height: 121))
-        return HStack(spacing: surface.v(5, 7)) {
+        HStack(spacing: surface.v(5, 7)) {
             Text(verbatim: state.nameDraft)
                 .font(Theme.field(surface.v(44, 63.7)))
                 .foregroundStyle(Theme.ink)
@@ -67,37 +62,54 @@ struct AddMemberContent: View {
         .background(Theme.field, in: RoundedRectangle(cornerRadius: surface.v(20, 29)))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: state.nameDraft))
-    }
-
-    // MARK: Key wheel
-
-    private var keyRow: some View {
-        let index = state.letterIndex
-        let big = surface.v(104, 150.5), small = surface.v(80, 115.8), gap = surface.v(8, 11.6)
-        let mid = surface.canvas.width / 2
-
-        return ZStack {
-            ForEach((index - 5)...(index + 5), id: \.self) { i in
-                let k = i - index
-                let isCenter = k == 0
-                                let x = isCenter ? mid
-                    : mid + Double(k.signum()) * (big / 2 + gap + small / 2 + Double(abs(k) - 1) * (small + gap))
-                KeyFace(surface: surface, key: LetterKey.at(i), size: isCenter ? big : small,
-                        selected: isCenter, squeeze: state.confirmCount)
-                    .position(x: x, y: surface.v(70, 100))
-                    .opacity(abs(k) >= 5 ? 0 : 1)
-                    .onTapGesture {
-                        guard surface == .phone else { return }
-                        state.tapLetterKey(at: i)
-                    }
-            }
-            if surface == .wall {
-                CursorView(size: 58, trigger: index)
-                    .position(x: mid + big / 2 - 10, y: 100 + big / 2 - 4)
+        .task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(0.55))
+                caretOn.toggle()
             }
         }
-        .contentShape(Rectangle())
-        .gesture(swipe(step: small + gap), including: surface == .phone ? .all : .subviews)
+    }
+}
+
+/// The endless wheel of keys under the name. Lays itself out across its own width.
+struct LetterWheel: View {
+    let surface: Surface
+    /// Taps on the phone; the onboarding passes its own so a key press goes through its step.
+    var onTap: ((Int) -> Void)?
+    @Environment(AppState.self) private var state
+    @State private var dragStart: Int?
+
+    var body: some View {
+        GeometryReader { geo in
+            let index = state.letterIndex
+            let big = surface.v(104, 150.5), small = surface.v(80, 115.8), gap = surface.v(8, 11.6)
+            let mid = geo.size.width / 2
+            let y = geo.size.height / 2
+
+            ZStack {
+                ForEach((index - 5)...(index + 5), id: \.self) { i in
+                    let k = i - index
+                    let isCenter = k == 0
+                    let x = isCenter ? mid
+                        : mid + Double(k.signum()) * (big / 2 + gap + small / 2 + Double(abs(k) - 1) * (small + gap))
+                    KeyFace(surface: surface, key: LetterKey.at(i), size: isCenter ? big : small,
+                            selected: isCenter, squeeze: state.confirmCount)
+                        .position(x: x, y: y)
+                        .opacity(abs(k) >= 5 ? 0 : 1)
+                        .onTapGesture {
+                            guard surface == .phone else { return }
+                            if let onTap { onTap(i) } else { state.tapLetterKey(at: i) }
+                        }
+                }
+                if surface == .wall {
+                    CursorView(size: 58, trigger: index)
+                        .position(x: mid + big / 2 - 10, y: y + big / 2 - 4)
+                }
+            }
+            .contentShape(Rectangle())
+            .gesture(swipe(step: small + gap), including: surface == .phone ? .all : .subviews)
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: state.letterIndex)
     }
 
     /// Phone: dragging sideways turns the wheel, one key per key width.

@@ -10,6 +10,8 @@ struct RootView: View {
         Group {
             if case .wizard(let step) = state.route {
                 WizardView(step: step)
+            } else if case .tutorial(let step) = state.route {
+                TutorialScreen(step: step)
             } else {
                 MainStack()
             }

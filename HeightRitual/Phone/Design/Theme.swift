@@ -38,6 +38,12 @@ enum Theme {
     static let secondaryButton = Color(white: 0xF2 / 255)
     /// Secondary buttons on the wall, white text.
     static let wallSecondaryButton = Color(white: 0xB3 / 255)
+    /// The controller box as drawn on the onboarding, in the colours of the real buttons.
+    static let controllerBody = Color(white: 0xF1 / 255)
+    static let controllerOff = Color(white: 0xD9 / 255)
+    static let controllerBack = Color(red: 0.94, green: 0.42, blue: 0.18)
+    static let controllerArrow = Color(red: 0.50, green: 0.70, blue: 0.98)
+    static let controllerConfirm = ControlIcon.confirmGreen
     /// Delete on the letter wheel.
     static let destructive = Color(red: 0.90, green: 0.18, blue: 0.16)
     /// Save on the letter wheel, and a confirmed check.

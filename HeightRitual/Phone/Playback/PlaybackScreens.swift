@@ -26,6 +26,8 @@ struct StoryIndicator: View {
 struct RecordFigure: View {
     let record: GrowthRecord?
     let tallestMM: Int
+    /// How much of the card's height the tallest record's outline takes.
+    var share: CGFloat = 0.78
     @Environment(AppState.self) private var state
 
     var body: some View {
@@ -36,7 +38,7 @@ struct RecordFigure: View {
                 if let record, state.clipURL(record) != nil {
                     PlayerLayerView(player: state.wallPlayer.player)
                 } else if let record {
-                    let full = floor * 0.78
+                    let full = floor * share
                     let h = full * CGFloat(record.heightMM) / CGFloat(max(tallestMM, 1))
                     let outline = PersonOutline.path(heightPt: h, centerX: geo.size.width / 2, floorY: floor)
                     outline.stroke(Theme.guide, style: StrokeStyle(lineWidth: 1.5, dash: [5, 3]))

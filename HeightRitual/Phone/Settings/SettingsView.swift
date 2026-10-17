@@ -135,6 +135,16 @@ private struct SettingsList: View {
             .listRowBackground(SettingsStyle.row)
             Section {
                 Button {
+                    state.startTutorial()
+                } label: {
+                    Label {
+                        Text("Onboarding with controller")
+                        Text("Demo: a guided first use to learn the controller")
+                    } icon: {
+                        Image(systemName: "gamecontroller")
+                    }
+                }
+                Button {
                     confirmSample = true
                 } label: {
                     Label {

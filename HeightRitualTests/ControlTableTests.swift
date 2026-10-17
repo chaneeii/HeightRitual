@@ -336,6 +336,75 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.route, .wizard(.cameraPosition), "Done in the wizard moves to the next step")
     }
 
+    // Onboarding with the controller: every step, the member it adds and its first record.
+    func testOnboardingWithController() {
+        let h = Harness()
+        let s = h.state
+
+        s.openSettings()
+        s.startTutorial()
+        XCTAssertEqual(s.route, .tutorial(.welcome))
+        XCTAssertFalse(s.showsSettings, "the Settings sheet closes")
+        h.confirm()
+        XCTAssertEqual(s.route, .tutorial(.family))
+        h.confirm()
+        XCTAssertEqual(s.route, .tutorial(.name))
+
+        s.handle(.knob(13))                 // A + 13 = N
+        s.handle(.confirm)
+        s.handle(.knob(1))                  // O
+        s.handle(.confirm)
+        XCTAssertEqual(s.nameDraft, "NO")
+        s.handle(.knob(-15))                // back to Save
+        XCTAssertEqual(LetterKey.at(s.letterIndex), .save)
+        h.confirm()
+        XCTAssertEqual(s.route, .tutorial(.chooseRecord))
+        XCTAssertEqual(s.store.members.last?.name, "No")
+
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .tutorial(.name))
+        XCTAssertEqual(s.store.members.count, 2, "going back removes the member it added")
+        s.handle(.confirm)
+        s.handle(.knob(-1))
+        h.confirm()
+        XCTAssertEqual(s.store.members.last?.name, "A")
+
+        s.handle(.right)
+        h.confirm()
+        XCTAssertEqual(s.route, .tutorial(.chooseRecord), "Lookback is not this step's answer")
+        XCTAssertEqual(s.notice, "Choose Record to measure first")
+        s.handle(.left)
+        h.confirm()
+        XCTAssertEqual(s.route, .tutorial(.film))
+        s.handle(.confirm)
+        XCTAssertEqual(s.tutorialFilmLeft, 5)
+        h.scheduler.advance(5)
+        XCTAssertEqual(s.route, .tutorial(.height))
+
+        s.handle(.right)
+        s.handle(.right)
+        s.handle(.right)
+        s.handle(.right)
+        s.handle(.knob(1))
+        XCTAssertEqual(s.tutorialMM, 1245)
+        h.confirm()
+        XCTAssertEqual(s.route, .tutorial(.saved))
+        XCTAssertEqual(s.savedRecord?.heightMM, 1245)
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .tutorial(.saved), "only Back moves on here")
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .tutorial(.chooseLookback))
+        s.handle(.right)
+        h.confirm()
+        XCTAssertEqual(s.route, .tutorial(.lookback))
+        XCTAssertEqual(s.selectedRecord?.heightMM, 1245)
+        h.confirm()
+        XCTAssertEqual(s.route, .tutorial(.ready))
+        h.confirm()
+        XCTAssertEqual(s.route, .home)
+        XCTAssertEqual(s.highlightedMember?.name, "A", "Home opens on the member just added")
+    }
+
     // Leaving Make with an unsaved clip discards it and says so for two seconds.
     func testLeavingMakeDiscards() {
         let h = Harness()

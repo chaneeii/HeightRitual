@@ -452,3 +452,7 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
   - The controller now has five controls: Back (Cancel), the knob, Left, Right and the round
     Confirm. Record, the mode switch and the auto play switch are gone; Confirm starts filming
     and stops it early. The app still accepts their old codes, so older firmware keeps working.
+  - Settings > Onboarding with controller (demo, 17 Oct): ten guided steps on the phone and the
+    wall, with the controller drawn underneath and only the controls of that step in colour (the
+    drawing can be tapped like the box). The name picked becomes a member, the dial's height its
+    first record; the last step opens Home on that member. Back is a step back throughout.

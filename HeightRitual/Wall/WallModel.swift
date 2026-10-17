@@ -110,7 +110,7 @@ extension AppState {
         case .settings:
             model.kind = .idle
 
-        case .home, .memberMenu, .addMember:
+        case .home, .memberMenu, .addMember, .tutorial:
             model.kind = .screen
 
         case .makeFilm:

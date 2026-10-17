@@ -48,6 +48,12 @@ struct WallScreen: View {
                 HeightContent(surface: .wall, height: height)
             case .makeSaved:
                 SavedContent(surface: .wall)
+            case .tutorial(let step):
+                // The phone's onboarding frame, scaled into the strip.
+                DesignCanvas(surface: .phone) {
+                    TutorialContent(step: step, onWall: true)
+                }
+                .frame(width: Surface.wall.canvas.width, height: Surface.wall.canvas.height)
             default:
                 HomeContent(surface: .wall)
             }

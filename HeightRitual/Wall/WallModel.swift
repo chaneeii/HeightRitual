@@ -14,8 +14,6 @@ struct WallModel: Equatable {
         case dark
         /// S2: centimetre ruler for fitting to a tape on the wall.
         case ruler
-        /// S1: white frame along the picture's edge.
-        case frame
         /// S3: two bright lines at 0 and 100 cm for the camera position.
         case cameraLines
     }
@@ -95,9 +93,6 @@ extension AppState {
         switch route {
         case .memberEdit, .wizard(.welcome), .wizard(.permissions):
             model.kind = .idle
-
-        case .settings(.placement), .wizard(.placement):
-            model.kind = .frame
 
         case .settings(.fitToWall), .wizard(.fitToWall):
             model.kind = .ruler

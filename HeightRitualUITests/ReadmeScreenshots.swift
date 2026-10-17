@@ -24,9 +24,8 @@ final class ReadmeScreenshots: XCTestCase {
             app.buttons["Next"].tap(); pause(); save("W0-2-welcome-make")
             app.buttons["Next"].tap(); pause(); save("W0-3-welcome-memory")
             app.buttons["Set up the wall"].tap(); pause(); save("W1-setup-permissions")
-            app.buttons["Next"].tap(); pause(); save("W2-setup-placement")
-            app.buttons["Next"].tap(); pause(); save("W3-setup-fit-to-wall")
-            app.buttons["Next"].tap(); pause(1.5); save("W4-setup-camera-position")
+            app.buttons["Next"].tap(); pause(); save("W2-setup-fit-to-wall")
+            app.buttons["Next"].tap(); pause(1.5); save("W3-setup-camera-position")
             app.buttons["Finish"].tap(); pause()
         }
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 5))

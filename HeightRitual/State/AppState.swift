@@ -679,18 +679,6 @@ final class AppState {
         controller.forget()
     }
 
-    // MARK: Projector placement (S1)
-
-    /// On its side also turns the wall image, so the picture is upright on the wall.
-    func setProjectorOnItsSide(_ onItsSide: Bool) {
-        settings.projector.onItsSide = onItsSide
-        if onItsSide && settings.wall.rotation == 0 {
-            settings.wall.rotation = -90
-        } else if !onItsSide {
-            settings.wall.rotation = 0
-        }
-    }
-
     // MARK: Fit to wall (S2)
 
     func selectFitValue(_ value: FitValue) { fitValue = value }

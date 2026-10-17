@@ -41,7 +41,6 @@ struct SettingsPageView: View {
         switch page {
         case .list: return "Settings"
         case .family: return "Family"
-        case .placement: return "Projector placement"
         case .fitToWall: return "Fit to wall"
         case .cameraPosition: return "Camera position"
         case .units: return "Units"
@@ -54,7 +53,6 @@ struct SettingsPageView: View {
         switch page {
         case .list: SettingsList()
         case .family: FamilyPage()
-        case .placement: PlacementPage()
         case .fitToWall: FitToWallPage()
         case .cameraPosition: CameraPositionPage()
         case .units: UnitsPage()
@@ -77,8 +75,6 @@ private struct SettingsList: View {
                      systemImage: "person.2", value: "\(state.store.members.count)")
             }
             Section {
-                link(.placement, "Projector placement", detail: "How far from the wall the projector stands",
-                     systemImage: "videoprojector")
                 link(.fitToWall, "Fit to wall", detail: "Make projected centimetres match a tape measure",
                      systemImage: "ruler")
                 link(.cameraPosition, "Camera position", detail: "Where the floor and 100 cm are in the camera picture",
@@ -87,7 +83,7 @@ private struct SettingsList: View {
             } header: {
                 Text("Setup")
             } footer: {
-                Text("The first time, do these in order: placement, then fit to wall, then camera position. Without them heights on the wall are not true size.")
+                Text("The first time, do these in order: fit to wall, then camera position. Without them heights on the wall are not true size.")
             }
             Section {
                 Picker(selection: $settings.unit) {

@@ -7,7 +7,7 @@ Version 3, 5 Oct 2026. This version follows the team's wireframes and controller
 Changes from v2: two modes (Make, Memory) as the app's top level; "family member" instead of
 "child"; recording order is member, film, height; the height is pre-filled by an estimate from
 the video; auto play / manual in Memory; new controller layout (separate Cancel, auto play toggle,
-no Playback or Push button); setup pages for projector placement, wall fit, camera position,
+no Playback or Push button); setup pages for wall fit, camera position,
 units and permissions; a foot guide while filming.
 
 The Swift sources in this repository are a v1 draft (still photo, different flow) that was never
@@ -62,7 +62,7 @@ Decisions made:
 
 | Feature | Supports | Priority |
 |---|---|---|
-| Setup: projector placement, fit to wall, camera position | C1 | P0 |
+| Setup: fit to wall, camera position | C1 | P0 |
 | Background removal for every video frame | C1, C2 | P0 |
 | Foot guide while filming | C2 | P0 |
 | Height estimate from the video, editable | C2 | P0 |
@@ -98,7 +98,7 @@ Settings button at the top right. The controller's mode switch selects the same 
        +--> saved: opens R2 for that member with the new record selected
 ```
 
-First start runs a setup wizard: permissions, projector placement, fit to wall, camera position.
+First start runs a setup wizard: permissions, fit to wall, camera position.
 Each step can be reopened from Settings.
 
 ## 5. Screens
@@ -113,14 +113,13 @@ Each step can be reopened from Settings.
 | R2 | Memory: wall | Segmented control "Auto play / Manual" at the top. Copy of the wall. Manual: Previous, Next, Replay. Auto play: Stop. No Record: filming is only in Make | Marks for all records; the selected record's clip life-size; caption "Nora, Aug 2025, 121.0 cm". Auto play: each record in order |
 | R3 | One record | Clip, date, height, growth since the record before. Change height, Delete | Unchanged |
 | A1 | Add or edit member | Name, colour, Delete member | Unchanged |
-| S | Settings | List: Family, Projector placement, Fit to wall, Camera position, Units, Sound, Controller, Permissions, Sample family, Delete everything | Unchanged |
-| S1 | Projector placement | Projector type (throw ratio), upright or on its side; result: distance from the wall, picture height and width; reminders (section 7) | White frame with the picture's edge |
+| S | Settings | List: Family, Fit to wall, Camera position, Units, Sound, Controller, Permissions, Sample family, Delete everything | Unchanged |
 | S2 | Fit to wall | Three sliders (floor line, size, left/right), fine-step toggle, rotation, "Top of picture: 176 cm" | Centimetre ruler: 0, 100, 150 highlighted, dashed line at 170 |
 | S3 | Camera position | Camera preview with two draggable lines: floor and 100 cm. Text: put them on the projected lines | Two bright lines at 0 and 100 cm |
 | S4 | Units | cm or feet and inches | Unchanged |
 | S5 | Permissions | Camera, Bluetooth, Microphone (only if sound is on): state of each, button to open iOS Settings | Unchanged |
 | S6 | Controller | Connected or searching, last control used (for testing), Forget this controller | Unchanged |
-| W | First-start wizard | S5, S1, S2, S3 in order with Next and Skip | As in each step |
+| W | First-start wizard | S5, S2, S3 in order with Next and Skip | As in each step |
 
 States, not separate screens:
 
@@ -210,16 +209,11 @@ IDs 12 (Playback) and 21 (Push) from earlier versions are no longer used.
 
 ## 7. Setup
 
-### S1 Projector placement
+### S1 Projector placement (removed)
 
-Helps the user put the projector at the right distance before any fine tuning.
-
-- Inputs: throw ratio (presets: 0.8, 1.2, 1.5, custom) and orientation (upright, on its side).
-- Upright: `pictureHeight = distance / throwRatio * 9/16`. On its side: `pictureHeight = distance / throwRatio`.
-- Output: the distance for a picture 180 cm tall, and the resulting width.
-  Example, throw ratio 0.8: 2.56 m upright, 1.44 m on its side.
-- Reminders on the page: the bottom edge of the picture must touch the floor; switch off automatic
-  keystone and autofocus after focusing; zoom at 100 %.
+There is no placement page. The projector is placed by hand; the picture must reach at least 170 cm
+(S2 shows "Top of picture"). The wall rotation defaults to -90 degrees, the group's projector on its
+side, and is changed on S2.
 
 ### S2 Fit to wall
 
@@ -311,7 +305,7 @@ GrowthRecord { id: UUID, memberID: UUID, date: Date, heightMM: Int,
                videoFile: String?, posterFile: String?, hasSound: Bool,
                bodyRatio: Double?, floorRatio: Double? }
 Settings     { unit: "cm" | "ftin", soundOn: Bool, autoPlay: Bool,
-               projector: { throwRatio, onItsSide }, wall: Calibration, camera: CameraPosition? }
+               wall: Calibration, camera: CameraPosition? }
 ```
 
 - `Documents/records.json`, `Documents/media/<uuid>.mov`, `Documents/media/<uuid>.png`.
@@ -328,7 +322,6 @@ Settings     { unit: "cm" | "ftin", soundOn: Bool, autoPlay: Bool,
 | W3 | Everything on the wall is positioned in real centimetres from the floor | P0 |
 | W4 | After S2 a projected 100 cm line is within 1 cm of a real 100 cm mark, 150 within 1.5 cm | P0 |
 | W5 | The wall image can be rotated for a projector on its side; the screen stays awake | P0 |
-| S1 | Projector placement gives the distance for a 180 cm picture for the chosen throw ratio and orientation | P0 |
 | S2 | Camera position stores floor and 100 cm lines; the foot guide and the estimate use them | P0 |
 | S3 | The wizard runs on first start and every step can be skipped and reopened | P0 |
 | S4 | Units can be switched at any time without changing stored heights | P0 |
@@ -371,7 +364,7 @@ Camera, Bluetooth and the external display cannot be tested in the simulator.
 
 On a real iPhone on its stand, projector connected.
 
-1. First start: the wizard asks for camera and Bluetooth, then shows placement, fit to wall and camera position.
+1. First start: the wizard asks for camera and Bluetooth, then shows fit to wall and camera position.
 2. Fit to wall against tape marks at 0 and 100 cm. Projected 150 is within 1.5 cm of a real 150.
 3. Camera position: the two lines are placed on the projected lines.
 4. Memory, Nora (sample): six marks; the knob moves through them; auto play runs and any button stops it.
@@ -392,7 +385,7 @@ On a real iPhone on its stand, projector connected.
 - Clip length (5 s assumed). Auto play: loop until stopped (assumed) or run once?
 - Sound: projector speaker or phone speaker?
 - Should adults be recorded too? The picture reaches about 176 cm; taller people are cut off.
-- Projector model and throw ratio; can it run on its side without overheating?
+- Can the projector run on its side without overheating?
 
 Assumed in milestone 1 (simplest behaviour; confirm or change):
 
@@ -415,8 +408,7 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
   R3 shows the memory wall with that record.
 - Until a projector is connected, the phone's wall copy assumes a 1920 x 1080 picture.
 - R2 always shows the selected record (date, height, growth) under the wall copy; tapping it opens R3.
-- Choosing "On its side" on S1 also sets the S2 rotation to -90 degrees (unless 90 was chosen);
-  "Upright" sets it to 0.
+- The S2 rotation starts at -90 degrees (projector on its side).
 - The Settings button is hidden during the wizard; the wizard is left only by Next, Skip or Finish.
 - Bluetooth permission is asked when "Allow" is pressed on S5, not at launch.
 - S2 has, per value, a slider and - / + buttons (one knob step each); tapping a value selects it for the knob.

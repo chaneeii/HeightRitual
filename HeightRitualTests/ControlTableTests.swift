@@ -258,7 +258,6 @@ final class ControlTableTests: XCTestCase {
 
         s.startWizard()
         s.wizardNext()
-        s.wizardNext()
         XCTAssertEqual(s.route, .wizard(.fitToWall))
         s.handle(.confirm)
         XCTAssertEqual(s.route, .wizard(.cameraPosition), "Done in the wizard moves to the next step")

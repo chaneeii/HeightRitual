@@ -59,8 +59,9 @@ struct Calibration: Codable, Equatable {
     var ptPerCM: Double = 5
     /// Moves the drawing left or right, in points.
     var shiftPt: Double = 0
-    /// 0 when the projector stands normally; 90 or -90 when it lies on its side.
-    var rotation: Int = 0
+    /// 0 when the projector stands normally; 90 or -90 when it lies on its side. -90 by default:
+    /// the group's projector lies on its side that way.
+    var rotation: Int = -90
 
     /// The projected image size after rotation, in the wall's own up and down direction.
     func logicalSize(for screen: CGSize) -> CGSize {
@@ -104,12 +105,6 @@ struct CameraPosition: Codable, Equatable {
     var centerX: Double = 0.5
 }
 
-/// Projector placement inputs (SPEC 7, S1).
-struct ProjectorSetup: Codable, Equatable {
-    var throwRatio: Double = 0.8
-    var onItsSide = false
-}
-
 /// Values in the settings list, kept in UserDefaults. Setup values survive "Delete everything".
 @MainActor
 @Observable
@@ -126,7 +121,6 @@ final class SettingsStore {
             save(language, "language")
         }
     }
-    var projector: ProjectorSetup { didSet { save(projector, "projector") } }
     var wall: Calibration { didSet { save(wall, "wall") } }
     var camera: CameraPosition? { didSet { save(camera, "camera") } }
     /// The first-start wizard has been finished or skipped through.
@@ -148,7 +142,6 @@ final class SettingsStore {
         let language: AppLanguage = load("language") ?? .system
         self.language = language
         AppLanguage.current = language
-        projector = load("projector") ?? ProjectorSetup()
         wall = load("wall") ?? Calibration()
         camera = load("camera") as CameraPosition?
         wizardDone = load("wizardDone") ?? false
@@ -158,29 +151,5 @@ final class SettingsStore {
         if let data = try? JSONEncoder().encode(value) {
             defaults.set(data, forKey: "settings." + key)
         }
-    }
-}
-
-extension ProjectorSetup {
-    /// Picture height the placement page aims for (SPEC 7, S1).
-    static let targetPictureCM = 180.0
-    static let presets: [Double] = [0.8, 1.2, 1.5]
-
-    /// Height / width of the picture: 9/16 upright, 16/9 on its side.
-    var aspect: Double { onItsSide ? 16.0 / 9.0 : 9.0 / 16.0 }
-
-    /// Upright: `pictureHeight = distance / throwRatio * 9/16`.
-    /// On its side: `pictureHeight = distance / throwRatio`.
-    func pictureHeightCM(distanceCM: Double) -> Double {
-        onItsSide ? distanceCM / throwRatio : distanceCM / throwRatio * 9 / 16
-    }
-
-    /// Distance from the wall for a picture `heightCM` tall.
-    func distanceCM(forPictureHeight heightCM: Double = targetPictureCM) -> Double {
-        onItsSide ? heightCM * throwRatio : heightCM * throwRatio * 16 / 9
-    }
-
-    func pictureWidthCM(forPictureHeight heightCM: Double = targetPictureCM) -> Double {
-        heightCM / aspect
     }
 }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// W: first start. Three welcome pages on what the app is, then the setup steps:
-/// permissions, projector placement, fit to wall, camera position, each with Next and Skip.
+/// permissions, fit to wall, camera position, each with Next and Skip.
 /// Every setup step can be reopened from Settings.
 struct WizardView: View {
     let step: WizardStep
@@ -44,7 +44,6 @@ struct WizardView: View {
     private var page: SettingsPage {
         switch step {
         case .welcome, .permissions: return .permissions
-        case .placement: return .placement
         case .fitToWall: return .fitToWall
         case .cameraPosition: return .cameraPosition
         }
@@ -53,7 +52,6 @@ struct WizardView: View {
     @ViewBuilder private var content: some View {
         switch step {
         case .welcome, .permissions: PermissionsPage()
-        case .placement: PlacementPage()
         case .fitToWall: FitToWallPage()
         case .cameraPosition: CameraPositionPage()
         }

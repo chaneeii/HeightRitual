@@ -86,7 +86,6 @@ struct WallCanvas: View {
             case .marks: drawMarks(ctx, g)
             case .footGuide: drawFootGuide(ctx, g)
             case .dark: drawNumber(ctx, g)
-            case .frame: drawFrame(ctx, g)
             case .cameraLines: drawCameraLines(ctx, g)
             }
         }
@@ -189,22 +188,6 @@ struct WallCanvas: View {
     }
 
     // MARK: Setup pages
-
-    /// S1: the picture's edge, so its size and the floor contact can be seen on the wall.
-    private func drawFrame(_ ctx: GraphicsContext, _ g: WallGeometry) {
-        let rect = CGRect(origin: .zero, size: g.size).insetBy(dx: 3, dy: 3)
-        ctx.stroke(Path(rect), with: .color(.white), lineWidth: 6)
-        var cross = Path()
-        cross.move(to: CGPoint(x: g.size.width / 2, y: 0))
-        cross.addLine(to: CGPoint(x: g.size.width / 2, y: g.size.height))
-        cross.move(to: CGPoint(x: 0, y: g.size.height / 2))
-        cross.addLine(to: CGPoint(x: g.size.width, y: g.size.height / 2))
-        ctx.stroke(cross, with: .color(.white.opacity(0.4)), lineWidth: 2)
-        let text = Text("The bottom edge touches the floor")
-            .font(.system(size: font(g), design: .serif)).italic()
-            .foregroundColor(.white)
-        ctx.draw(text, at: CGPoint(x: g.size.width / 2, y: g.size.height - font(g) * 1.5), anchor: .center)
-    }
 
     /// S3: bright lines at 0 and 100 cm; the phone's camera lines are dragged onto them.
     private func drawCameraLines(_ ctx: GraphicsContext, _ g: WallGeometry) {

@@ -71,29 +71,6 @@
         }
       }
     },
-    "%lld cm tall, %lld cm wide": {
-      "extractionState": "stale",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "높이 %lld cm, 너비 %lld cm"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld cm hög, %lld cm bred"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "高 %lld 厘米，宽 %lld 厘米"
-          }
-        }
-      }
-    },
     "%lld of %lld": {
       "extractionState": "stale",
       "localizations": {
@@ -475,29 +452,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "背景"
-          }
-        }
-      }
-    },
-    "Before fitting to the wall": {
-      "extractionState": "stale",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "벽에 맞추기 전에"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Innan du anpassar till väggen"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "对齐墙面之前"
           }
         }
       }
@@ -1072,28 +1026,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "墙面预览"
-          }
-        }
-      }
-    },
-    "Custom": {
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "직접 입력"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anpassat"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "自定义"
           }
         }
       }
@@ -1781,29 +1713,6 @@
         }
       }
     },
-    "Focus, then switch off automatic keystone and autofocus.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "초점을 맞춘 뒤 자동 키스톤과 자동 초점을 꺼주세요."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fokusera och stäng sedan av automatisk keystone och autofokus."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "对焦后关闭自动梯形校正和自动对焦。"
-          }
-        }
-      }
-    },
     "Foot guide: stand with your heels on the line": {
       "extractionState": "stale",
       "localizations": {
@@ -1940,28 +1849,6 @@
         }
       }
     },
-    "From the projector's manual: distance divided by picture width.": {
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "프로젝터 설명서에 있어요: 거리 ÷ 화면 너비."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Från projektorns manual: avstånd delat med bildens bredd."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "见投影仪说明书：距离除以画面宽度。"
-          }
-        }
-      }
-    },
     "Heels on the line, back against the wall": {
       "localizations": {
         "ko": {
@@ -2048,29 +1935,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Height Ritual 需要相机来拍摄视频。"
-          }
-        }
-      }
-    },
-    "How far from the wall the projector stands": {
-      "extractionState": "stale",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "프로젝터를 벽에서 얼마나 떨어뜨릴지"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hur långt från väggen projektorn står"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "投影仪离墙多远"
           }
         }
       }
@@ -2891,28 +2755,6 @@
         }
       }
     },
-    "On its side": {
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "옆으로 눕힘"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "På sidan"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "侧放"
-          }
-        }
-      }
-    },
     "Open Settings": {
       "extractionState": "stale",
       "localizations": {
@@ -3005,29 +2847,6 @@
         }
       }
     },
-    "Orientation": {
-      "extractionState": "stale",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "방향"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riktning"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "方向"
-          }
-        }
-      }
-    },
     "Permissions": {
       "extractionState": "stale",
       "localizations": {
@@ -3092,29 +2911,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "视频截图，已标出头顶"
-          }
-        }
-      }
-    },
-    "Picture": {
-      "extractionState": "stale",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "화면"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bild"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "画面"
           }
         }
       }
@@ -3275,74 +3071,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "投影画面：地面至 %lld 厘米"
-          }
-        }
-      }
-    },
-    "Projector placement": {
-      "extractionState": "stale",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "프로젝터 위치"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projektorns placering"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "投影仪摆放"
-          }
-        }
-      }
-    },
-    "Projector type": {
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "프로젝터 종류"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projektortyp"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "投影仪类型"
-          }
-        }
-      }
-    },
-    "Put the lens this far from the wall": {
-      "extractionState": "stale",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "렌즈를 벽에서 이만큼 떨어뜨리세요"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Placera linsen så här långt från väggen"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "镜头离墙的距离"
           }
         }
       }
@@ -3824,29 +3552,6 @@
         }
       }
     },
-    "Set zoom to 100 percent.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "줌을 100%로 맞추세요."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ställ in zoom på 100 procent."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "将缩放设为 100%。"
-          }
-        }
-      }
-    },
     "Settings": {
       "extractionState": "stale",
       "localizations": {
@@ -4273,51 +3978,6 @@
         }
       }
     },
-    "The bottom edge of the picture must touch the floor.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "화면 아래 끝이 바닥에 닿아야 해요."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bildens nederkant måste nå golvet."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "画面下边缘必须接触地面。"
-          }
-        }
-      }
-    },
-    "The bottom edge touches the floor": {
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "아래 끝이 바닥에 닿아요"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nederkanten når golvet"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "下边缘接触地面"
-          }
-        }
-      }
-    },
     "The camera is not allowed": {
       "extractionState": "stale",
       "localizations": {
@@ -4385,24 +4045,24 @@
         }
       }
     },
-    "The first time, do these in order: placement, then fit to wall, then camera position. Without them heights on the wall are not true size.": {
+    "The first time, do these in order: fit to wall, then camera position. Without them heights on the wall are not true size.": {
       "localizations": {
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "처음에는 프로젝터 위치, 벽에 맞추기, 카메라 위치 순서로 하세요. 이걸 안 하면 벽의 키가 실제 크기가 아니에요."
+            "value": "처음에는 벽에 맞추기, 카메라 위치 순서로 하세요. 이걸 안 하면 벽의 키가 실제 크기가 아니에요."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Första gången: gör placering, sedan anpassa till väggen, sedan kamerans position. Annars är längderna på väggen inte i verklig storlek."
+            "value": "Första gången: anpassa först till väggen, sedan kamerans position. Annars är längderna på väggen inte i verklig storlek."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "首次使用时请按顺序完成：投影仪摆放、对齐墙面、相机位置。否则墙上的身高不是真实尺寸。"
+            "value": "首次使用时请按顺序完成：对齐墙面、相机位置。否则墙上的身高不是真实尺寸。"
           }
         }
       }
@@ -4447,28 +4107,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "画面至少要达到 170 厘米。请把投影仪移得离墙更远。"
-          }
-        }
-      }
-    },
-    "The projector shows a white frame along the edge of the picture.": {
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "프로젝터가 화면 가장자리에 흰 테두리를 보여줘요."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projektorn visar en vit ram längs bildens kant."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "投影仪会在画面边缘显示白色边框。"
           }
         }
       }
@@ -4558,29 +4196,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "此操作无法撤销。"
-          }
-        }
-      }
-    },
-    "Throw ratio": {
-      "extractionState": "stale",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "투사비"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projektionsförhållande"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "投射比"
           }
         }
       }

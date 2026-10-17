@@ -38,11 +38,10 @@ Hi-fi prototype for KTH DM2601 (Media Technology and Interaction Design), Group 
 
 ### One-time setup
 
-A projected centimetre has to be a real centimetre. Three steps, guided by a wizard on first launch:
+A projected centimetre has to be a real centimetre. Two steps, guided by a wizard on first launch:
 
-1. **Projector placement**: the throw ratio gives the distance from the lens to the wall.
-2. **Fit to wall**: move and scale the projected ruler until 0 and 100 sit on a tape measure.
-3. **Camera position**: drag two lines in the camera picture onto the projected 0 and 100 cm
+1. **Fit to wall**: move and scale the projected ruler until 0 and 100 sit on a tape measure.
+2. **Camera position**: drag two lines in the camera picture onto the projected 0 and 100 cm
    lines, so heights can be read from the video.
 
 <p align="center">
@@ -133,7 +132,7 @@ height set by hand.
 | **M1 → M2 → M3** | Choose a member → Film → Height | Make tab |
 | **R1 → R2 → R3** | Choose a member → Memory wall → Record detail | Memory tab (the app opens here) |
 | **A1** | Add or edit a family member | sheet |
-| **S, S1 to S6** | Settings: family, placement, fit to wall, camera position, units, permissions, controller | sheet |
+| **S, S2 to S6** | Settings: family, fit to wall, camera position, units, permissions, controller | sheet |
 
 Every screen, captured: [`docs/images/screens/`](docs/images/screens). The full spec with the
 controller table per screen: [`docs/SPEC.md`](docs/SPEC.md).

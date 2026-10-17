@@ -13,12 +13,12 @@ enum HeightState: Equatable {
 }
 
 enum SettingsPage: Equatable {
-    case list, family, placement, fitToWall, cameraPosition, units, controller, permissions
+    case list, family, fitToWall, cameraPosition, units, controller, permissions
 }
 
-/// First-start wizard: what the app is, then S5, S1, S2, S3 in order.
+/// First-start wizard: what the app is, then S5, S2, S3 in order.
 enum WizardStep: Int, CaseIterable {
-    case welcome, permissions, placement, fitToWall, cameraPosition
+    case welcome, permissions, fitToWall, cameraPosition
 
     static let setupSteps = allCases.filter { $0 != .welcome }
 }

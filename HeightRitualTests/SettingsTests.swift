@@ -5,27 +5,8 @@ import XCTest
 @MainActor
 final class SettingsTests: XCTestCase {
 
-    // S1: distance for a 180 cm picture.
-    func testProjectorPlacement() {
-        var projector = ProjectorSetup(throwRatio: 0.8, onItsSide: false)
-        XCTAssertEqual(projector.distanceCM(), 256, accuracy: 0.001, "0.8 upright: 2.56 m")
-        XCTAssertEqual(projector.pictureWidthCM(), 320, accuracy: 0.001)
-        XCTAssertEqual(projector.pictureHeightCM(distanceCM: 256), 180, accuracy: 0.001)
-        projector.onItsSide = true
-        XCTAssertEqual(projector.distanceCM(), 144, accuracy: 0.001, "0.8 on its side: 1.44 m")
-        XCTAssertEqual(projector.pictureWidthCM(), 101.25, accuracy: 0.001)
-        XCTAssertEqual(projector.pictureHeightCM(distanceCM: 144), 180, accuracy: 0.001)
-    }
-
-    func testOnItsSideTurnsTheWallImage() {
-        let h = Harness()
-        h.state.setProjectorOnItsSide(true)
-        XCTAssertEqual(h.state.settings.wall.rotation, -90)
-        h.state.settings.wall.rotation = 90
-        h.state.setProjectorOnItsSide(true)
-        XCTAssertEqual(h.state.settings.wall.rotation, 90, "a chosen direction is kept")
-        h.state.setProjectorOnItsSide(false)
-        XCTAssertEqual(h.state.settings.wall.rotation, 0)
+    func testWallRotationDefaultsToOnItsSide() {
+        XCTAssertEqual(Calibration().rotation, -90, "the group's projector lies on its side")
     }
 
     // S4: switching units changes every shown height, never a stored one.
@@ -50,12 +31,10 @@ final class SettingsTests: XCTestCase {
         let defaults = UserDefaults(suiteName: suite)!
         let first = SettingsStore(defaults: defaults)
         first.unit = .ftin
-        first.projector = ProjectorSetup(throwRatio: 1.2, onItsSide: true)
         first.wall.ptPerCM = 6.5
         first.camera = CameraPosition(floorY: 0.9, y100: 0.5)
         let second = SettingsStore(defaults: defaults)
         XCTAssertEqual(second.unit, .ftin)
-        XCTAssertEqual(second.projector, ProjectorSetup(throwRatio: 1.2, onItsSide: true))
         XCTAssertEqual(second.wall.ptPerCM, 6.5)
         XCTAssertEqual(second.camera, CameraPosition(floorY: 0.9, y100: 0.5))
         defaults.removePersistentDomain(forName: suite)
@@ -70,9 +49,6 @@ final class SettingsTests: XCTestCase {
         s.wizardNext()
         XCTAssertEqual(s.route, .wizard(.permissions))
         XCTAssertEqual(s.wallModel.kind, .idle)
-        s.wizardNext()
-        XCTAssertEqual(s.route, .wizard(.placement))
-        XCTAssertEqual(s.wallModel.kind, .frame)
         s.wizardNext()
         XCTAssertEqual(s.route, .wizard(.fitToWall))
         XCTAssertEqual(s.wallModel.kind, .ruler)

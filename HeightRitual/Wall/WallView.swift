@@ -21,6 +21,7 @@ struct WallView: View {
             WallCanvas(model: model)
                 .overlay { if model.kind == .screen { WallScreen() } }
                 .overlay { WallClipOverlay(model: model, player: state.wallPlayer.player) }
+                .overlay { WallScreenOverlay(route: state.route) }
                 .overlay {
                     // Layers (SPEC 10): wall, marks, clip. A clip with its background would hide
                     // the marks, so they are drawn once more above it.
@@ -128,7 +129,7 @@ struct WallCanvas: View {
 
         // Caption just above the selected mark's left end, inside the narrow strip; kept inside
         // the picture for members taller than its top.
-        if let caption = model.caption, let figure = model.figure {
+        if model.showsText, let caption = model.caption, let figure = model.figure {
             let y = max(g.y(mm: figure.heightMM) - size * 0.9, size * 1.5)
             let text = Text(caption)
                 .font(.system(size: size * 1.1, design: .serif)).italic()
@@ -149,7 +150,7 @@ struct WallCanvas: View {
             }
         }
 
-        if let headline = model.headline {
+        if model.showsText, let headline = model.headline {
             let text = Text(headline)
                 .font(.system(size: g.length(cm: 7), design: .serif)).italic()
                 .foregroundColor(model.marks.isEmpty && model.figure == nil ? pencil.opacity(0.8) : model.accent)
@@ -300,5 +301,18 @@ struct PlayerLayerView: UIViewRepresentable {
     final class LayerView: UIView {
         override class var layerClass: AnyClass { AVPlayerLayer.self }
         var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
+    }
+}
+
+/// The wall's own screen text laid over the life-size picture: while filming and in Lookback.
+private struct WallScreenOverlay: View {
+    let route: Route
+
+    var body: some View {
+        switch route {
+        case .makeFilm(let film): WallFilmOverlay(film: film)
+        case .memoryWall, .record: WallPlaybackOverlay()
+        default: EmptyView()
+        }
     }
 }

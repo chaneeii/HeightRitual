@@ -46,6 +46,8 @@ struct WallModel: Equatable {
     var marks: [Mark] = []
     var figure: Figure?
     var caption: String?
+    /// False where the wall's screen draws its own text over the picture (Lookback).
+    var showsText = true
     /// Large name or message near the top of the picture.
     var headline: String?
     /// Dashed coral line of a record being made.
@@ -77,6 +79,7 @@ extension AppState {
 
         func showMemoryWall() {
             model.kind = .marks
+            model.showsText = false
             model.accent = Palette.color(currentMember?.colorIndex ?? 0)
             model.marks = marks(of: memberID, selecting: recordIndex)
             if let record = selectedRecord, let member = currentMember {
@@ -110,28 +113,15 @@ extension AppState {
         case .home, .memberMenu, .addMember:
             model.kind = .screen
 
-        case .makeFilm(.ready):
+        case .makeFilm:
+            // Ready and filming: the life-size outline to stand in; the wall's own screen
+            // (title, Record, time left) is laid over it (`WallFilmOverlay`).
             model.kind = .footGuide
-            model.accent = Palette.color(currentMember?.colorIndex ?? 0)
+            model.accent = Theme.guide
             model.guideMM = FootGuide.outlineMM(lastMM: memberID.flatMap(store.lastRecord)?.heightMM)
 
-        case .makeFilm(.countdown(let n)):
-            model.kind = .dark
-            model.bigNumber = n
-
-        case .makeFilm(.filming(let left)):
-            model.kind = .dark
-            model.bigNumber = left
-
-        case .makeHeight(let state):
-            model.kind = .marks
-            model.accent = Palette.color(currentMember?.colorIndex ?? 0)
-            model.marks = marks(of: memberID, selecting: nil)
-            if state == .editing, let mm = draft?.heightMM {
-                model.liveMM = mm
-                model.liveLabel = L("Now") + "  " + HeightFormatter.text(mm, unit: unit)
-                model.figure = .init(heightMM: mm, posterFile: nil, bodyRatio: draft?.clip.bodyRatio)
-            }
+        case .makeHeight, .makeSaved:
+            model.kind = .screen
 
         case .memoryWall, .record:
             showMemoryWall()

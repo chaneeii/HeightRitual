@@ -16,6 +16,12 @@ fallback for risk 1), M5 camera, M6 `Capture/VideoCutout.swift` (Vision segmenta
 head-top estimate), M7 `Playback/WallPlayer.swift` (clip on the wall and in the wall copy), the
 controller light. P1 live foot check and the camera position auto-detect are not built.
 
+- Redesign in progress (feature/new-design): member-first Home wheel, member menu, letter-wheel
+  add, Record (film, dial, saved) and Lookback, each with a phone and a wall version
+  (`Phone/Home`, `Phone/Record`, `Phone/Playback`, `Phone/Design`). Colours and fonts only from
+  `Theme`; controller buttons only as `ControlIcon`. Debug builds: the projector button on every
+  page shows the wall on the phone with the controller's buttons; `-DebugFakeClip` fakes a
+  filmed clip in the simulator.
 - The phone UI follows Apple's HIG: system TabView (Make / Memory, hidden on pushed screens),
   NavigationStacks drawn from `AppState.route` (`State/Navigation.swift`; the system back button
   sends Cancel), Settings and A1 as sheets with Forms.
@@ -23,7 +29,7 @@ controller light. P1 live foot check and the camera position auto-detect are not
 - English, Korean, Simplified Chinese, Swedish (`Resources/*.xcstrings`), chosen in Settings.
   Strings built in code go through `L(_:)` so they follow that choice.
 - The controller connects on a device; buttons-only firmware in `Firmware/controller_buttons/`.
-- 53 unit tests in `HeightRitualTests/` pass in the simulator (scheme runs them in English).
+- 56 unit tests in `HeightRitualTests/` pass in the simulator (scheme runs them in English).
 
 ## Commands
 

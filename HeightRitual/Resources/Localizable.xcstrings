@@ -71,6 +71,50 @@
         }
       }
     },
+    "%@'s growth": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@의 성장"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@s tillväxt"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@的成长"
+          }
+        }
+      }
+    },
+    "%@'s height is now %@": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@의 키는 이제 %@예요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ är nu %@ lång"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@现在的身高是 %@"
+          }
+        }
+      }
+    },
     "%lld of %lld": {
       "extractionState": "stale",
       "localizations": {
@@ -253,6 +297,28 @@
         }
       }
     },
+    "Add a new member": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새 가족 추가"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lägg till en ny medlem"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加新成员"
+          }
+        }
+      }
+    },
     "Add family member": {
       "extractionState": "stale",
       "localizations": {
@@ -272,6 +338,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "添加家人"
+          }
+        }
+      }
+    },
+    "Add member": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가족 추가"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lägg till"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加成员"
+          }
+        }
+      }
+    },
+    "Add someone you want to measure": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "키를 잴 사람을 추가하세요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lägg till någon du vill mäta"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加你想测量的人"
           }
         }
       }
@@ -429,6 +539,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "自动播放"
+          }
+        }
+      }
+    },
+    "Back": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "뒤로"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tillbaka"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "返回"
           }
         }
       }
@@ -704,6 +836,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "修改或删除单条记录将与视频播放一起完成（里程碑 7）。"
+          }
+        }
+      }
+    },
+    "Check %@'s height": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@의 키를 확인하세요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontrollera %@s längd"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "确认%@的身高"
+          }
+        }
+      }
+    },
+    "Choose a family member": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가족을 선택하세요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Välj en familjemedlem"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择一位家庭成员"
           }
         }
       }
@@ -1075,6 +1251,28 @@
         }
       }
     },
+    "Delete": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "삭제"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Radera"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除"
+          }
+        }
+      }
+    },
     "Delete %@": {
       "extractionState": "stale",
       "localizations": {
@@ -1277,6 +1475,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "完成"
+          }
+        }
+      }
+    },
+    "Drag the dial to adjust, then tap Save": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다이얼을 끌어 맞춘 뒤 저장을 누르세요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dra i ratten för att justera, tryck sedan på Spara"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拖动表盘调整，然后点按保存"
           }
         }
       }
@@ -1939,6 +2159,28 @@
         }
       }
     },
+    "Hold still for a few seconds": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "몇 초만 가만히 있어요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stå still några sekunder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保持不动几秒钟"
+          }
+        }
+      }
+    },
     "Language": {
       "localizations": {
         "ko": {
@@ -2003,6 +2245,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "左右"
+          }
+        }
+      }
+    },
+    "Let's start with your family": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가족부터 시작해요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Börja med din familj"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "先从你的家人开始"
           }
         }
       }
@@ -2092,6 +2356,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "载入示例家庭？"
+          }
+        }
+      }
+    },
+    "Lookback": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "돌아보기"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Titta tillbaka"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回顾"
           }
         }
       }
@@ -2205,6 +2491,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "手动"
+          }
+        }
+      }
+    },
+    "Measure %@": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 키 재기"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mät %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "测量%@"
+          }
+        }
+      }
+    },
+    "Measure someone else": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다른 사람 재기"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mät någon annan"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "测量其他人"
           }
         }
       }
@@ -2915,6 +3245,28 @@
         }
       }
     },
+    "Pick letters with the knob,\nthen choose Save": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노브로 글자를 고른 뒤\n저장을 선택하세요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Välj bokstäver med ratten,\nvälj sedan Spara"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用旋钮选择字母，\n然后选择保存"
+          }
+        }
+      }
+    },
     "Play": {
       "extractionState": "stale",
       "localizations": {
@@ -2978,6 +3330,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在准备视频"
+          }
+        }
+      }
+    },
+    "Press %@ or %@ to choose, then %@": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 또는 %@로 고른 뒤 %@"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tryck %@ eller %@ för att välja, sedan %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按 %@ 或 %@ 选择，然后按 %@"
+          }
+        }
+      }
+    },
+    "Press %@ to add": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@를 눌러 추가"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tryck %@ för att lägga till"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按 %@ 添加"
           }
         }
       }
@@ -3142,6 +3538,28 @@
         }
       }
     },
+    "Record today's height": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오늘의 키를 기록해요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spela in dagens längd"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "记录今天的身高"
+          }
+        }
+      }
+    },
     "Recording light": {
       "localizations": {
         "ko": {
@@ -3160,6 +3578,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "录制指示灯"
+          }
+        }
+      }
+    },
+    "Recording…": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "녹화 중…"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spelar in…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "录制中…"
+          }
+        }
+      }
+    },
+    "Recording… hold still (%llds)": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "녹화 중… 가만히 있어요 (%lld초)"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spelar in… stå still (%lld s)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "录制中…保持不动（%lld秒）"
           }
         }
       }
@@ -3457,6 +3919,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在搜索控制器"
+          }
+        }
+      }
+    },
+    "See %@'s growth": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@의 성장 보기"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se %@s tillväxt"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "查看%@的成长"
           }
         }
       }
@@ -3800,6 +4284,50 @@
         }
       }
     },
+    "Stand inside the outline, feet on the marks.": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "윤곽 안에 서서 발을 표시에 맞추세요."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ställ dig i konturen med fötterna på markeringarna."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "站在轮廓内，脚踩标记。"
+          }
+        }
+      }
+    },
+    "Stand inside the outline, feet on the marks.\nPress %@ to start recording": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "윤곽 안에 서서 발을 표시에 맞추세요.\n%@를 누르면 녹화가 시작돼요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ställ dig i konturen med fötterna på markeringarna.\nTryck %@ för att börja spela in"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "站在轮廓内，脚踩标记。\n按 %@ 开始录制"
+          }
+        }
+      }
+    },
     "Stand with your heels on the line and film again.": {
       "localizations": {
         "ko": {
@@ -3868,6 +4396,72 @@
         }
       }
     },
+    "Swipe to browse, then tap to start": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "넘겨서 찾고, 눌러서 시작하세요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Svep för att bläddra, tryck för att börja"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "滑动浏览，点按开始"
+          }
+        }
+      }
+    },
+    "Swipe to find a letter and tap to add it.\nTap Save when you're done!": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "넘겨서 글자를 찾고 눌러서 넣어요.\n다 되면 저장을 누르세요!"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Svep för att hitta en bokstav och tryck för att lägga till den.\nTryck på Spara när du är klar!"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "滑动找到字母，点按添加。\n完成后点按保存！"
+          }
+        }
+      }
+    },
+    "Swipe to look back": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "넘겨서 돌아보세요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Svep för att titta tillbaka"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "滑动回顾"
+          }
+        }
+      }
+    },
     "Switch to Make to film one.": {
       "localizations": {
         "ko": {
@@ -3930,6 +4524,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "点按家人可重命名、改颜色或删除。删除家人会同时删除其记录。"
+          }
+        }
+      }
+    },
+    "Tap to choose": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "눌러서 고르세요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tryck för att välja"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "点按选择"
           }
         }
       }
@@ -4200,6 +4816,28 @@
         }
       }
     },
+    "This takes a few seconds": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "몇 초 걸려요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Det tar några sekunder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要几秒钟"
+          }
+        }
+      }
+    },
     "Top of picture": {
       "extractionState": "stale",
       "localizations": {
@@ -4264,6 +4902,72 @@
           "stringUnit": {
             "state": "translated",
             "value": "画面顶部：%lld 厘米   %@"
+          }
+        }
+      }
+    },
+    "Turn the knob or press %@ %@ to look back": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노브를 돌리거나 %@ %@를 눌러 돌아보세요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vrid ratten eller tryck %@ %@ för att titta tillbaka"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "转动旋钮或按 %@ %@ 回顾"
+          }
+        }
+      }
+    },
+    "Turn the knob or press %@ %@,\nthen press %@": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노브를 돌리거나 %@ %@를 누른 뒤\n%@를 누르세요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vrid ratten eller tryck %@ %@,\ntryck sedan %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "转动旋钮或按 %@ %@，\n然后按 %@"
+          }
+        }
+      }
+    },
+    "Turn the knob to fine-tune": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노브를 돌려 미세 조정하세요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vrid ratten för att finjustera"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "转动旋钮微调"
           }
         }
       }
@@ -4375,6 +5079,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "仅在手机保持在支架上时有效。移动手机后需要重新设置。"
+          }
+        }
+      }
+    },
+    "Watch %@ grow": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@의 성장을 지켜봐요"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se %@ växa"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "看看%@的成长"
           }
         }
       }

@@ -42,15 +42,13 @@ final class ControllerProtocolTests: XCTestCase {
         h.openFilm()
         XCTAssertEqual(h.controller.lights.last?.bytes, [0, 1], "off, make light")
         h.state.handle(.record)
-        XCTAssertEqual(h.controller.lights.last?.recording, .countdown)
-        h.scheduler.advance(3)
-        XCTAssertEqual(h.controller.lights.last?.recording, .steady)
+        XCTAssertEqual(h.controller.lights.last?.recording, .steady, "steady while filming")
         h.state.handle(.record)
         XCTAssertEqual(h.controller.lights.last?.recording, .steady, "steady while cutting out")
         h.state.finishProcessing(ProcessedClip(estimatedMM: 1250))
         XCTAssertEqual(h.controller.lights.last?.recording, .off)
         h.state.handle(.confirm)
-        XCTAssertEqual(h.controller.lights.last?.bytes, [3, 0], "saved flash, memory light")
+        XCTAssertEqual(h.controller.lights.last?.recording, .saved, "saved flash")
     }
 
     func testControllerPageListsPacketsAndStaysPut() {

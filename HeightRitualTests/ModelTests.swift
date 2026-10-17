@@ -57,7 +57,7 @@ final class ModelTests: XCTestCase {
         first.confirm()
         first.confirm()
         first.state.handle(.record)
-        first.scheduler.advance(3)
+        first.scheduler.advance(1)
         first.state.handle(.record)
         first.state.finishProcessing(ProcessedClip())
         XCTAssertNil(first.state.draft?.heightMM, "first record without an estimate starts empty")

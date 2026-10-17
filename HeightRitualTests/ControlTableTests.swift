@@ -107,7 +107,8 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.route, .addMember, "Save with no letters does nothing")
     }
 
-    // Row: M2 film: ready — Confirm or Record starts the countdown, Cancel goes back to M1.
+    // Row: M2 film: ready — Confirm or Record films at once (no countdown), Cancel goes back to
+    // the member menu.
     func testFilmReady() {
         let h = Harness()
         let s = h.state
@@ -115,52 +116,44 @@ final class ControlTableTests: XCTestCase {
         h.openFilm()
         XCTAssertTrue(h.camera.previewing)
         s.handle(.confirm)
-        XCTAssertEqual(s.route, .makeFilm(.countdown(3)))
-
-        s.handle(.cancel)
-        s.handle(.record)
-        XCTAssertEqual(s.route, .makeFilm(.countdown(3)))
+        XCTAssertEqual(s.route, .makeFilm(.filming(secondsLeft: 5)))
+        XCTAssertTrue(h.camera.recording)
 
         s.handle(.cancel)
         XCTAssertEqual(s.route, .makeFilm(.ready))
+        s.handle(.record)
+        XCTAssertEqual(s.route, .makeFilm(.filming(secondsLeft: 5)))
+
+        s.handle(.cancel)
         s.handle(.cancel)
         XCTAssertEqual(s.route, .memberMenu)
         XCTAssertFalse(h.camera.previewing)
     }
 
-    // Row: M2 film: countdown, filming — Cancel discards, Record stops early.
-    func testFilmCountdownAndFilming() {
+    // Row: M2 filming — the seconds count down, Cancel discards, Record stops early.
+    func testFilming() {
         let h = Harness()
         let s = h.state
 
         h.openFilm()
         s.handle(.record)
-        h.scheduler.advance(1)
-        XCTAssertEqual(s.route, .makeFilm(.countdown(2)))
-        s.handle(.cancel)
-        XCTAssertEqual(s.route, .makeFilm(.ready))
-        h.scheduler.advance(10)
-        XCTAssertEqual(s.route, .makeFilm(.ready), "cancelled countdown does not start filming")
-
-        s.handle(.record)
-        h.scheduler.advance(3)
-        XCTAssertEqual(s.route, .makeFilm(.filming(secondsLeft: 5)))
-        XCTAssertTrue(h.camera.recording)
         h.scheduler.advance(2)
         XCTAssertEqual(s.route, .makeFilm(.filming(secondsLeft: 3)))
         s.handle(.cancel)
         XCTAssertEqual(s.route, .makeFilm(.ready))
         XCTAssertFalse(h.camera.recording)
+        h.scheduler.advance(10)
+        XCTAssertEqual(s.route, .makeFilm(.ready), "cancelled filming stays cancelled")
 
         s.handle(.record)
-        h.scheduler.advance(4)
+        h.scheduler.advance(1)
         s.handle(.record)
         XCTAssertEqual(s.route, .makeHeight(.cuttingOut(progress: 0)), "Record stops early")
 
         // Without a press, filming ends by itself after 5 s.
         s.handle(.cancel)
         s.handle(.record)
-        h.scheduler.advance(3 + 5)
+        h.scheduler.advance(5)
         XCTAssertEqual(s.route, .makeHeight(.cuttingOut(progress: 0)))
     }
 
@@ -207,7 +200,7 @@ final class ControlTableTests: XCTestCase {
         XCTAssertNil(s.draft)
 
         h.state.handle(.record)
-        h.scheduler.advance(3)
+        h.scheduler.advance(1)
         s.handle(.record)
         s.finishProcessing(ProcessedClip(estimatedMM: 1225))
         s.handle(.knob(2))
@@ -216,10 +209,16 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(records.count, before + 1)
         XCTAssertEqual(records.last?.heightMM, 1235)
         XCTAssertEqual(records.last?.heightSource, .edited)
-        XCTAssertEqual(s.route, .memoryWall, "Save opens Memory")
+        XCTAssertEqual(s.route, .makeSaved, "Save shows Saved")
+        XCTAssertEqual(s.savedRecord?.heightMM, 1235)
+        h.confirm()
+        XCTAssertEqual(s.route, .memoryWall, "See growth opens Lookback")
         XCTAssertEqual(s.mode, .memory)
         XCTAssertEqual(s.selectedRecord?.id, records.last?.id, "with the new record selected")
         XCTAssertNil(s.notice)
+        XCTAssertTrue(s.showsLookbackHint)
+        s.handle(.left)
+        XCTAssertFalse(s.showsLookbackHint, "the hint goes at the first move")
     }
 
     // Row: R2 wall: manual — knob and Left / Right move, Confirm replays, Cancel back to R1,

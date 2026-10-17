@@ -436,3 +436,15 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
     (so the reach from the floor does not change), black elsewhere. Left and right moves the strip
     within a wide picture. Every copy of the wall on the phone (R2, M3, S2, full screen) shows
     exactly that strip, upright, so it reads like the phone itself (decided 12 Oct).
+  - Redesign (17 Oct, Figma "Ritual", branch feature/new-design). Members come first: Home is a
+    wheel of member cards with an Add card last (knob and Left / Right turn it, Confirm opens).
+    Choosing a member darkens Home and offers Record or Lookback; Cancel goes back to the wheel.
+    A member is added from an endless letter wheel (Delete, Save, A to Z). The mode switch only
+    preselects Record (Make) or Lookback (Memory) on that menu. Every screen has a phone version
+    (touch) and a wall version (608 x 1080 strip, controller only, cursor and thick border on the
+    selection). Confirm turns the wall's check green for a moment before the choice opens.
+  - Recording has no countdown: Record films five seconds at once, with a bar and the seconds
+    left. The height is checked on a dial (knob 0.5 cm, Left / Right 1 cm, dragged on the phone),
+    then a Saved screen offers the member's growth (Confirm) or someone else (Cancel). Lookback on
+    the wall lays the date, height, growth and story segments over the life-size clip; its hint
+    goes away at the first move. Black and white for now; colours and fonts come from `Theme`.

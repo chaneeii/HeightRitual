@@ -114,11 +114,11 @@ struct Harness {
         confirm()
     }
 
-    /// M2 -> countdown -> filming -> stop early -> M3 cutting out.
+    /// M2 -> filming -> stop early -> M3 cutting out.
     func filmAndStop() {
         openFilm()
         state.handle(.record)
-        scheduler.advance(3)
+        scheduler.advance(1)
         state.handle(.record)
     }
 

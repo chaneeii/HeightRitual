@@ -48,7 +48,6 @@ final class AppState {
     @ObservationIgnored let controller: ControllerLink
     @ObservationIgnored let scheduler: Scheduling
 
-    static let countdownSeconds = 3
     static let filmSeconds = 5
     /// How long auto play shows a record without a clip (sample records).
     static let stillSeconds = 1.5
@@ -73,6 +72,10 @@ final class AppState {
     private(set) var confirmCount = 0
     /// Debug builds: the phone shows the wall picture instead of its own screens.
     var debugShowsWall = false
+    /// The record just saved, for the "Saved" screen.
+    private(set) var savedRecordID: UUID?
+    /// "Turn the knob or press ◀ ▶ to look back" on the wall, until the first move.
+    private(set) var showsLookbackHint = false
     private(set) var memberID: UUID?
     private(set) var recordIndex = 0
     private(set) var isAutoPlaying = false
@@ -183,6 +186,8 @@ final class AppState {
             handleHome(event)
         case .memberMenu:
             handleMenu(event)
+        case .makeSaved:
+            handleSaved(event)
         case .addMember:
             handleAddMember(event)
         case .makeFilm(let state):
@@ -263,19 +268,25 @@ final class AppState {
     private func handleFilm(_ event: ControlEvent, _ state: FilmState) {
         switch (state, event) {
         case (.ready, .confirm), (.ready, .record):
-            startCountdown()
+            startFilming()
         case (.ready, .cancel):
             menuChoice = .record
             go(to: .memberMenu)
-        case (.countdown, .cancel), (.countdown, .record):
-            // Stopping before filming started leaves nothing to keep.
-            go(to: .makeFilm(.ready))
         case (.filming, .cancel):
             go(to: .makeFilm(.ready))
         case (.filming, .record):
             finishFilming()
         default:
             break
+        }
+    }
+
+    private func handleSaved(_ event: ControlEvent) {
+        guard !confirmFlash else { return }
+        switch event {
+        case .confirm: seeGrowth()
+        case .cancel: measureSomeoneElse()
+        default: break
         }
     }
 
@@ -347,6 +358,9 @@ final class AppState {
         }
         if previous == .memoryWall && next != .memoryWall {
             isAutoPlaying = false
+        }
+        if next == .memoryWall && previous != .memoryWall {
+            if case .record = previous {} else { showsLookbackHint = true }
         }
         let onWall: (Route) -> Bool = { if case .record = $0 { return true }; return $0 == .memoryWall }
         if onWall(previous) && !onWall(next) { wallPlayer.stop() }
@@ -465,20 +479,9 @@ final class AppState {
 
     // MARK: Film (M2)
 
-    private func startCountdown() {
-        countdownTick(Self.countdownSeconds)
-    }
-
-    private func countdownTick(_ remaining: Int) {
-        if remaining == 0 {
-            startFilming()
-            return
-        }
-        go(to: .makeFilm(.countdown(remaining)))
-        timer = scheduler.after(1) { [weak self] in self?.countdownTick(remaining - 1) }
-    }
-
-    private func startFilming() {
+    /// Record starts filming at once (no countdown); the screens show the time left.
+    func startFilming() {
+        guard route == .makeFilm(.ready) else { return }
         camera.startRecording(sound: settings.soundOn)
         filmingTick(Self.filmSeconds)
     }
@@ -504,6 +507,14 @@ final class AppState {
     }
 
     private func startProcessing(_ movie: URL?) {
+        #if DEBUG
+        // Simulator (no camera): `-DebugFakeClip` pretends a person 120 cm tall was filmed, so the
+        // height and saved screens can be checked.
+        if movie == nil, ProcessInfo.processInfo.arguments.contains("-DebugFakeClip") {
+            finishProcessing(ProcessedClip(estimatedMM: 1200))
+            return
+        }
+        #endif
         let camera = settings.camera
         let processor = processor
         processingTask = Task { [weak self] in
@@ -595,16 +606,50 @@ final class AppState {
         // 파일은 Store로 옮겨졌으니 discard 대상이 아님
         self.draft = nil
         recordIndex = currentRecords.firstIndex { $0.id == record.id } ?? max(0, currentRecords.count - 1)
-        go(to: .memoryWall)
-        replayCount += 1
+        savedRecordID = record.id
+        go(to: .makeSaved)
         light.recording = .saved
         controller.setLight(light)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 
+    // MARK: Saved (M4)
+
+    var savedRecord: GrowthRecord? { savedRecordID.flatMap(store.record) }
+
+    /// "See Nora's growth": the memory wall on the record just saved.
+    func seeGrowth() {
+        guard route == .makeSaved else { return }
+        confirmThen { [weak self] in
+            guard let self else { return }
+            if let id = savedRecordID, let index = currentRecords.firstIndex(where: { $0.id == id }) {
+                recordIndex = index
+            }
+            go(to: .memoryWall)
+            replayCount += 1
+        }
+    }
+
+    /// "Measure someone else": back to the wheel.
+    func measureSomeoneElse() {
+        guard route == .makeSaved else { return }
+        go(to: .home)
+    }
+
+    /// Phone: dragging the dial sets the height directly.
+    func setDraftHeight(_ mm: Int) {
+        guard var draft, route == .makeHeight(.editing) else { return }
+        let clamped = min(max(mm, HeightFormatter.minMM), HeightFormatter.maxMM)
+        guard clamped != draft.heightMM else { return }
+        draft.heightMM = clamped
+        draft.fromEstimate = false
+        self.draft = draft
+    }
+
     // MARK: Memory wall (R2)
 
     func moveRecord(by steps: Int) {
+        showsLookbackHint = false
         let count = currentRecords.count
         guard count > 0 else { return }
         let next = min(max(recordIndex + steps, 0), count - 1)
@@ -875,7 +920,6 @@ final class AppState {
     private func updateLight() {
         var next = light
         switch route {
-        case .makeFilm(.countdown): next.recording = .countdown
         case .makeFilm(.filming), .makeHeight(.cuttingOut): next.recording = .steady
         default: next.recording = .off
         }

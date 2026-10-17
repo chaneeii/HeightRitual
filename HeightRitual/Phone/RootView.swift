@@ -77,9 +77,10 @@ private struct MainStack: View {
     @ViewBuilder private func destination(_ step: NavStep) -> some View {
         switch step {
         case .addMember: AddMemberScreen()
-        case .film: FilmView(film: state.filmState)
-        case .height: HeightView(height: state.heightState)
-        case .wall: MemoryWallView()
+        case .film: FilmScreen(film: state.filmState)
+        case .height: HeightScreen(height: state.heightState)
+        case .saved: SavedScreen()
+        case .wall: PlaybackScreen()
         case .record(let id): RecordDetailView(recordID: id)
         }
     }

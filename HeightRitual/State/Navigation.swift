@@ -6,6 +6,7 @@ enum NavStep: Hashable {
     case addMember               // A2
     case film                    // M2
     case height                  // M3
+    case saved                   // M4
     case wall                    // R2
     case record(UUID)            // R3
 }
@@ -25,6 +26,7 @@ extension AppState {
         switch route {
         case .makeFilm: return [.film]
         case .makeHeight: return [.film, .height]
+        case .makeSaved: return [.film, .height, .saved]
         default: return []
         }
     }

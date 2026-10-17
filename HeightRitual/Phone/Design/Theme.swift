@@ -23,6 +23,21 @@ enum Theme {
     static let hint = Color(white: 0x6B / 255)
     /// The text cursor in the name field.
     static let caret = Color.black
+    /// The outline to stand in and the foot marks, on the camera picture and the wall.
+    static let guide = Color(white: 0.88)
+    /// Record (the one coloured control: it films).
+    static let record = Color(red: 0.98, green: 0.24, blue: 0.27)
+    /// The bar that fills while filming.
+    static let progress = Color.black
+    static let progressTrack = Color(white: 0xCC / 255)
+    /// Behind the height dial.
+    static let dialBackground = Color(white: 0.985)
+    static let dialTick = Color(white: 0.45)
+    static let dialNeedle = Color.black
+    /// Secondary buttons (Retake, Measure someone else).
+    static let secondaryButton = Color(white: 0xF2 / 255)
+    /// Secondary buttons on the wall, white text.
+    static let wallSecondaryButton = Color(white: 0xB3 / 255)
     /// Delete on the letter wheel.
     static let destructive = Color(red: 0.90, green: 0.18, blue: 0.16)
     /// Save on the letter wheel, and a confirmed check.

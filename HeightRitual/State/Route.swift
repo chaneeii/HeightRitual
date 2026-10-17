@@ -2,7 +2,6 @@ import Foundation
 
 enum FilmState: Equatable {
     case ready
-    case countdown(Int)
     case filming(secondsLeft: Int)
 }
 
@@ -66,6 +65,7 @@ enum Route: Equatable {
     case addMember                // A2: name from the letter wheel
     case makeFilm(FilmState)      // M2
     case makeHeight(HeightState)  // M3
+    case makeSaved                // M4: saved, then growth or someone else
     case memoryWall               // R2
     case record(UUID)             // R3
     case memberEdit(UUID?)        // A1, nil = new member
@@ -75,7 +75,7 @@ enum Route: Equatable {
     /// The mode a route belongs to; nil for screens outside both modes.
     var mode: Mode? {
         switch self {
-        case .makeFilm, .makeHeight: return .make
+        case .makeFilm, .makeHeight, .makeSaved: return .make
         case .memoryWall, .record: return .memory
         default: return nil
         }
@@ -92,7 +92,7 @@ enum Route: Equatable {
     /// Countdown, filming and the height step hold work that is lost when going anywhere else.
     var holdsMakeSession: Bool {
         switch self {
-        case .makeFilm(.countdown), .makeFilm(.filming), .makeHeight: return true
+        case .makeFilm(.filming), .makeHeight: return true
         default: return false
         }
     }

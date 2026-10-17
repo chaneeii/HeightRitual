@@ -25,6 +25,14 @@ enum HeightFormatter {
         }
     }
 
+    /// A height as a large number and a small unit: ("121.0", "cm"); ft and in stay in one piece.
+    static func parts(_ mm: Int, unit: HeightUnit) -> (number: String, unit: String?) {
+        switch unit {
+        case .cm: return (String(format: "%.1f", Double(mm) / 10), "cm")
+        case .ftin: return (text(mm, unit: .ftin), nil)
+        }
+    }
+
     /// Growth between two records, "+5.0 cm" or "+2 in".
     static func difference(_ mm: Int, unit: HeightUnit) -> String {
         let sign = mm < 0 ? "-" : "+"

@@ -59,18 +59,16 @@ final class WallModelTests: XCTestCase {
         XCTAssertEqual(wall.kind, .footGuide)
         XCTAssertEqual(wall.guideMM, 1310, "last height plus 10 cm")
         h.state.handle(.record)
-        wall = h.state.wallModel
-        XCTAssertEqual(wall.kind, .dark)
-        XCTAssertEqual(wall.bigNumber, 3)
+        XCTAssertEqual(h.state.wallModel.kind, .footGuide, "the outline stays while filming")
     }
 
-    func testHeightLineFollowsTheNumber() {
+    func testHeightAndSavedShowTheScreen() {
         let h = Harness()
         h.openHeight(estimateMM: 1250)
-        XCTAssertEqual(h.state.wallModel.liveMM, 1250)
-        h.state.handle(.knob(1))
-        XCTAssertEqual(h.state.wallModel.liveMM, 1255)
-        XCTAssertEqual(h.state.wallModel.figure?.heightMM, 1255)
+        XCTAssertEqual(h.state.wallModel.kind, .screen)
+        h.state.handle(.confirm)
+        XCTAssertEqual(h.state.route, .makeSaved)
+        XCTAssertEqual(h.state.wallModel.kind, .screen)
     }
 
     func testFitToWallShowsRuler() {

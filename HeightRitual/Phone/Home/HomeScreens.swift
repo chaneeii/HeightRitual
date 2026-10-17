@@ -44,6 +44,10 @@ struct WallScreen: View {
             case .memberMenu:
                 HomeContent(surface: .wall)
                 MemberMenuOverlay(surface: .wall)
+            case .makeHeight(let height):
+                HeightContent(surface: .wall, height: height)
+            case .makeSaved:
+                SavedContent(surface: .wall)
             default:
                 HomeContent(surface: .wall)
             }

@@ -10,6 +10,8 @@ struct SettingsSheet: View {
         NavigationStack(path: Binding(get: { path }, set: { state.setSettingsPath($0) })) {
             SettingsList()
                 .navigationTitle("Settings")
+                .toolbarBackground(SettingsStyle.background, for: .navigationBar)
+                .toolbarColorScheme(.dark, for: .navigationBar)
                 .toolbar {
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Done") { state.dismissSettings() }
@@ -62,6 +64,14 @@ struct SettingsPageView: View {
     }
 }
 
+/// The settings list's dark blue-grey look. The same in light and dark appearance, so the list
+/// is always drawn with dark-appearance text and controls.
+enum SettingsStyle {
+    static let background = Color(red: 0.10, green: 0.13, blue: 0.18)
+    static let row = Color(red: 0.17, green: 0.21, blue: 0.28)
+    static let icon = Color(red: 0.56, green: 0.71, blue: 0.91)
+}
+
 private struct SettingsList: View {
     @Environment(AppState.self) private var state
     @State private var confirmSample = false
@@ -74,6 +84,7 @@ private struct SettingsList: View {
                 link(.family, "Family", detail: "Add, rename or remove the people you measure",
                      systemImage: "person.2", value: "\(state.store.members.count)")
             }
+            .listRowBackground(SettingsStyle.row)
             Section {
                 link(.fitToWall, "Fit to wall", detail: "Make projected centimetres match a tape measure",
                      systemImage: "ruler")
@@ -85,6 +96,7 @@ private struct SettingsList: View {
             } footer: {
                 Text("The first time, do these in order: fit to wall, then camera position. Without them heights on the wall are not true size.")
             }
+            .listRowBackground(SettingsStyle.row)
             Section {
                 Picker(selection: $settings.unit) {
                     Text("Centimetres").tag(HeightUnit.cm)
@@ -112,6 +124,7 @@ private struct SettingsList: View {
                 link(.permissions, "Permissions", detail: "Camera, Bluetooth and microphone",
                      systemImage: "hand.raised")
             }
+            .listRowBackground(SettingsStyle.row)
             Section {
                 Button {
                     confirmSample = true
@@ -132,7 +145,12 @@ private struct SettingsList: View {
             } footer: {
                 Text("Delete everything removes members, records and clips. Setup values are kept.")
             }
+            .listRowBackground(SettingsStyle.row)
         }
+        .scrollContentBackground(.hidden)
+        .background(SettingsStyle.background)
+        .tint(SettingsStyle.icon)
+        .environment(\.colorScheme, .dark)
         .confirmationDialog("Load the sample family?", isPresented: $confirmSample, titleVisibility: .visible) {
             Button("Replace with sample family", role: .destructive) { state.loadSampleFamily() }
         } message: {

@@ -16,6 +16,9 @@ struct WallModel: Equatable {
         case ruler
         /// S3: two bright lines at 0 and 100 cm for the camera position.
         case cameraLines
+        /// Home, the member menu and adding a member: the wall shows the screen itself
+        /// (`WallScreen`), driven by the controller.
+        case screen
     }
 
     struct Mark: Equatable {
@@ -104,18 +107,8 @@ extension AppState {
         case .settings:
             model.kind = .idle
 
-        case .makeWho, .memoryWho:
-            model.kind = .marks
-            let members = store.members
-            if members.indices.contains(highlight) {
-                let member = members[highlight]
-                model.accent = Palette.color(member.colorIndex)
-                model.headline = member.name
-                model.marks = marks(of: member.id, selecting: nil)
-            } else {
-                model.headline = members.isEmpty ? L("Add the first family member")
-                                                 : L("New family member")
-            }
+        case .home, .memberMenu, .addMember:
+            model.kind = .screen
 
         case .makeFilm(.ready):
             model.kind = .footGuide

@@ -101,10 +101,17 @@ struct Harness {
 
     var nora: Member { state.store.members[0] }
 
-    /// M1 -> Nora -> M2 ready.
-    func openFilm() {
-        state.handle(.mode(.make))
+    /// Confirm, then let the green check finish so the choice opens.
+    func confirm() {
         state.handle(.confirm)
+        scheduler.advance(AppState.confirmSeconds)
+    }
+
+    /// Home -> Nora -> member menu -> Record -> M2 ready.
+    func openFilm() {
+        confirm()
+        state.handle(.left)
+        confirm()
     }
 
     /// M2 -> countdown -> filming -> stop early -> M3 cutting out.
@@ -121,9 +128,10 @@ struct Harness {
         state.finishProcessing(ProcessedClip(estimatedMM: estimateMM))
     }
 
-    /// R1 -> Nora -> R2 manual, newest record selected.
+    /// Home -> Nora -> member menu -> Lookback -> R2 manual, newest record selected.
     func openMemoryWall() {
-        state.handle(.mode(.memory))
-        state.handle(.confirm)
+        confirm()
+        state.handle(.right)
+        confirm()
     }
 }

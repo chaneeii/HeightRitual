@@ -19,6 +19,7 @@ struct WallView: View {
             // The part of Left and right that moved the strip no longer moves the drawing in it.
             let model = { var m = state.wallModel; m.calibration.shiftPt -= offset; return m }()
             WallCanvas(model: model)
+                .overlay { if model.kind == .screen { WallScreen() } }
                 .overlay { WallClipOverlay(model: model, player: state.wallPlayer.player) }
                 .overlay {
                     // Layers (SPEC 10): wall, marks, clip. A clip with its background would hide
@@ -87,6 +88,7 @@ struct WallCanvas: View {
             case .footGuide: drawFootGuide(ctx, g)
             case .dark: drawNumber(ctx, g)
             case .cameraLines: drawCameraLines(ctx, g)
+            case .screen: ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Theme.paper))
             }
         }
     }

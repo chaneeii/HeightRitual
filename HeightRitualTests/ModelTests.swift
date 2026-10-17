@@ -53,9 +53,9 @@ final class ModelTests: XCTestCase {
 
         let first = Harness()
         first.state.store.addMember(name: "Ada")
-        first.state.handle(.mode(.make))
         first.state.handle(.knob(2))
-        first.state.handle(.confirm)
+        first.confirm()
+        first.confirm()
         first.state.handle(.record)
         first.scheduler.advance(3)
         first.state.handle(.record)

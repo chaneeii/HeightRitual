@@ -8,10 +8,16 @@ struct WizardView: View {
     @Environment(AppState.self) private var state
 
     var body: some View {
-        if step == .welcome {
-            WelcomeView()
-        } else {
-            setup
+        Group {
+            if step == .welcome {
+                WelcomeView()
+            } else {
+                setup
+            }
+        }
+        .overlay(alignment: .topTrailing) {
+            DebugWallButton()
+                .padding(.trailing, 8)
         }
     }
 

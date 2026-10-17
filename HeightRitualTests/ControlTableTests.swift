@@ -5,39 +5,106 @@ import XCTest
 @MainActor
 final class ControlTableTests: XCTestCase {
 
-    // Row: M1, R1 who is it? — knob and Left / Right move the highlight, Confirm opens.
-    func testWhoIsIt() {
+    // Row: H, the Home wheel — knob and Left / Right turn it, Confirm opens the card after the
+    // check has turned green. The Add card comes last.
+    func testHomeWheel() {
         let h = Harness()
         let s = h.state
 
-        s.handle(.mode(.make))
-        XCTAssertEqual(s.route, .makeWho)
-        XCTAssertEqual(s.whoTileCount, 3, "Nora, Leo and the + tile")
+        XCTAssertEqual(s.route, .home, "the app opens on Home")
+        XCTAssertEqual(s.homeCardCount, 3, "Nora, Leo and the Add card")
         s.handle(.knob(1))
         XCTAssertEqual(s.highlight, 1)
         s.handle(.knob(5))
-        XCTAssertEqual(s.highlight, 2, "stops at the + tile")
+        XCTAssertEqual(s.highlight, 2, "stops at the Add card")
+        XCTAssertTrue(s.highlightsAddCard)
         s.handle(.left)
         XCTAssertEqual(s.highlight, 1)
-        s.handle(.right)
-        s.handle(.confirm)
-        XCTAssertEqual(s.route, .memberEdit(nil), "Confirm on + opens A1")
-        s.handle(.cancel)
-        XCTAssertEqual(s.route, .makeWho)
         s.handle(.knob(-9))
         XCTAssertEqual(s.highlight, 0)
-        s.handle(.confirm)
-        XCTAssertEqual(s.route, .makeFilm(.ready))
-        XCTAssertEqual(s.currentMember, h.nora)
 
+        s.handle(.confirm)
+        XCTAssertTrue(s.confirmFlash, "the check turns green first")
+        XCTAssertEqual(s.route, .home)
+        s.handle(.right)
+        XCTAssertEqual(s.highlight, 0, "no turning while the choice opens")
+        h.scheduler.advance(AppState.confirmSeconds)
+        XCTAssertFalse(s.confirmFlash)
+        XCTAssertEqual(s.route, .memberMenu)
+        XCTAssertEqual(s.currentMember, h.nora)
+    }
+
+    // Row: H1, the member menu — Left / Right or the knob choose, Confirm opens, Cancel goes back.
+    func testMemberMenu() {
+        let h = Harness()
+        let s = h.state
+
+        h.confirm()
+        XCTAssertEqual(s.menuChoice, .record)
+        s.handle(.right)
+        XCTAssertEqual(s.menuChoice, .lookback)
+        s.handle(.knob(-1))
+        XCTAssertEqual(s.menuChoice, .record)
         s.handle(.mode(.memory))
-        XCTAssertEqual(s.route, .memoryWho)
-        XCTAssertEqual(s.whoTileCount, 2, "no + tile in Memory")
+        XCTAssertEqual(s.menuChoice, .lookback, "the mode switch preselects")
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .home)
+        XCTAssertEqual(s.highlight, 0, "the wheel keeps the member")
+
+        s.handle(.right)
+        h.confirm()
+        XCTAssertEqual(s.currentMember?.name, "Leo")
+        s.handle(.right)
+        h.confirm()
+        XCTAssertEqual(s.route, .memoryWall)
+        XCTAssertEqual(s.recordIndex, 3, "newest record selected")
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .memberMenu, "back from Lookback is the menu")
+        XCTAssertEqual(s.menuChoice, .lookback)
+
+        s.handle(.record)
+        h.scheduler.advance(AppState.confirmSeconds)
+        XCTAssertEqual(s.route, .makeFilm(.ready), "Record on the box goes straight to filming")
+    }
+
+    // Row: A2, add member — the letter wheel has no ends; Confirm presses the key in the middle.
+    func testAddMember() {
+        let h = Harness()
+        let s = h.state
+
+        s.handle(.knob(2))
+        h.confirm()
+        XCTAssertEqual(s.route, .addMember)
+        XCTAssertEqual(LetterKey.at(s.letterIndex), .letter("A"))
+        s.handle(.confirm)
         s.handle(.right)
         s.handle(.confirm)
-        XCTAssertEqual(s.route, .memoryWall)
-        XCTAssertEqual(s.currentMember?.name, "Leo")
-        XCTAssertEqual(s.recordIndex, 3, "newest record selected")
+        XCTAssertEqual(s.nameDraft, "AB")
+        s.handle(.knob(-3))
+        XCTAssertEqual(LetterKey.at(s.letterIndex), .delete)
+        s.handle(.confirm)
+        XCTAssertEqual(s.nameDraft, "A")
+        s.handle(.left)
+        XCTAssertEqual(LetterKey.at(s.letterIndex), .letter("Z"), "past Delete comes Z")
+        s.handle(.confirm)
+        s.handle(.knob(2))
+        XCTAssertEqual(LetterKey.at(s.letterIndex), .save)
+        h.confirm()
+        XCTAssertEqual(s.route, .home)
+        XCTAssertEqual(s.store.members.last?.name, "Az")
+        XCTAssertEqual(s.highlight, 2, "the new member is in the middle")
+
+        s.handle(.knob(5))
+        h.confirm()
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .home, "Cancel leaves without saving")
+        XCTAssertEqual(s.store.members.count, 3)
+
+        s.openTile(3)
+        h.scheduler.advance(AppState.confirmSeconds)
+        s.handle(.knob(-1))
+        h.confirm()
+        XCTAssertEqual(s.route, .addMember, "Save with no letters does nothing")
     }
 
     // Row: M2 film: ready — Confirm or Record starts the countdown, Cancel goes back to M1.
@@ -57,7 +124,7 @@ final class ControlTableTests: XCTestCase {
         s.handle(.cancel)
         XCTAssertEqual(s.route, .makeFilm(.ready))
         s.handle(.cancel)
-        XCTAssertEqual(s.route, .makeWho)
+        XCTAssertEqual(s.route, .memberMenu)
         XCTAssertFalse(h.camera.previewing)
     }
 
@@ -178,11 +245,11 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.route, .memoryWall)
 
         s.handle(.cancel)
-        XCTAssertEqual(s.route, .memoryWho)
+        XCTAssertEqual(s.route, .memberMenu)
 
-        s.handle(.confirm)
+        h.confirm()
         s.handle(.record)
-        XCTAssertEqual(s.route, .memoryWall, "no filming from Memory; only Make films")
+        XCTAssertEqual(s.route, .memoryWall, "no filming from Lookback")
         XCTAssertEqual(s.mode, .memory)
 
         h.openMemoryWall()
@@ -263,41 +330,28 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.route, .wizard(.cameraPosition), "Done in the wizard moves to the next step")
     }
 
-    // Line under the table: the mode switch on every screen.
-    func testModeSwitch() {
+    // Leaving Make with an unsaved clip discards it and says so for two seconds.
+    func testLeavingMakeDiscards() {
         let h = Harness()
         let s = h.state
 
-        XCTAssertEqual(s.route, .memoryWho, "the app opens on Memory, R1")
-        XCTAssertEqual(s.mode, .memory)
-        s.handle(.mode(.memory))
-        XCTAssertEqual(s.route, .memoryWho)
         s.handle(.mode(.make))
-        XCTAssertEqual(s.route, .makeWho)
+        XCTAssertEqual(s.route, .home, "the mode switch never moves away from Home")
 
-        s.handle(.confirm)
-        s.handle(.mode(.make))
-        XCTAssertEqual(s.route, .makeFilm(.ready), "the same position again, as sent on reconnect, is ignored")
-
-        s.openSettings()
-        s.handle(.mode(.memory))
-        XCTAssertEqual(s.route, .memoryWho, "works from Settings too")
-
-        // Leaving Make with an unsaved clip discards it and says so for two seconds.
         h.openHeight()
         XCTAssertNotNil(s.draft)
-        s.handle(.mode(.memory))
-        XCTAssertEqual(s.route, .memoryWho)
+        s.openSettings()
         XCTAssertNil(s.draft)
         XCTAssertEqual(s.notice, "Not saved")
         h.scheduler.advance(2)
         XCTAssertNil(s.notice)
+        s.leaveSettings()
+        XCTAssertEqual(s.route, .makeFilm(.ready))
 
         // Leaving from filming also discards.
-        h.openFilm()
         s.handle(.record)
         h.scheduler.advance(4)
-        s.handle(.mode(.memory))
+        s.openSettings()
         XCTAssertFalse(h.camera.recording)
         XCTAssertEqual(s.notice, "Not saved")
     }

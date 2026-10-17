@@ -51,6 +51,9 @@ struct ScreenChrome: ViewModifier {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
+                    DebugWallButton()
+                }
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         state.openSettings()
                     } label: {

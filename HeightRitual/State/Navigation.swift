@@ -3,6 +3,7 @@ import Foundation
 /// One pushed screen in a NavigationStack. The stacks are drawn from the route, so the system
 /// back button and swipe stay in step with the controller.
 enum NavStep: Hashable {
+    case addMember               // A2
     case film                    // M2
     case height                  // M3
     case wall                    // R2
@@ -64,8 +65,10 @@ extension AppState {
         return false
     }
 
-    /// The one stack above the tabs: Make's or Memory's screens, whichever the route is in.
-    var navigationPath: [NavStep] { makePath + memoryPath }
+    /// The one stack above Home: adding a member, or the screens of Record or Lookback.
+    var navigationPath: [NavStep] {
+        route == .addMember ? [.addMember] : makePath + memoryPath
+    }
 
     /// The height step's state shown on M3.
     var heightState: HeightState {

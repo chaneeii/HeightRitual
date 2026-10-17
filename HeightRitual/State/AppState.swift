@@ -52,12 +52,27 @@ final class AppState {
     static let filmSeconds = 5
     /// How long auto play shows a record without a clip (sample records).
     static let stillSeconds = 1.5
+    /// How long the check stays green before a confirmed choice opens.
+    static let confirmSeconds = 0.35
+    static let maxNameLength = 12
 
-    private(set) var route: Route = .memoryWho
-    /// Nil on Home before a mode has been chosen.
+    private(set) var route: Route = .home
+    /// Make while filming, Memory while looking back; nil on Home.
     private(set) var mode: Mode?
-    /// Highlighted tile on M1 and R1. On M1 the index after the last member is the + tile.
+    /// The card in the middle of the Home wheel. The index after the last member is the Add card.
     private(set) var highlight = 0
+    /// The highlighted choice on the member menu.
+    private(set) var menuChoice: MemberAction = .record
+    /// The name being built on the add-member screen, in capitals as picked.
+    private(set) var nameDraft = ""
+    /// Position on the letter wheel; any integer, read through `LetterKey.at(_:)`.
+    private(set) var letterIndex = LetterKey.startIndex
+    /// True for a moment after Confirm while the check turns green; the chosen action follows.
+    private(set) var confirmFlash = false
+    /// Goes up on every Confirm, so screens can play a press animation.
+    private(set) var confirmCount = 0
+    /// Debug builds: the phone shows the wall picture instead of its own screens.
+    var debugShowsWall = false
     private(set) var memberID: UUID?
     private(set) var recordIndex = 0
     private(set) var isAutoPlaying = false
@@ -87,8 +102,8 @@ final class AppState {
     @ObservationIgnored private var timer: ScheduledTask?
     @ObservationIgnored private var noticeTimer: ScheduledTask?
     @ObservationIgnored private var processingTask: Task<Void, Never>?
-    @ObservationIgnored private(set) var settingsReturn: Route = .memoryWho
-    @ObservationIgnored private(set) var memberEditReturn: Route = .memoryWho
+    @ObservationIgnored private(set) var settingsReturn: Route = .home
+    @ObservationIgnored private(set) var memberEditReturn: Route = .home
 
     init(store: Store, settings: SettingsStore, camera: CameraProviding, processor: ClipProcessing,
          controller: ControllerLink, scheduler: Scheduling) {
@@ -100,8 +115,7 @@ final class AppState {
         self.scheduler = scheduler
         // 첫 실행: 셋업 마법사부터 (SPEC 5, W)
         if settings.wizardDone {
-            route = .memoryWho
-            mode = .memory
+            route = .home
         } else {
             route = .wizard(.welcome)
         }
@@ -141,9 +155,15 @@ final class AppState {
         currentRecords.indices.contains(recordIndex) ? currentRecords[recordIndex] : nil
     }
 
-    /// Number of tiles on the who grid: members, plus the + tile in Make.
-    var whoTileCount: Int {
-        store.members.count + (route == .makeWho ? 1 : 0)
+    /// Cards on the Home wheel: every member, then the Add card.
+    var homeCardCount: Int { store.members.count + 1 }
+
+    /// The highlighted Home card is the Add card.
+    var highlightsAddCard: Bool { highlight >= store.members.count }
+
+    /// The member on the highlighted Home card.
+    var highlightedMember: Member? {
+        store.members.indices.contains(highlight) ? store.members[highlight] : nil
     }
 
     var showsEstimateNote: Bool { draft?.fromEstimate == true }
@@ -159,8 +179,12 @@ final class AppState {
             return
         }
         switch route {
-        case .makeWho, .memoryWho:
-            handleWho(event)
+        case .home:
+            handleHome(event)
+        case .memberMenu:
+            handleMenu(event)
+        case .addMember:
+            handleAddMember(event)
         case .makeFilm(let state):
             handleFilm(event, state)
         case .makeHeight(let state):
@@ -180,14 +204,15 @@ final class AppState {
         }
     }
 
-    /// The slide switch, or a tab on the phone. A position equal to the current mode is ignored,
-    /// so the switch report sent on every reconnect does not move the user away from their screen.
+    /// The slide switch. Members come first now, so it only preselects Record (Make) or Lookback
+    /// (Memory) on the member menu; it never moves the user away from their screen.
     private func switchMode(to next: Mode) {
-        guard next != mode else { return }
-        go(to: next == .make ? .makeWho : .memoryWho)
+        guard route == .memberMenu else { return }
+        menuChoice = next == .make ? .record : .lookback
     }
 
-    private func handleWho(_ event: ControlEvent) {
+    private func handleHome(_ event: ControlEvent) {
+        guard !confirmFlash else { return }
         switch event {
         case .knob(let steps): moveHighlight(by: steps)
         case .left: moveHighlight(by: -1)
@@ -197,12 +222,51 @@ final class AppState {
         }
     }
 
+    private func handleMenu(_ event: ControlEvent) {
+        guard !confirmFlash else { return }
+        switch event {
+        case .knob(let steps): menuChoice = steps < 0 ? .record : .lookback
+        case .left: menuChoice = .record
+        case .right: menuChoice = .lookback
+        case .confirm: chooseMenu(menuChoice)
+        case .cancel: go(to: .home)
+        case .record: chooseMenu(.record)
+        default: break
+        }
+    }
+
+    private func handleAddMember(_ event: ControlEvent) {
+        guard !confirmFlash else { return }
+        switch event {
+        case .knob(let steps): moveLetter(by: steps)
+        case .left: moveLetter(by: -1)
+        case .right: moveLetter(by: 1)
+        case .confirm: pressLetterKey()
+        case .cancel: go(to: .home)
+        default: break
+        }
+    }
+
+    /// Confirm on the wall: the check turns green, then the choice opens.
+    private func confirmThen(_ action: @escaping @MainActor () -> Void) {
+        guard !confirmFlash else { return }
+        confirmCount += 1
+        confirmFlash = true
+        timer?.cancel()
+        timer = scheduler.after(Self.confirmSeconds) { [weak self] in
+            guard let self else { return }
+            confirmFlash = false
+            action()
+        }
+    }
+
     private func handleFilm(_ event: ControlEvent, _ state: FilmState) {
         switch (state, event) {
         case (.ready, .confirm), (.ready, .record):
             startCountdown()
         case (.ready, .cancel):
-            go(to: .makeWho)
+            menuChoice = .record
+            go(to: .memberMenu)
         case (.countdown, .cancel), (.countdown, .record):
             // Stopping before filming started leaves nothing to keep.
             go(to: .makeFilm(.ready))
@@ -240,7 +304,9 @@ final class AppState {
         case .left: moveRecord(by: -1)
         case .right: moveRecord(by: 1)
         case .confirm: replayCount += 1
-        case .cancel: go(to: .memoryWho)
+        case .cancel:
+            menuChoice = .lookback
+            go(to: .memberMenu)
         case .autoPlayToggle: startAutoPlay()
         // 녹화는 Make 모드에서만 — 모드 스위치와 화면이 어긋나지 않게
         case .record, .mode: break
@@ -285,11 +351,9 @@ final class AppState {
         let onWall: (Route) -> Bool = { if case .record = $0 { return true }; return $0 == .memoryWall }
         if onWall(previous) && !onWall(next) { wallPlayer.stop() }
 
-        switch next {
-        case .makeWho, .memoryWho:
-            highlight = memberID.flatMap { id in store.members.firstIndex { $0.id == id } } ?? 0
-        default:
-            break
+        if next == .home {
+            highlight = memberID.flatMap { id in store.members.firstIndex { $0.id == id } }
+                ?? min(highlight, store.members.count)
         }
 
         if next.usesCamera && !previous.usesCamera { camera.startPreview() }
@@ -300,34 +364,102 @@ final class AppState {
         updateLight()
     }
 
-    // MARK: Who is it? (M1, R1)
+    // MARK: Home (H) and the member menu (H1)
 
     func moveHighlight(by steps: Int) {
-        let count = whoTileCount
-        guard count > 0 else { return }
-        highlight = min(max(highlight + steps, 0), count - 1)
+        highlight = min(max(highlight + steps, 0), homeCardCount - 1)
     }
 
-    /// Tapping a tile on the phone: highlight it, then open it.
+    /// Tapping a card on the phone: bring it to the middle, then open it.
     func openTile(_ index: Int) {
+        guard (0..<homeCardCount).contains(index) else { return }
         highlight = index
         openHighlighted()
     }
 
     private func openHighlighted() {
-        let members = store.members
-        if route == .makeWho && highlight == members.count {
-            openMemberEdit(nil)
+        if highlightsAddCard {
+            confirmThen { [weak self] in self?.openAddMember() }
             return
         }
-        guard members.indices.contains(highlight) else { return }
-        memberID = members[highlight].id
-        if route == .makeWho {
-            go(to: .makeFilm(.ready))
-        } else {
-            recordIndex = max(0, currentRecords.count - 1)
-            go(to: .memoryWall)
-            if settings.autoPlay { startAutoPlay() }
+        guard let member = highlightedMember else { return }
+        confirmThen { [weak self] in
+            guard let self else { return }
+            memberID = member.id
+            menuChoice = .record
+            go(to: .memberMenu)
+        }
+    }
+
+    /// Record or Lookback for the chosen member (Confirm, or a tap on the phone).
+    func chooseMenu(_ action: MemberAction) {
+        guard route == .memberMenu, currentMember != nil else { return }
+        menuChoice = action
+        confirmThen { [weak self] in
+            guard let self else { return }
+            switch action {
+            case .record:
+                go(to: .makeFilm(.ready))
+            case .lookback:
+                recordIndex = max(0, currentRecords.count - 1)
+                go(to: .memoryWall)
+                if settings.autoPlay { startAutoPlay() }
+            }
+        }
+    }
+
+    /// The phone's way of moving the menu highlight without confirming.
+    func highlightMenu(_ action: MemberAction) {
+        guard route == .memberMenu else { return }
+        menuChoice = action
+    }
+
+    func closeMemberMenu() {
+        guard route == .memberMenu else { return }
+        go(to: .home)
+    }
+
+    // MARK: Add member (A2)
+
+    func openAddMember() {
+        nameDraft = ""
+        letterIndex = LetterKey.startIndex
+        go(to: .addMember)
+    }
+
+    func moveLetter(by steps: Int) {
+        letterIndex += steps
+    }
+
+    /// Confirm on the letter wheel: add the letter, remove the last one, or save.
+    func pressLetterKey() {
+        guard route == .addMember else { return }
+        confirmCount += 1
+        switch LetterKey.at(letterIndex) {
+        case .letter(let character):
+            if nameDraft.count < Self.maxNameLength { nameDraft.append(character) }
+        case .delete:
+            if !nameDraft.isEmpty { nameDraft.removeLast() }
+        case .save:
+            saveNewMember()
+        }
+    }
+
+    /// Tapping a key on the phone: bring it to the middle and press it.
+    func tapLetterKey(at index: Int) {
+        letterIndex = index
+        pressLetterKey()
+    }
+
+    private func saveNewMember() {
+        let name = nameDraft.capitalized
+        guard !name.isEmpty else { return }
+        confirmCount -= 1   // confirmThen counts this press
+        confirmThen { [weak self] in
+            guard let self else { return }
+            if let member = store.addMember(name: name) { memberID = member.id }
+            nameDraft = ""
+            go(to: .home)
         }
     }
 
@@ -639,11 +771,11 @@ final class AppState {
     private func validated(_ target: Route) -> Route {
         switch target {
         case .makeFilm, .makeHeight:
-            return currentMember == nil ? .makeWho : .makeFilm(.ready)
-        case .memoryWall:
-            return currentMember == nil ? .memoryWho : .memoryWall
+            return currentMember == nil ? .home : .makeFilm(.ready)
+        case .memoryWall, .memberMenu:
+            return currentMember == nil ? .home : target
         case .record(let id):
-            return store.record(id) == nil ? (currentMember == nil ? .memoryWho : .memoryWall) : target
+            return store.record(id) == nil ? (currentMember == nil ? .home : .memoryWall) : target
         case .memberEdit(let id?):
             return store.member(id) == nil ? .settings(.family) : target
         default:
@@ -723,7 +855,7 @@ final class AppState {
     /// "Set up later" on the welcome pages: setup stays reachable from the banner and Settings.
     func skipWizard() {
         settings.wizardDone = true
-        go(to: .memoryWho)
+        go(to: .home)
     }
 
     /// Next and Skip both move on; every step can be reopened from Settings.
@@ -734,7 +866,7 @@ final class AppState {
             go(to: .wizard(next))
         } else {
             settings.wizardDone = true
-            go(to: .memoryWho)
+            go(to: .home)
         }
     }
 

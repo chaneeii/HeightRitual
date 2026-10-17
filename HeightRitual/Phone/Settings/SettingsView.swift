@@ -13,6 +13,9 @@ struct SettingsSheet: View {
                 .toolbarBackground(SettingsStyle.background, for: .navigationBar)
                 .toolbarColorScheme(.dark, for: .navigationBar)
                 .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        DebugWallButton(color: .white)
+                    }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Done") { state.dismissSettings() }
                     }
@@ -25,6 +28,12 @@ struct SettingsSheet: View {
                         MemberEditView(memberID: id, inSheet: false)
                     }
                 }
+        }
+        .overlay {
+            #if DEBUG
+            // The sheet covers the root view's preview, so it shows its own.
+            if state.debugShowsWall { DebugWallPreview() }
+            #endif
         }
     }
 }

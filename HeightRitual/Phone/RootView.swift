@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Phone screen. The Make / Memory tab bar is Home (SPEC 4); each tab is a NavigationStack drawn
-/// from `AppState.route`. Settings and A1 are sheets. The first-start wizard covers everything.
+/// Phone screen. Home is the wheel of members; one NavigationStack drawn from `AppState.route`
+/// pushes adding a member, Record and Lookback above it. Settings and A1 are sheets. The
+/// first-start wizard covers everything. Debug builds can show the wall picture instead.
 struct RootView: View {
     @Environment(AppState.self) private var state
 
@@ -10,8 +11,13 @@ struct RootView: View {
             if case .wizard(let step) = state.route {
                 WizardView(step: step)
             } else {
-                MainTabs()
+                MainStack()
             }
+        }
+        .overlay {
+            #if DEBUG
+            if state.debugShowsWall { DebugWallPreview() }
+            #endif
         }
         .overlay(alignment: .top) {
             if let notice = state.notice {
@@ -37,40 +43,24 @@ struct RootView: View {
     }
 }
 
-/// One NavigationStack around the Make / Memory TabView: screens pushed from either tab cover the
-/// whole TabView, tab bar included, and popping brings it back. No tab bar hiding is needed, so it
-/// cannot get stuck hidden (as it did with a stack per tab on iOS 26).
-private struct MainTabs: View {
+/// One NavigationStack above Home. Pushed screens cover Home completely and popping brings it back.
+private struct MainStack: View {
     @Environment(AppState.self) private var state
 
     var body: some View {
         // Read here, in body, so Observation re-renders this view whenever they change. Values read
         // only inside a Binding's closure are not tracked: the route could move on while the stack
-        // stayed put (a push lost, the tab bar left hidden), until something else redrew the view.
+        // stayed put, until something else redrew the view.
         let path = state.navigationPath
-        let selectedTab = state.mode ?? .memory
         let showsSettings = state.showsSettings
         let showsMemberSheet = state.showsMemberSheet
 
         NavigationStack(path: Binding(get: { path },
                                       set: { state.popped(path.count - $0.count) })) {
-            TabView(selection: Binding(get: { selectedTab },
-                                       set: { state.handle(.mode($0)) })) {
-                MemberGridView(mode: .make)
-                    .tabItem { Label("Make", systemImage: "record.circle") }
-                    .tag(Mode.make)
-                MemberGridView(mode: .memory)
-                    .tabItem { Label("Memory", systemImage: "clock.arrow.circlepath") }
-                    .tag(Mode.memory)
-            }
-            // The tabs draw their own large titles (a shared title flickered when switching tabs);
-            // the bar keeps only the Settings button.
-            .navigationTitle("")
-            .navigationBarTitleDisplayMode(.inline)
-            .screenChrome(statusInContent: true)
-            .navigationDestination(for: NavStep.self) { step in
-                destination(step)
-            }
+            HomeScreen()
+                .navigationDestination(for: NavStep.self) { step in
+                    destination(step)
+                }
         }
         .sheet(isPresented: Binding(get: { showsSettings },
                                     set: { if !$0 { state.dismissSettings() } })) {
@@ -86,6 +76,7 @@ private struct MainTabs: View {
 
     @ViewBuilder private func destination(_ step: NavStep) -> some View {
         switch step {
+        case .addMember: AddMemberScreen()
         case .film: FilmView(film: state.filmState)
         case .height: HeightView(height: state.heightState)
         case .wall: MemoryWallView()
@@ -98,3 +89,51 @@ private struct MainTabs: View {
         return nil
     }
 }
+
+#if DEBUG
+/// Debug builds: the wall picture on the phone, with the controller's buttons underneath so the
+/// wall's screens can be driven without the box.
+struct DebugWallPreview: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text(verbatim: "Wall preview")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.7))
+                Spacer()
+                DebugWallButton(color: .white)
+            }
+            .padding(.horizontal, 12)
+
+            WallView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            HStack(spacing: 18) {
+                pad(.back, "Back") { state.handle(.cancel) }
+                pad(.left, "Left") { state.handle(.left) }
+                pad(.confirm, "Confirm") { state.handle(.confirm) }
+                pad(.right, "Right") { state.handle(.right) }
+                Button { state.handle(.record) } label: {
+                    Image(systemName: "record.circle").font(.system(size: 34)).foregroundStyle(.red)
+                }
+                .buttonStyle(PressStyle())
+            }
+            .padding(.vertical, 10)
+        }
+        .padding(.top, 50)
+        .padding(.bottom, 20)
+        .background(Color.black)
+        .ignoresSafeArea()
+    }
+
+    private func pad(_ glyph: ControlIcon.Glyph, _ name: String, _ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            ControlIcon(glyph: glyph, size: 44).foregroundStyle(.white)
+        }
+        .buttonStyle(PressStyle())
+        .accessibilityLabel(Text(verbatim: "Debug pad \(name)"))
+    }
+}
+#endif

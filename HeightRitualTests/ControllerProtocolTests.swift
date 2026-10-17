@@ -33,8 +33,8 @@ final class ControllerProtocolTests: XCTestCase {
 
     func testControllerEventsGoThroughHandle() {
         let h = Harness()
-        h.controller.onEvent?(.mode(.memory))
-        XCTAssertEqual(h.state.route, .memoryWho)
+        h.controller.onEvent?(.knob(1))
+        XCTAssertEqual(h.state.highlight, 1)
     }
 
     func testLight() {

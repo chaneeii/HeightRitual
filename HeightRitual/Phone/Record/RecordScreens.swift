@@ -116,7 +116,7 @@ struct WallFilmOverlay: View {
 // MARK: M3 height (Figma 223:838, 223:2071)
 
 /// Checking the height: the clip (or the outline at the dial's height), the dial, Retake and Save.
-/// Knob: 0.5 cm a step, Left / Right: 1 cm; on the phone the dial is dragged.
+/// Knob: 0.1 cm a step, Left / Right: 1 cm; on the phone the dial is dragged.
 struct HeightContent: View {
     let surface: Surface
     let height: HeightState

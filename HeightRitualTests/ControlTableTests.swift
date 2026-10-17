@@ -180,7 +180,7 @@ final class ControlTableTests: XCTestCase {
         XCTAssertNil(s.draft)
     }
 
-    // Row: M3 height — knob +/- 0.5 cm, Left / Right -/+ 1 cm, Confirm saves, Cancel retakes.
+    // Row: M3 height — knob +/- 0.1 cm, Left / Right -/+ 1 cm, Confirm saves, Cancel retakes.
     func testHeight() {
         let h = Harness()
         let s = h.state
@@ -192,9 +192,9 @@ final class ControlTableTests: XCTestCase {
         XCTAssertTrue(s.showsEstimateNote)
 
         s.handle(.knob(1))
-        XCTAssertEqual(s.draft?.heightMM, 1230)
+        XCTAssertEqual(s.draft?.heightMM, 1226, "0.1 cm a knob step")
         XCTAssertFalse(s.showsEstimateNote, "a changed field shows no note")
-        s.handle(.knob(-3))
+        s.handle(.knob(-11))
         XCTAssertEqual(s.draft?.heightMM, 1215)
         s.handle(.right)
         XCTAssertEqual(s.draft?.heightMM, 1225)
@@ -210,7 +210,7 @@ final class ControlTableTests: XCTestCase {
         h.scheduler.advance(1)
         s.handle(.record)
         s.finishProcessing(ProcessedClip(estimatedMM: 1225))
-        s.handle(.knob(2))
+        s.handle(.knob(10))
         s.handle(.confirm)
         let records = s.store.records(for: h.nora.id)
         XCTAssertEqual(records.count, before + 1)
@@ -385,7 +385,7 @@ final class ControlTableTests: XCTestCase {
         s.handle(.right)
         s.handle(.right)
         s.handle(.right)
-        s.handle(.knob(1))
+        s.handle(.knob(5))
         XCTAssertEqual(s.tutorialMM, 1245)
         h.confirm()
         XCTAssertEqual(s.route, .tutorial(.saved))

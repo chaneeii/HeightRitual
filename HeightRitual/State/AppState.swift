@@ -305,7 +305,7 @@ final class AppState {
         case (.cuttingOut, .cancel):
             go(to: .makeFilm(.ready))
         case (.editing, .knob(let steps)):
-            adjustDraft(by: steps, coarse: false)
+            adjustDraft(by: steps, coarse: false, fineMM: 1)
         case (.editing, .left):
             adjustDraft(by: -1, coarse: true)
         case (.editing, .right):
@@ -600,10 +600,10 @@ final class AppState {
 
     // MARK: Height (M3)
 
-    private func adjustDraft(by steps: Int, coarse: Bool) {
+    private func adjustDraft(by steps: Int, coarse: Bool, fineMM: Int = 5) {
         guard var draft else { return }
         let base = draft.heightMM ?? HeightFormatter.emptyFieldStartMM
-        draft.heightMM = HeightFormatter.step(base, by: steps, unit: settings.unit, coarse: coarse)
+        draft.heightMM = HeightFormatter.step(base, by: steps, unit: settings.unit, coarse: coarse, fineMM: fineMM)
         draft.fromEstimate = false
         self.draft = draft
     }
@@ -996,7 +996,7 @@ final class AppState {
             if event == .confirm && tutorialFilmLeft == nil { tutorialFilmTick(Self.filmSeconds) }
         case .height:
             switch event {
-            case .knob(let steps): tutorialMM = HeightFormatter.step(tutorialMM, by: steps, unit: settings.unit, coarse: false)
+            case .knob(let steps): tutorialMM = HeightFormatter.step(tutorialMM, by: steps, unit: settings.unit, coarse: false, fineMM: 1)
             case .left: tutorialMM = HeightFormatter.step(tutorialMM, by: -1, unit: settings.unit, coarse: true)
             case .right: tutorialMM = HeightFormatter.step(tutorialMM, by: 1, unit: settings.unit, coarse: true)
             case .confirm: confirmThen { [weak self] in self?.saveTutorialRecord() }

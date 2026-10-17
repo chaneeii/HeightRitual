@@ -167,7 +167,7 @@ struct TutorialContent: View {
         case .film:
             if let left = state.tutorialFilmLeft { return Text("Hold still… \(left)") }
             return Text("Press \(inlineIcon(.confirm, size: s)) to film")
-        case .height: return Text("Knob \(inlineIcon(.knob, size: s)) 0.5 cm, \(inlineIcon(.left, size: s)) \(inlineIcon(.right, size: s)) 1 cm,\nthen \(inlineIcon(.confirm, size: s)) to save")
+        case .height: return Text("Knob \(inlineIcon(.knob, size: s)) 0.1 cm, \(inlineIcon(.left, size: s)) \(inlineIcon(.right, size: s)) 1 cm,\nthen \(inlineIcon(.confirm, size: s)) to save")
         case .saved: return Text("Press \(inlineIcon(.back, size: s)) to go back")
         case .lookback: return Text("Turn the knob to step through the years,\nthen press \(inlineIcon(.confirm, size: s))")
         case .ready: return Text("")

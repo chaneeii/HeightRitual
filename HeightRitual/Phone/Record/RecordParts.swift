@@ -112,19 +112,19 @@ struct HeightDial: View, Animatable {
             arc.addArc(center: center, radius: radius, startAngle: .degrees(-180), endAngle: .degrees(0), clockwise: false)
             ctx.stroke(arc, with: .color(Theme.dialTick.opacity(0.18)), lineWidth: 1.5 * k)
 
-            // Ticks every half centimetre, numbers on whole ones.
-            let first = Int((valueCM - 7).rounded(.down) * 2), last = Int((valueCM + 7).rounded(.up) * 2)
-            for half in first...last {
-                let cm = Double(half) / 2
+            // Ticks every millimetre, longer at half and whole centimetres, numbers on whole ones.
+            let first = Int(((valueCM - 7) * 10).rounded(.down)), last = Int(((valueCM + 7) * 10).rounded(.up))
+            for tenth in first...last {
+                let cm = Double(tenth) / 10
                 let degrees = (cm - valueCM) * Self.degreesPerCM
                 guard abs(degrees) < 82 else { continue }
-                let whole = half % 2 == 0
+                let whole = tenth % 10 == 0, half = tenth % 5 == 0
                 let fade = 1 - abs(degrees) / 95
                 var tick = Path()
                 tick.move(to: point(degrees, radius + 8 * k))
-                tick.addLine(to: point(degrees, radius + (whole ? 30 : 19) * k))
-                ctx.stroke(tick, with: .color(Theme.dialTick.opacity(fade)),
-                           style: StrokeStyle(lineWidth: (whole ? 2.2 : 1.6) * k, lineCap: .round))
+                tick.addLine(to: point(degrees, radius + (whole ? 30 : half ? 19 : 13) * k))
+                ctx.stroke(tick, with: .color(Theme.dialTick.opacity(fade * (whole || half ? 1 : 0.55))),
+                           style: StrokeStyle(lineWidth: (whole ? 2.2 : half ? 1.6 : 1) * k, lineCap: .round))
                 if whole {
                     let near = abs(cm - valueCM) < 0.5
                     let label = Text(verbatim: "\(Int(cm))")

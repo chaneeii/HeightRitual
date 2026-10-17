@@ -16,6 +16,7 @@ final class ModelTests: XCTestCase {
 
     func testHeightStepsAndLimits() {
         XCTAssertEqual(HeightFormatter.step(1212, by: 1, unit: .cm, coarse: false), 1215, "snaps to 0.5 cm")
+        XCTAssertEqual(HeightFormatter.step(1212, by: 1, unit: .cm, coarse: false, fineMM: 1), 1213, "the knob: 0.1 cm")
         XCTAssertEqual(HeightFormatter.step(1210, by: -1, unit: .cm, coarse: true), 1200)
         XCTAssertEqual(HeightFormatter.step(405, by: -3, unit: .cm, coarse: true), 400)
         XCTAssertEqual(HeightFormatter.step(2195, by: 5, unit: .cm, coarse: false), 2200)

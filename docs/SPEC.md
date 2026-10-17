@@ -456,3 +456,5 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
     wall, with the controller drawn underneath and only the controls of that step in colour (the
     drawing can be tapped like the box). The name picked becomes a member, the dial's height its
     first record; the last step opens Home on that member. Back is a step back throughout.
+  - On the height check the knob steps 0.1 cm (Left / Right stay 1 cm); the dial has a tick per
+    millimetre (17 Oct).

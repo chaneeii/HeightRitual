@@ -108,7 +108,7 @@ done without a device run by the user.
 
 | # | Where | Risk | If it fails |
 |---|---|---|---|
-| 1 | External scene | With the SwiftUI lifecycle the plist entry alone may not be picked up; the projector would mirror the phone | Add `UIApplicationDelegateAdaptor` and return the configuration in `application(_:configurationForConnecting:options:)` |
+| 1 | External scene | With the SwiftUI lifecycle the plist entry alone may not be picked up; the projector would mirror the phone | Add `UIApplicationDelegateAdaptor` and return the configuration in `application(_:configurationForConnecting:options:)`. Done; on an iPhone 12 with a Lightning HDMI adapter it still mirrored, because iOS 27 apps built with the iOS 27 SDK need a SwiftUI scene accessory (`ExternalNonInteractiveAccessory`, as in TimeCapsule). Added in `HeightRitualApp`, with `UIApplicationSupportsMultipleScenes` true (not yet retested) |
 | 2 | Alpha video | `AVPlayerLayer` may not composite transparent HEVC over the wall drawing | Render frames through `AVPlayerItemVideoOutput` into a Core Image backed view |
 | 3 | Two layers, one player | The phone copy and the wall may not both play | Phone shows the poster and a progress bar only |
 | 4 | Cut-out time | 150 frames of `.accurate` segmentation may take too long | `.balanced`, 15 fps, or shorter clips |

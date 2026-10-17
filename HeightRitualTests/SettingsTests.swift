@@ -20,10 +20,10 @@ final class SettingsTests: XCTestCase {
     func testOnItsSideTurnsTheWallImage() {
         let h = Harness()
         h.state.setProjectorOnItsSide(true)
-        XCTAssertEqual(h.state.settings.wall.rotation, 90)
-        h.state.settings.wall.rotation = -90
+        XCTAssertEqual(h.state.settings.wall.rotation, -90)
+        h.state.settings.wall.rotation = 90
         h.state.setProjectorOnItsSide(true)
-        XCTAssertEqual(h.state.settings.wall.rotation, -90, "a chosen direction is kept")
+        XCTAssertEqual(h.state.settings.wall.rotation, 90, "a chosen direction is kept")
         h.state.setProjectorOnItsSide(false)
         XCTAssertEqual(h.state.settings.wall.rotation, 0)
     }

@@ -143,8 +143,10 @@ private struct WheelCard: View {
         let side = Double(offset.signum())
         let far = abs(offset) >= 2
 
-        let size = center ? surface.s(CGSize(width: 172, height: 258), CGSize(width: 228, height: 342))
-                          : surface.s(CGSize(width: 84, height: 126), CGSize(width: 154, height: 231))
+        // Every card is drawn at the middle card's size and scaled down at the sides, so the name,
+        // its band, the corners and the border all shrink together while the wheel turns.
+        let size = surface.s(CGSize(width: 172, height: 258), CGSize(width: 228, height: 342))
+        let sideScale = surface.v(84.0 / 172, 154.0 / 228)
         let mid = surface.p(CGPoint(x: 201, y: 367.6), CGPoint(x: 304, y: 514.7))
         let step = surface.p(CGPoint(x: 163.9, y: 210.6), CGPoint(x: 272, y: 176.7))
         let reach = far ? 1.8 : 1.0
@@ -152,6 +154,7 @@ private struct WheelCard: View {
 
         CardFace(surface: surface, member: member, size: size, isCenter: center, addLabel: addLabel)
             .confirmSqueeze(squeeze, active: center && pressable)
+            .scaleEffect(center ? 1 : sideScale)
             .rotationEffect(.degrees(side * (far ? 55 : 30)))
             .position(position)
             .opacity(far ? 0 : 1)
@@ -171,7 +174,6 @@ struct CardFace: View {
     var body: some View {
         let scale = size.height / surface.v(258, 342)
         let radius = surface.v(20, 26.5) * scale
-        let border = isCenter ? surface.v(5, 6.6) : 0
 
         ZStack(alignment: .bottom) {
             if let member {
@@ -212,7 +214,8 @@ struct CardFace: View {
         .frame(width: size.width, height: size.height)
         .overlay {
             RoundedRectangle(cornerRadius: radius)
-                .strokeBorder(Theme.ink, lineWidth: border)
+                .strokeBorder(Theme.ink, lineWidth: surface.v(5, 6.6))
+                .opacity(isCenter ? 1 : 0)
         }
         .shadow(color: .black.opacity(isCenter ? 0.1 : 0), radius: surface.v(16, 21))
     }

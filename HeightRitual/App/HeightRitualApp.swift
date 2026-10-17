@@ -28,10 +28,15 @@ struct HeightRitualApp: App {
 /// Since iOS 27, an app built with the iOS 27 SDK only gets its own external display scene if it
 /// registers a scene accessory; otherwise the projector mirrors the phone. Older iOS versions
 /// still use the Info.plist entry and `ExternalSceneDelegate`. (Same as in TimeCapsule.)
+///
+/// The accessory API only exists in the iOS 27 SDK (Xcode 27). SwiftUI is version 7 in the
+/// iOS 26 SDK, so the check below keeps the project building with Xcode 26, where the app uses
+/// `ExternalSceneDelegate` on every iOS version.
 private struct ProjectorAccessory: ViewModifier {
     let state: AppState
 
     func body(content: Content) -> some View {
+        #if canImport(SwiftUI, _version: 8.0)
         if #available(iOS 27.0, *) {
             content.sceneAccessory {
                 ExternalNonInteractiveAccessory {
@@ -45,6 +50,9 @@ private struct ProjectorAccessory: ViewModifier {
         } else {
             content
         }
+        #else
+        content
+        #endif
     }
 
     private func useFullProjectorPicture() {
@@ -64,9 +72,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
                      configurationForConnecting session: UISceneSession,
                      options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         let configuration = UISceneConfiguration(name: nil, sessionRole: session.role)
-        if #unavailable(iOS 27.0), session.role == .windowExternalDisplayNonInteractive {
-            configuration.delegateClass = ExternalSceneDelegate.self
-        }
+        guard session.role == .windowExternalDisplayNonInteractive else { return configuration }
+        #if canImport(SwiftUI, _version: 8.0)
+        if #available(iOS 27.0, *) { return configuration }
+        #endif
+        configuration.delegateClass = ExternalSceneDelegate.self
         return configuration
     }
 }

@@ -124,17 +124,17 @@ struct SetupBanner: View {
     }
 }
 
-/// The phone's copy of the wall, at the projected picture's proportions.
+/// The phone's copy of the wall: the 9:16 strip that is used on the wall.
 /// The expand button shows it full screen, e.g. to check it without a projector.
 struct WallCopy: View {
     @Environment(AppState.self) private var state
     @State private var expanded = false
 
     var body: some View {
-        let logical = state.settings.wall.logicalSize(for: state.wallSize)
-        // Square corners: the projected picture is a rectangle, and its edge frame must stay visible.
+        let strip = state.settings.wall.stripSize(for: state.wallSize)
+        // Square corners: the projected strip is a rectangle, and its edge frame must stay visible.
         WallView()
-            .aspectRatio(logical.width / logical.height, contentMode: .fit)
+            .aspectRatio(strip.width / strip.height, contentMode: .fit)
             .clipped()
             .overlay(Rectangle().stroke(Color(.separator), lineWidth: 1))
             .overlay(alignment: .bottomTrailing) {
@@ -159,38 +159,28 @@ struct WallCopy: View {
     }
 }
 
-/// The wall copy filling the phone screen: exactly the projected picture, with the fit-to-wall
-/// values applied. A landscape picture (projector upright, 16:9) is turned 90 degrees so it fills
-/// the phone's long side; turn the phone to read it. Controls keep working while it is shown.
+/// The wall copy filling the phone screen: exactly the strip used on the wall, upright, with the
+/// fit-to-wall values applied. Controls keep working while it is shown.
 private struct FullScreenWall: View {
     @Environment(AppState.self) private var state
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         let wall = state.settings.wall
-        let logical = wall.logicalSize(for: state.wallSize)
-        let landscape = logical.width > logical.height
-        let topCM = Int(wall.visibleTopCM(imageHeight: Double(logical.height)))
-        GeometryReader { geo in
-            // Turned pictures use the screen's long side as their width.
-            let box = landscape ? CGSize(width: geo.size.height, height: geo.size.width) : geo.size
-            // Caption in the picture's bottom-left corner: away from the close button either way.
-            ZStack(alignment: .bottomLeading) {
-                WallView()
-                    .aspectRatio(logical.width / logical.height, contentMode: .fit)
-                    .frame(width: box.width, height: box.height)
-                Text("Projector picture: floor to \(topCM) cm")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(.ultraThinMaterial, in: Capsule())
-                    .padding(12)
-            }
-            .frame(width: box.width, height: box.height)
-            .rotationEffect(.degrees(landscape ? 90 : 0))
-            .frame(width: geo.size.width, height: geo.size.height)
+        let strip = wall.stripSize(for: state.wallSize)
+        let topCM = Int(wall.visibleTopCM(imageHeight: Double(strip.height)))
+        ZStack(alignment: .bottomLeading) {
+            WallView()
+                .aspectRatio(strip.width / strip.height, contentMode: .fit)
+            Text("Projector picture: floor to \(topCM) cm")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(.ultraThinMaterial, in: Capsule())
+                .padding(12)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black)
         .ignoresSafeArea()
         .overlay(alignment: .topTrailing) {

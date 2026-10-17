@@ -41,14 +41,14 @@ final class ExternalSceneDelegate: UIResponder, UIWindowSceneDelegate {
 }
 
 extension UIScreen {
-    /// Use the projector's full resolution, and stop iOS from shrinking the picture to allow
-    /// for TV overscan, which leaves a black border around it.
+    /// iOS shrinks the picture on external screens by default (overscan for old TVs), which
+    /// left a black band between the drawing and the floor on the projector. Use every pixel
+    /// of the projector's own resolution instead. The preferred mode is the projector's native
+    /// one; the largest mode could be a 4K input that the projector scales down again.
     func useFullPicture() {
-        if let best = availableModes.max(by: {
-            $0.size.width * $0.size.height < $1.size.width * $1.size.height
-        }) {
-            currentMode = best
-        }
         overscanCompensation = .none
+        if let native = preferredMode, availableModes.contains(native) {
+            currentMode = native
+        }
     }
 }

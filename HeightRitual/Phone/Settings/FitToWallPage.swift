@@ -14,7 +14,7 @@ struct FitToWallPage: View {
         Form {
             Section {
                 WallCopy()
-                    .frame(maxHeight: 200)
+                    .frame(maxHeight: 320)
                     .frame(maxWidth: .infinity)
                     .bareListRow()
             } footer: {

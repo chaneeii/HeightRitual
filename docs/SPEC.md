@@ -440,3 +440,7 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
     in the field (dashed, needs the camera position). "Nobody found" also offers "Use this clip
     anyway", which keeps the clip as filmed with the height set by hand (testing without a person).
   - The cut-out writes no sound yet; the clip as filmed keeps it.
+  - The wall uses only a portrait strip of the projected picture: 9:16, the picture's full height
+    (so the reach from the floor does not change), black elsewhere. Left and right moves the strip
+    within a wide picture. Every copy of the wall on the phone (R2, M3, S2, full screen) shows
+    exactly that strip, upright, so it reads like the phone itself (decided 12 Oct).

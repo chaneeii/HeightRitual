@@ -7,7 +7,7 @@ struct HomeScreen: View {
     var body: some View {
         DesignCanvas(surface: .phone) {
             HomeContent(surface: .phone)
-            if state.route == .memberMenu {
+            if state.showsMemberMenu {
                 MemberMenuOverlay(surface: .phone)
                     .transition(.opacity)
             } else {
@@ -15,7 +15,7 @@ struct HomeScreen: View {
             }
         }
         .ignoresSafeArea()
-        .animation(.easeInOut(duration: 0.25), value: state.route == .memberMenu)
+        .animation(.easeInOut(duration: 0.25), value: state.showsMemberMenu)
         .toolbar(.hidden, for: .navigationBar)
     }
 }

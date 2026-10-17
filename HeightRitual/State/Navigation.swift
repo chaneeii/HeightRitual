@@ -62,6 +62,13 @@ extension AppState {
         }
     }
 
+    /// The member menu, also while its member is being edited in the sheet above it.
+    var showsMemberMenu: Bool {
+        if route == .memberMenu { return true }
+        if case .memberEdit = route { return memberEditReturn == .memberMenu }
+        return false
+    }
+
     var showsMemberSheet: Bool {
         if case .memberEdit = route { return !memberEditInSettings }
         return false

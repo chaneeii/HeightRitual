@@ -49,6 +49,11 @@ final class Store {
     // MARK: Members
 
     @discardableResult
+    /// The poster of the member's newest record that has one: the photo on their card.
+    func latestPhotoURL(for memberID: UUID) -> URL? {
+        records(for: memberID).reversed().lazy.compactMap(\.posterFile).first.flatMap(mediaURL)
+    }
+
     func addMember(name: String, colorIndex: Int? = nil) -> Member? {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
@@ -63,7 +68,7 @@ final class Store {
         let trimmed = member.name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         members[index] = Member(id: member.id, name: trimmed, colorIndex: member.colorIndex,
-                                photoFile: members[index].photoFile)
+                                photoFile: members[index].photoFile, cardStyle: member.cardStyle)
         save()
     }
 

@@ -126,6 +126,10 @@ struct PhoneAppBar: View {
     var back: Back = .none
     var onDark = false
     var onBack: () -> Void = {}
+    /// The gear opens app Settings unless a screen gives it its own job (the member menu: edit
+    /// this member).
+    var onGear: (() -> Void)?
+    var gearLabel: Text = Text("Settings")
     @Environment(AppState.self) private var state
 
     var body: some View {
@@ -156,7 +160,7 @@ struct PhoneAppBar: View {
             Spacer()
             DebugWallButton(color: color)
             Button {
-                state.openSettings()
+                if let onGear { onGear() } else { state.openSettings() }
             } label: {
                 Image("Gear")
                     .resizable()
@@ -167,7 +171,7 @@ struct PhoneAppBar: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(PressStyle())
-            .accessibilityLabel("Settings")
+            .accessibilityLabel(gearLabel)
         }
         .padding(.horizontal, 14)
         .frame(width: Surface.phone.canvas.width, height: 44)

@@ -33,11 +33,11 @@ struct HomeContent: View {
             }
 
             // Under the member menu its own heading takes this place.
-            if state.route != .memberMenu {
+            if !state.showsMemberMenu {
                 ScreenHeading(surface: surface, title: title(empty), subtitle: subtitle(empty))
             }
 
-            if surface == .wall && state.route != .memberMenu {
+            if surface == .wall && !state.showsMemberMenu {
                 bottomHint(empty: empty)
                     .position(x: w / 2, y: 947)
             }
@@ -177,7 +177,8 @@ struct CardFace: View {
 
         ZStack(alignment: .bottom) {
             if let member {
-                RoundedRectangle(cornerRadius: radius).fill(Theme.memberCard)
+                // The member's own colour, or their newest photo (`Member.card`).
+                RoundedRectangle(cornerRadius: radius).fill(Palette.color(member.colorIndex))
                 memberPhoto(member)
                     .clipShape(RoundedRectangle(cornerRadius: radius))
                 Rectangle()
@@ -222,7 +223,8 @@ struct CardFace: View {
 
     @ViewBuilder
     private func memberPhoto(_ member: Member) -> some View {
-        if let image = state.store.mediaURL(member.photoFile).flatMap({ UIImage(contentsOfFile: $0.path) }) {
+        if member.card == .photo,
+           let image = state.store.latestPhotoURL(for: member.id).flatMap({ UIImage(contentsOfFile: $0.path) }) {
             Image(uiImage: image).resizable().scaledToFill()
                 .frame(width: size.width, height: size.height)
         }

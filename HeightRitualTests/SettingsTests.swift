@@ -202,4 +202,26 @@ final class SettingsTests: XCTestCase {
         h.state.startWizard()
         XCTAssertEqual(h.state.route, .wizard(.permissions), "the banner goes straight to the setup steps")
     }
+
+    // The gear on the member menu edits that member; the card shows a colour or the newest photo.
+    func testMemberCardStyle() throws {
+        let h = Harness()
+        let s = h.state
+        h.confirm()
+        s.openMemberEdit(s.currentMember?.id)
+        XCTAssertEqual(s.route, .memberEdit(h.nora.id))
+        XCTAssertTrue(s.showsMemberSheet)
+        XCTAssertEqual(h.nora.card, .photo, "the newest photo by default")
+        XCTAssertNil(s.store.latestPhotoURL(for: h.nora.id), "sample records have no photo")
+
+        s.saveMember(id: h.nora.id, name: "Nora", colorIndex: 3, cardStyle: .colour)
+        XCTAssertEqual(s.route, .memberMenu, "back to the menu")
+        XCTAssertEqual(h.nora.card, .colour)
+        XCTAssertEqual(h.nora.colorIndex, 3)
+
+        let poster = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".jpg")
+        try Data([1]).write(to: poster)
+        s.store.addRecord(memberID: h.nora.id, heightMM: 1250, source: .edited, clip: ProcessedClip(posterURL: poster))
+        XCTAssertNotNil(s.store.latestPhotoURL(for: h.nora.id), "a new record brings a photo")
+    }
 }

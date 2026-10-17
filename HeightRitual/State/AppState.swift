@@ -756,11 +756,13 @@ final class AppState {
         go(to: .memberEdit(id))
     }
 
-    func saveMember(id: UUID?, name: String, colorIndex: Int, photo: PhotoChange = .keep) {
+    func saveMember(id: UUID?, name: String, colorIndex: Int, cardStyle: CardStyle? = nil,
+                    photo: PhotoChange = .keep) {
         var savedID: UUID?
         if let id, var member = store.member(id) {
             member.name = name
             member.colorIndex = colorIndex
+            if let cardStyle { member.cardStyle = cardStyle }
             store.updateMember(member)
             savedID = id
         } else if let member = store.addMember(name: name, colorIndex: colorIndex) {

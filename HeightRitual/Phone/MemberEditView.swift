@@ -1,7 +1,8 @@
-import PhotosUI
 import SwiftUI
 
-/// A1: add or edit a family member. Photo, name, colour, and Delete member for an existing one.
+/// A1: add or edit a family member. What the card shows (colour or newest photo), name, colour,
+/// and Delete member for an existing one. Opened from the gear on the member menu, or in
+/// Settings > Family.
 /// A sheet from M1 (Cancel / Save), a pushed page in Settings > Family (Back / Save).
 struct MemberEditView: View {
     let memberID: UUID?
@@ -11,52 +12,36 @@ struct MemberEditView: View {
     @State private var colorIndex = 0
     @State private var confirmDelete = false
     @State private var loaded = false
-    @State private var pickerItem: PhotosPickerItem?
-    @State private var pendingImage: UIImage?
-    @State private var photoChange: PhotoChange = .keep
+    @State private var cardStyle: CardStyle = .photo
     @FocusState private var nameFocused: Bool
 
     private var existing: Member? { memberID.flatMap(state.store.member) }
     private var canSave: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty }
 
-    /// The member as it will look after Save, for the avatar preview.
-    private var preview: Member {
-        Member(id: existing?.id ?? UUID(), name: name, colorIndex: colorIndex, photoFile: existing?.photoFile)
-    }
-
-    private var hasPhoto: Bool {
-        switch photoChange {
-        case .set: return true
-        case .remove: return false
-        case .keep: return existing?.photoFile != nil
-        }
+    /// The newest record's photo, shown on the card when "Latest photo" is chosen.
+    private var latestPhoto: UIImage? {
+        existing.flatMap { state.store.latestPhotoURL(for: $0.id) }.flatMap { UIImage(contentsOfFile: $0.path) }
     }
 
     var body: some View {
         Form {
             Section {
                 HStack(spacing: 16) {
-                    AvatarView(member: preview, size: 88, pendingPhoto: pendingImage,
-                               showsPhoto: photoChange != .remove)
-                    VStack(alignment: .leading, spacing: 8) {
-                        PhotosPicker(selection: $pickerItem, matching: .images) {
-                            Text(hasPhoto ? "Change photo" : "Choose photo")
-                        }
-                        if hasPhoto {
-                            Button("Remove photo", role: .destructive) {
-                                photoChange = .remove
-                                pendingImage = nil
-                                pickerItem = nil
-                            }
-                        }
+                    cardPreview
+                    Picker("Card", selection: $cardStyle) {
+                        Text("Colour").tag(CardStyle.colour)
+                        Text("Latest photo").tag(CardStyle.photo)
                     }
-                    .buttonStyle(.bordered)
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
                 }
                 .padding(.vertical, 8)
             } header: {
-                Text("Photo")
+                Text("Card")
             } footer: {
-                Text("Without a photo, the first letter of the name is shown in the chosen colour.")
+                Text(latestPhoto == nil
+                     ? "Latest photo shows the photo from the newest record. Until there is one, the card shows the colour."
+                     : "Latest photo shows the photo from the newest record.")
             }
             Section("Name") {
                 TextField("Name", text: $name)
@@ -118,22 +103,13 @@ struct MemberEditView: View {
                     .disabled(!canSave)
             }
         }
-        .onChange(of: pickerItem) { _, item in
-            guard let item else { return }
-            Task {
-                guard let data = try? await item.loadTransferable(type: Data.self),
-                      let image = UIImage(data: data),
-                      let jpeg = image.profileJPEG() else { return }
-                pendingImage = UIImage(data: jpeg)
-                photoChange = .set(jpeg)
-            }
-        }
         .onAppear {
             guard !loaded else { return }
             loaded = true
             if let existing {
                 name = existing.name
                 colorIndex = existing.colorIndex
+                cardStyle = existing.card
             } else {
                 colorIndex = state.store.members.count % Palette.memberColors.count
                 nameFocused = true
@@ -142,6 +118,26 @@ struct MemberEditView: View {
     }
 
     private func save() {
-        state.saveMember(id: existing?.id, name: name, colorIndex: colorIndex, photo: photoChange)
+        state.saveMember(id: existing?.id, name: name, colorIndex: colorIndex, cardStyle: cardStyle)
+    }
+
+    /// The card as it will look on Home.
+    private var cardPreview: some View {
+        ZStack(alignment: .bottom) {
+            RoundedRectangle(cornerRadius: 8).fill(Palette.color(colorIndex))
+            if cardStyle == .photo, let latestPhoto {
+                Image(uiImage: latestPhoto).resizable().scaledToFill()
+                    .frame(width: 60, height: 90)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            Rectangle().fill(Theme.paper).frame(height: 24)
+                .overlay(Text(verbatim: name).font(.caption.bold()).lineLimit(1).minimumScaleFactor(0.5).padding(.horizontal, 3))
+                .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 8, bottomTrailingRadius: 8))
+        }
+        .frame(width: 60, height: 90)
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.primary, lineWidth: 2))
+        .animation(.easeInOut(duration: 0.2), value: cardStyle)
+        .animation(.easeInOut(duration: 0.2), value: colorIndex)
+        .accessibilityHidden(true)
     }
 }

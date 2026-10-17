@@ -45,7 +45,9 @@ struct MemberMenuOverlay: View {
                     .foregroundStyle(Theme.paper)
                     .position(x: 24 + 37.7, y: 28 + 37.7)
             } else {
-                PhoneAppBar(back: .filled, onDark: true) { state.closeMemberMenu() }
+                PhoneAppBar(back: .filled, onDark: true, onBack: { state.closeMemberMenu() },
+                            onGear: { state.openMemberEdit(state.currentMember?.id) },
+                            gearLabel: Text("Edit \(name)"))
             }
         }
         .frame(width: surface.canvas.width, height: surface.canvas.height)

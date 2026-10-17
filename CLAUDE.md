@@ -26,8 +26,8 @@ controller light. P1 live foot check and the camera position auto-detect are not
   NavigationStacks drawn from `AppState.route` (`State/Navigation.swift`; the system back button
   sends Cancel), Settings and A1 as sheets with Forms.
 - iPhone and iPad, portrait, full screen. Light / dark / system appearance.
-- English, Korean, Simplified Chinese, Swedish (`Resources/*.xcstrings`), chosen in Settings.
-  Strings built in code go through `L(_:)` so they follow that choice.
+- English only (localization removed 17 Oct). Strings built in code still go through `L(_:)`,
+  dates use `Locale.english`.
 - The controller connects on a device; buttons-only firmware in `Firmware/controller_buttons/`.
 - 56 unit tests in `HeightRitualTests/` pass in the simulator (scheme runs them in English).
 
@@ -54,8 +54,9 @@ Run `xcodegen` after adding, removing or moving source files. The `.xcodeproj` i
 - One decision per screen, one obvious next action. Follow Apple's HIG: system controls, targets at least 44 pt. No hidden gestures.
 - Keep `Firmware/controller/controller.ino`, `ControllerManager` and the protocol table in SPEC section 6 in sync.
 - Clips of family members never leave the device.
-- UI text: English source strings, sentence case, no emoji. Add every new string to
-  `Resources/Localizable.xcstrings` with ko, zh-Hans and sv translations.
+- UI text: English only, sentence case, no emoji. No string catalogs or translations.
+- The controller has five controls: Back (Cancel), the knob, Left, Right and the round Confirm.
+  Confirm also starts and stops filming. Show them only with `ControlIcon`.
 - Camera, Bluetooth, video writing and the external display cannot be tested in the simulator.
   Say so when a change touches them and has not been run on a device. Never claim they work untested.
 - Finish one milestone, build, and report before starting the next.

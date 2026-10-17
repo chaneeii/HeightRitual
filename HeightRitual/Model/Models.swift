@@ -69,6 +69,6 @@ enum Palette {
 extension Date {
     /// "Aug 2025", in the app's language.
     var monthYear: String {
-        formatted(.dateTime.month(.abbreviated).year().locale(AppLanguage.current.locale))
+        formatted(.dateTime.month(.abbreviated).year().locale(.english))
     }
 }

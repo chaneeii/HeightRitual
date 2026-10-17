@@ -82,7 +82,7 @@ struct PlaybackScreen: View {
             .position(x: 201, y: 458)
 
             if let record {
-                Text(verbatim: record.date.formatted(.dateTime.year().month(.twoDigits).day(.twoDigits)))
+                Text(verbatim: record.date.formatted(.dateTime.year().month(.twoDigits).day(.twoDigits).locale(.english)))
                     .font(.system(size: 15))
                     .foregroundStyle(Theme.ink)
                     .position(x: 201, y: 744)
@@ -171,7 +171,7 @@ struct WallPlaybackOverlay: View {
             if let record = state.selectedRecord {
                 let parts = HeightFormatter.parts(record.heightMM, unit: unit)
                 VStack(spacing: 4) {
-                    Text(verbatim: record.date.formatted(.dateTime.year().month(.twoDigits).day(.twoDigits)))
+                    Text(verbatim: record.date.formatted(.dateTime.year().month(.twoDigits).day(.twoDigits).locale(.english)))
                         .font(.system(size: 20))
                         .foregroundStyle(Color.white.opacity(0.7))
                     HStack(alignment: .lastTextBaseline, spacing: 2) {

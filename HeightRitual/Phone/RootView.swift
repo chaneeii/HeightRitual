@@ -116,10 +116,7 @@ struct DebugWallPreview: View {
                 pad(.left, "Left") { state.handle(.left) }
                 pad(.confirm, "Confirm") { state.handle(.confirm) }
                 pad(.right, "Right") { state.handle(.right) }
-                Button { state.handle(.record) } label: {
-                    Image(systemName: "record.circle").font(.system(size: 34)).foregroundStyle(.red)
-                }
-                .buttonStyle(PressStyle())
+                knob
             }
             .padding(.vertical, 10)
         }
@@ -127,6 +124,25 @@ struct DebugWallPreview: View {
         .padding(.bottom, 20)
         .background(Color.black)
         .ignoresSafeArea()
+    }
+
+    /// The knob: one step either way.
+    private var knob: some View {
+        HStack(spacing: 2) {
+            Button { state.handle(.knob(-1)) } label: {
+                Image(systemName: "arrow.counterclockwise").font(.system(size: 16, weight: .bold))
+                    .frame(width: 28, height: 44)
+            }
+            .accessibilityLabel(Text(verbatim: "Debug pad Knob down"))
+            ControlIcon(glyph: .knob, size: 36)
+            Button { state.handle(.knob(1)) } label: {
+                Image(systemName: "arrow.clockwise").font(.system(size: 16, weight: .bold))
+                    .frame(width: 28, height: 44)
+            }
+            .accessibilityLabel(Text(verbatim: "Debug pad Knob up"))
+        }
+        .foregroundStyle(.white)
+        .buttonStyle(PressStyle())
     }
 
     private func pad(_ glyph: ControlIcon.Glyph, _ name: String, _ action: @escaping () -> Void) -> some View {

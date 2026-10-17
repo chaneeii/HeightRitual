@@ -150,6 +150,13 @@ final class ControlTableTests: XCTestCase {
         s.handle(.record)
         XCTAssertEqual(s.route, .makeHeight(.cuttingOut(progress: 0)), "Record stops early")
 
+        // Confirm (the round button) stops early too: the box has no Record button.
+        s.handle(.cancel)
+        s.handle(.confirm)
+        h.scheduler.advance(1)
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .makeHeight(.cuttingOut(progress: 0)))
+
         // Without a press, filming ends by itself after 5 s.
         s.handle(.cancel)
         s.handle(.record)

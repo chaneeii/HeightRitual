@@ -21,7 +21,7 @@ struct HomeContent: View {
                 let member = members.indices.contains(index) ? members[index] : nil
                 WheelCard(surface: surface, member: member, offset: index - highlight,
                           addLabel: empty && surface == .phone ? Text("Add member") : Text("Add"),
-                          squeeze: state.confirmCount)
+                          squeeze: state.confirmCount, pressable: state.route == .home)
                     .onTapGesture {
                         guard surface == .phone else { return }
                         if index == highlight { state.openTile(index) } else { state.moveHighlight(by: index - highlight) }
@@ -135,6 +135,8 @@ private struct WheelCard: View {
     let offset: Int
     let addLabel: Text
     let squeeze: Int
+    /// Only on Home itself: under the member menu, Confirm belongs to the menu's cards.
+    let pressable: Bool
 
     var body: some View {
         let center = offset == 0
@@ -149,7 +151,7 @@ private struct WheelCard: View {
         let position = CGPoint(x: mid.x + side * step.x * reach, y: mid.y + (center ? 0 : step.y * (far ? 1.5 : 1)))
 
         CardFace(surface: surface, member: member, size: size, isCenter: center, addLabel: addLabel)
-            .confirmSqueeze(squeeze, active: center)
+            .confirmSqueeze(squeeze, active: center && pressable)
             .rotationEffect(.degrees(side * (far ? 55 : 30)))
             .position(position)
             .opacity(far ? 0 : 1)

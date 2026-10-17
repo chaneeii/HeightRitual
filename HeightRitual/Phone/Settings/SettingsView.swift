@@ -118,7 +118,6 @@ private struct SettingsList: View {
                         Image(systemName: "textformat.123")
                     }
                 }
-                LanguagePicker()
                 AppearancePicker()
                 Toggle(isOn: $settings.soundOn) {
                     Label {

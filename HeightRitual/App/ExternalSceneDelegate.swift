@@ -13,7 +13,7 @@ struct ExternalWall: View {
     var body: some View {
         WallView(isExternal: true)
             .environment(state)
-            .environment(\.locale, state.settings.language.locale)
+            .environment(\.locale, .english)
     }
 }
 

@@ -111,26 +111,3 @@ struct ControllerPage: View {
             .disabled(state.controllerStatus != .connected)
     }
 }
-
-/// Settings > Language: a dropdown like Appearance. The change applies at once, on the phone
-/// and the wall.
-struct LanguagePicker: View {
-    @Environment(AppState.self) private var state
-
-    var body: some View {
-        @Bindable var settings = state.settings
-        Picker(selection: $settings.language) {
-            Text("System").tag(AppLanguage.system)
-            ForEach(AppLanguage.allCases.filter { $0 != .system }, id: \.self) { language in
-                Text(verbatim: language.nativeName).tag(language)
-            }
-        } label: {
-            Label {
-                Text("Language")
-                Text("For the phone and the wall")
-            } icon: {
-                Image(systemName: "globe")
-            }
-        }
-    }
-}

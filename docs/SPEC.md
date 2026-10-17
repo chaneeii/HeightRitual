@@ -448,3 +448,7 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
     then a Saved screen offers the member's growth (Confirm) or someone else (Cancel). Lookback on
     the wall lays the date, height, growth and story segments over the life-size clip; its hint
     goes away at the first move. Black and white for now; colours and fonts come from `Theme`.
+  - English only: the language setting and the translations are removed (17 Oct).
+  - The controller now has five controls: Back (Cancel), the knob, Left, Right and the round
+    Confirm. Record, the mode switch and the auto play switch are gone; Confirm starts filming
+    and stops it early. The app still accepts their old codes, so older firmware keeps working.

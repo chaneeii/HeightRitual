@@ -274,7 +274,8 @@ final class AppState {
             go(to: .memberMenu)
         case (.filming, .cancel):
             go(to: .makeFilm(.ready))
-        case (.filming, .record):
+        case (.filming, .record), (.filming, .confirm):
+            // Confirm (the round button) stops early; the box has no Record button any more.
             finishFilming()
         default:
             break

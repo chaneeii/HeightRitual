@@ -138,8 +138,7 @@ Every screen, captured: [`docs/images/screens/`](docs/images/screens). The full 
 controller table per screen: [`docs/SPEC.md`](docs/SPEC.md).
 
 Design rules: one decision per screen, one obvious next action, system controls, targets of at
-least 44 pt, no hidden gestures. Light and dark appearance. English, Korean, Simplified Chinese and
-Swedish, chosen in Settings.
+least 44 pt, no hidden gestures. Light and dark appearance. English only.
 
 ## Controller
 
@@ -207,7 +206,7 @@ xcodebuild test -project HeightRitual.xcodeproj -scheme HeightRitual \
 
 | Part | State |
 |---|---|
-| State machine, navigation, all phone screens, wall drawing, settings, wizard, 4 languages | Done, 55 unit tests and the UI stress test pass in the simulator |
+| State machine, navigation, all phone screens, wall drawing, settings, wizard | Done, 56 unit tests pass in the simulator |
 | Controller over Bluetooth LE | Connects on a device; button input still being checked on the breadboard |
 | Camera, cut-out, alpha video playback, projector scene | Written; needs testing on a device with a projector |
 | Live foot check while filming, automatic camera position | Not built |

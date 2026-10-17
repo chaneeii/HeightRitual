@@ -6,44 +6,15 @@ enum HeightUnit: String, Codable, CaseIterable {
     case cm, ftin
 }
 
-/// The app's language, chosen in Settings. System follows the phone.
-enum AppLanguage: String, Codable, CaseIterable {
-    case system
-    case en
-    case ko
-    case zhHans = "zh-Hans"
-    case sv
-
-    /// The language last chosen; read by `L(_:)` and the date formats.
-    nonisolated(unsafe) static var current: AppLanguage = .system
-
-    /// The localization actually used: the chosen one, or the phone's best match.
-    var code: String {
-        self == .system ? (Bundle.main.preferredLocalizations.first ?? "en") : rawValue
-    }
-
-    var locale: Locale { Locale(identifier: code) }
-
-    /// The .lproj folder with this language's strings.
-    var bundle: Bundle {
-        Bundle.main.path(forResource: code, ofType: "lproj").flatMap(Bundle.init(path:)) ?? .main
-    }
-
-    /// Each language's own name, the same in every language (as in iOS).
-    var nativeName: String {
-        switch self {
-        case .system: return ""
-        case .en: return "English"
-        case .ko: return "한국어"
-        case .zhHans: return "简体中文"
-        case .sv: return "Svenska"
-        }
-    }
+extension Locale {
+    /// The app is in English only; dates and numbers use US English everywhere.
+    static let english = Locale(identifier: "en_US")
 }
 
-/// A string from code (not a SwiftUI Text) in the app's language.
+/// A string built in code (not a SwiftUI Text). The app is English only, so this is the
+/// English text itself; kept as one place in case translations come back.
 func L(_ value: String.LocalizationValue) -> String {
-    String(localized: value, bundle: AppLanguage.current.bundle)
+    String(localized: value, locale: .english)
 }
 
 /// The phone's light or dark look. The wall image is always black.
@@ -115,12 +86,6 @@ final class SettingsStore {
     /// Memory shows clips as filmed, with their background, instead of the cut-out.
     var showBackground: Bool { didSet { save(showBackground, "showBackground") } }
     var appearance: Appearance { didSet { save(appearance, "appearance") } }
-    var language: AppLanguage {
-        didSet {
-            AppLanguage.current = language
-            save(language, "language")
-        }
-    }
     var wall: Calibration { didSet { save(wall, "wall") } }
     var camera: CameraPosition? { didSet { save(camera, "camera") } }
     /// The first-start wizard has been finished or skipped through.
@@ -139,9 +104,6 @@ final class SettingsStore {
         autoPlay = load("autoPlay") ?? false
         showBackground = load("showBackground") ?? false
         appearance = load("appearance") ?? .system
-        let language: AppLanguage = load("language") ?? .system
-        self.language = language
-        AppLanguage.current = language
         wall = load("wall") ?? Calibration()
         camera = load("camera") as CameraPosition?
         wizardDone = load("wizardDone") ?? false

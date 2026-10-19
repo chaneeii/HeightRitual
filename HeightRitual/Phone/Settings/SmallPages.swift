@@ -101,7 +101,7 @@ struct ControllerPage: View {
         .confirmationDialog("Forget this controller?", isPresented: $confirmForget, titleVisibility: .visible) {
             Button("Forget", role: .destructive) { state.forgetController() }
         } message: {
-            Text("The app searches again and connects to the first Height Ritual controller it finds.")
+            Text("The app searches again and connects to the first Memory Meter controller it finds.")
         }
     }
 

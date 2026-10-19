@@ -71,7 +71,7 @@ enum LetterKey: Equatable {
 /// The guided first use from Settings (a demo feature): the app's real steps, one control at a
 /// time, with the controller drawn underneath.
 enum TutorialStep: Int, CaseIterable {
-    case welcome = 1      // what Height Ritual is
+    case welcome = 1      // what Memory Meter is
     case family           // add someone
     case name             // pick letters, Save
     case chooseRecord     // Left / Right to Record, Confirm

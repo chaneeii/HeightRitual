@@ -3,7 +3,7 @@ import Foundation
 /// The camera as AppState sees it. The AVFoundation version comes in milestone 5.
 @MainActor
 protocol CameraProviding: AnyObject {
-    func startPreview()
+    func startPreview(askMicrophone: Bool)
     func stopPreview()
     func startRecording(sound: Bool)
     /// Calls back with the movie file, or nil if nothing was recorded.
@@ -45,7 +45,7 @@ protocol ClipProcessing {
 /// Stands in for the camera until milestone 5, and in the simulator, which has no camera.
 @MainActor
 final class PlaceholderCamera: CameraProviding {
-    func startPreview() {}
+    func startPreview(askMicrophone: Bool) {}
     func stopPreview() {}
     func startRecording(sound: Bool) {}
     func stopRecording(_ done: @escaping @MainActor (URL?) -> Void) { done(nil) }

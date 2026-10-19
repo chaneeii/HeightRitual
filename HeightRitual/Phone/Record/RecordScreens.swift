@@ -45,7 +45,7 @@ struct FilmScreen: View {
             if CameraController.isRefused {
                 VStack(spacing: 12) {
                     Image(systemName: "video.slash").font(.system(size: 34))
-                    Text("Height Ritual needs the camera to film the clip.")
+                    Text("Memory Meter needs the camera to film the clip.")
                         .multilineTextAlignment(.center)
                     Button("Open permissions") {
                         state.openSettings()

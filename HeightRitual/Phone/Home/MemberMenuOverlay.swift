@@ -38,7 +38,7 @@ struct MemberMenuOverlay: View {
                     .id(choice)
                     .transition(.opacity)
 
-                ConfirmCheck(size: 120, confirmed: state.confirmFlash)
+                ConfirmCheck(size: 120, confirmed: state.confirmFlash, tint: Theme.paper.opacity(0.85))
                     .position(x: w / 2, y: 963)
 
                 ControlIcon(glyph: .back, size: 75.4)

@@ -7,7 +7,7 @@ final class FakeCamera: CameraProviding {
     var recording = false
     var movie: URL?
 
-    func startPreview() { previewing = true }
+    func startPreview(askMicrophone: Bool) { previewing = true }
     func stopPreview() { previewing = false }
     func startRecording(sound: Bool) { recording = true }
     func stopRecording(_ done: @escaping @MainActor (URL?) -> Void) {

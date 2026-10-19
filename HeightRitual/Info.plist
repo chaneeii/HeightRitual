@@ -9,7 +9,7 @@
 		<string>en</string>
 	</array>
 	<key>CFBundleDisplayName</key>
-	<string>Height Ritual</string>
+	<string>Memory Meter</string>
 	<key>NSCameraUsageDescription</key>
 	<string>The camera films the short clip that is projected life-size on the wall.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>

@@ -71,19 +71,26 @@ struct CursorView: View {
 }
 
 /// The round check at the bottom of the wall: a green outline (easy to see on the gray wall)
-/// until Confirm, then filled green with a pop.
+/// until Confirm, then filled green with a pop. `tint` draws both states in one colour instead.
 struct ConfirmCheck: View {
     var size: CGFloat
     var confirmed: Bool
+    var tint: Color?
 
     var body: some View {
         ZStack {
             ControlIcon(glyph: .confirmOutline, size: size)
-                .foregroundStyle(Theme.success)
+                .foregroundStyle(tint ?? Theme.success)
                 .opacity(confirmed ? 0 : 1)
-            ControlIcon(glyph: .confirm, size: size, confirmed: true)
-                .scaleEffect(confirmed ? 1 : 0.4)
-                .opacity(confirmed ? 1 : 0)
+            Group {
+                if let tint {
+                    ControlIcon(glyph: .confirm, size: size).foregroundStyle(tint)
+                } else {
+                    ControlIcon(glyph: .confirm, size: size, confirmed: true)
+                }
+            }
+            .scaleEffect(confirmed ? 1 : 0.4)
+            .opacity(confirmed ? 1 : 0)
         }
         .animation(.spring(response: 0.3, dampingFraction: 0.55), value: confirmed)
     }

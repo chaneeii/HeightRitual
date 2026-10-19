@@ -393,7 +393,7 @@ final class AppState {
                 ?? min(highlight, store.members.count)
         }
 
-        if next.usesCamera && !previous.usesCamera { camera.startPreview() }
+        if next.usesCamera && !previous.usesCamera { camera.startPreview(askMicrophone: settings.soundOn) }
         if previous.usesCamera && !next.usesCamera { camera.stopPreview() }
 
         route = next
@@ -739,7 +739,10 @@ final class AppState {
     private func playSelectedClip() {
         let onWall: Bool = { if case .record = route { return true }; return route == .memoryWall }()
         guard onWall, let record = selectedRecord else { return }
-        wallPlayer.play(clipURL(record), sound: settings.soundOn && record.hasSound)
+        let url = clipURL(record)
+        // A cut-out has no sound track; its sound comes from the clip as filmed.
+        let raw = store.mediaURL(record.rawVideoFile)
+        wallPlayer.play(url, sound: settings.soundOn && record.hasSound, soundFrom: url == raw ? nil : raw)
     }
 
     // MARK: One record (R3)

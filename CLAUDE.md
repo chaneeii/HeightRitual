@@ -1,4 +1,4 @@
-# Height Ritual
+# Height Ritual (app name: Memory Meter)
 
 iOS app plus ESP32 controller firmware for a KTH interaction design course prototype (DM2601, Group 6).
 A family member is filmed at the wall for a few seconds; the app suggests their height, the parent

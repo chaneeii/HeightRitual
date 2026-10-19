@@ -97,7 +97,7 @@ final class SettingsStore {
         }
         accentIndex = load("accentIndex")
         unit = load("unit") ?? .cm
-        soundOn = load("soundOn") ?? false
+        soundOn = load("soundOn") ?? true
         autoPlay = load("autoPlay") ?? false
         showBackground = load("showBackground") ?? false
         appearance = load("appearance") ?? .system

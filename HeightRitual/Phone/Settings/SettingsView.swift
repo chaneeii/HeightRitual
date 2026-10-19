@@ -69,9 +69,9 @@ struct SettingsPageView: View {
 /// The settings list's dark blue-grey look. The same in light and dark appearance, so the list
 /// is always drawn with dark-appearance text and controls.
 enum SettingsStyle {
-    static let background = Color(red: 0.10, green: 0.13, blue: 0.18)
-    static let row = Color(red: 0.17, green: 0.21, blue: 0.28)
-    static let icon = Color(red: 0.56, green: 0.71, blue: 0.91)
+    static let background = Color(red: 0.20, green: 0.40, blue: 0.23)
+    static let row = Color(red: 0.60, green: 0.75, blue: 0.60)
+    static let icon = Color(red: 0.10, green: 0.10, blue: 0.10)
 }
 
 private struct SettingsList: View {

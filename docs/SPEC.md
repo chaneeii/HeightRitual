@@ -169,9 +169,9 @@ The controller only reports what was used. The app decides what it means.
 | Saved | | | See the growth (Lookback) | Return to home |
 | Lookback | Previous / next record | Previous / next record | Replay the clip | Back to the member menu |
 | Lookback, auto play on | Stop, then move | Stop, then move | Stop | Stop |
-| Settings on the wall (grid) | Move through Setup guide and the tiles | Previous / next | Open (Setup guide, Fit to wall, Units, Permissions so far) | Close Settings |
+| Settings on the wall (grid) | Move through Setup guide and the tiles | Previous / next | Open (Setup guide, Fit to wall, Camera position, Units, Permissions so far) | Close Settings |
 | Settings: Units | Choose a unit | Centimetres / feet and inches | Save, back to the grid | Back to the grid |
-| Settings: Permissions, Setup guide | | | | Back to the grid |
+| Settings: Permissions, Setup guide, Camera position | | | | Back to the grid |
 | Settings: Fit to wall | Change selected value | Floor line / Size | Done | Done |
 | Onboarding with the controller | As each step says | | Next | Previous step |
 

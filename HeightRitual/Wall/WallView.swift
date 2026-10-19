@@ -257,11 +257,32 @@ struct WallCanvas: View {
             ctx.stroke(line(left, right, g.y(cm: 170)), with: .color(.white.opacity(0.8)),
                        style: StrokeStyle(lineWidth: 2, dash: [8, 6]))
         }
-        let label = model.fitValue.map { L("Adjusting: \($0.title)") } ?? ""
-        let status = Text("Top of picture: \(Int(g.topCM)) cm   \(label)")
+        let status = Text("Top of picture: \(Int(g.topCM)) cm")
             .font(.system(size: font(g, 0.8), design: .serif)).italic()
             .foregroundColor(pencil)
         ctx.draw(status, at: CGPoint(x: 16, y: 24), anchor: .leading)
+        // Floor line | Size: Left and Right choose (filled orange), the knob moves the chosen one.
+        if let chosen = model.fitValue {
+            let size = font(g, 2.0)
+            var x: CGFloat = 16
+            for value in FitValue.allCases {
+                let selected = value == chosen
+                let text = ctx.resolve(Text(verbatim: value.title)
+                    .font(.system(size: size, weight: .semibold))
+                    .foregroundColor(selected ? .white : pencil))
+                let measured = text.measure(in: CGSize(width: g.size.width, height: size * 3))
+                let pill = CGRect(x: x, y: 24 + size, width: measured.width + size * 1.4,
+                                  height: measured.height + size * 0.8)
+                let shape = Path(roundedRect: pill, cornerRadius: pill.height / 2)
+                if selected {
+                    ctx.fill(shape, with: .color(WallBackIcon.orange))
+                } else {
+                    ctx.stroke(shape, with: .color(pencil.opacity(0.6)), lineWidth: 2)
+                }
+                ctx.draw(text, at: CGPoint(x: pill.midX, y: pill.midY), anchor: .center)
+                x = pill.maxX + size * 0.6
+            }
+        }
         ctx.stroke(Path(CGRect(origin: .zero, size: g.size).insetBy(dx: 1, dy: 1)),
                    with: .color(.white.opacity(0.5)), lineWidth: 2)
     }

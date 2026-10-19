@@ -68,7 +68,14 @@ struct FitToWallPage: View {
                 if editing { state.selectFitValue(value) }
             }
         }
-        .padding(.vertical, 4)
+        .padding(8)
+        .overlay {
+            // The value the knob moves; Left and Right on the controller choose it.
+            if state.fitValue == value {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .strokeBorder(SettingsStyle.highlight, lineWidth: 3)
+            }
+        }
         .accessibilityElement(children: .contain)
         .accessibilityAddTraits(state.fitValue == value ? .isSelected : [])
     }

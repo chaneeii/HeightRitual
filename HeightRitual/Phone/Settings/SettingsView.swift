@@ -82,6 +82,8 @@ enum SettingsStyle {
     static let background = Color(red: 0.91, green: 0.95, blue: 1.00)   // light blue
     static let row = Color(red: 1.00, green: 1.00, blue: 1.00)          // white
     static let icon = Color(red: 0.20, green: 0.48, blue: 0.85)         // clear blue
+    /// The controller's choice, the same orange as on the projector.
+    static let highlight = Color(red: 0.93, green: 0.42, blue: 0.18)
 }
 
 private struct SettingsList: View {

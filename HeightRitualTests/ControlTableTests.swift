@@ -366,6 +366,19 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.route, .settings(.list))
     }
 
+    func testCameraPositionFromTheGrid() {
+        let h = Harness()
+        let s = h.state
+        s.openSettings()
+        s.handle(.knob(SettingsTile.cameraPosition.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.cameraPosition))
+        XCTAssertEqual(s.wallModel.kind, .cameraLines, "the projector shows the 0 and 100 cm lines")
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.list))
+        XCTAssertEqual(s.settingsHighlight, .cameraPosition)
+    }
+
     func testFitToWallFromTheGrid() {
         let h = Harness()
         let s = h.state

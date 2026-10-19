@@ -26,6 +26,7 @@ struct SettingsSheet: View {
                     }
                 }
         }
+        .virtualController()
     }
 }
 
@@ -47,6 +48,7 @@ struct SettingsPageView: View {
         case .fitToWall: return "Fit to wall"
         case .cameraPosition: return "Camera position"
         case .units: return "Units"
+        case .language: return "Language"
         case .controller: return "Controller"
         case .permissions: return "Permissions"
         }
@@ -60,6 +62,7 @@ struct SettingsPageView: View {
         case .fitToWall: FitToWallPage()
         case .cameraPosition: CameraPositionPage()
         case .units: UnitsPage()
+        case .language: LanguagePage()
         case .controller: ControllerPage()
         case .permissions: PermissionsPage()
         }
@@ -106,7 +109,8 @@ private struct SettingsList: View {
                 link(.units, "Units", detail: "For every height on the phone and the wall",
                      systemImage: "textformat.123",
                      value: settings.unit == .cm ? L("Centimetres") : L("Feet and inches"))
-                LanguagePicker()
+                link(.language, "Language", detail: "For the phone and the wall", systemImage: "globe",
+                     value: settings.language == .system ? L("System") : settings.language.nativeName)
                 AppearancePicker()
                 Toggle(isOn: $settings.soundOn) {
                     Label {

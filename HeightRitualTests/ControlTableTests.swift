@@ -268,6 +268,60 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.route, .memoryWall, "Back on the grid closes Settings")
     }
 
+    func testSettingsLanguageAndPermissions() {
+        let h = Harness()
+        let s = h.state
+        s.settings.language = .system
+        s.openSettings()
+        s.handle(.knob(SettingsTile.language.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.language))
+        XCTAssertEqual(s.wallModel.kind, .settingsLanguage)
+        XCTAssertEqual(s.languageHighlight, .system, "starts on the saved language")
+        s.handle(.right)
+        s.handle(.knob(3))
+        XCTAssertEqual(s.languageHighlight, .sv)
+        s.handle(.right)
+        XCTAssertEqual(s.languageHighlight, .sv, "stops at the last language")
+        s.handle(.cancel)
+        XCTAssertEqual(s.settings.language, .system, "Back leaves the language unchanged")
+        s.handle(.confirm)
+        s.handle(.right)
+        s.handle(.confirm)
+        XCTAssertEqual(s.settings.language, .en)
+        XCTAssertEqual(s.route, .settings(.list), "back to the grid after choosing")
+        s.settings.language = .system
+
+        s.handle(.knob(SettingsTile.permissions.rawValue - SettingsTile.language.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.permissions))
+        XCTAssertEqual(s.wallModel.kind, .settingsPermissions)
+        s.handle(.right)
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.permissions), "nothing to choose on Permissions")
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.list))
+
+        s.handle(.knob(-20))
+        XCTAssertEqual(s.settingsHighlight, .setupGuide)
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.setupGuide))
+        XCTAssertEqual(s.wallModel.kind, .settingsGuide, "the projector shows the setup pictures")
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.list))
+    }
+
+    func testLanguageChosenOnThePhoneGoesBack() {
+        let h = Harness()
+        let s = h.state
+        s.openSettings()
+        s.openSettingsPage(.language)
+        s.chooseLanguage(.ko)
+        XCTAssertEqual(s.settings.language, .ko)
+        XCTAssertEqual(s.route, .settings(.list))
+        s.settings.language = .system
+    }
+
     func testUnitChosenOnThePhoneGoesBack() {
         let h = Harness()
         let s = h.state

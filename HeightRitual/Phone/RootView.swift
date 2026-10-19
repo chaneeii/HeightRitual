@@ -25,6 +25,7 @@ struct RootView: View {
             }
         }
         .animation(.default, value: state.notice)
+        .virtualController(bottomPadding: 90)
         .overlay(alignment: .bottomLeading) {
             // UI tests read the route here to check the screen and AppState agree.
             if ProcessInfo.processInfo.arguments.contains("-UITestRoute") {
@@ -98,3 +99,39 @@ private struct MainTabs: View {
         return nil
     }
 }
+
+/// Temporary mockup, debug builds only: an on-screen stand-in for the controller, for testing on
+/// the phone and the projector without the box. Each button sends the same event as the real one.
+extension View {
+    func virtualController(bottomPadding: CGFloat = 0) -> some View {
+        #if DEBUG
+        overlay(alignment: .bottom) { VirtualController().padding(.bottom, bottomPadding) }
+        #else
+        self
+        #endif
+    }
+}
+
+#if DEBUG
+private struct VirtualController: View {
+    @Environment(AppState.self) private var state
+    private static let buttons: [(String, ControlEvent)] = [
+        ("arrowshape.turn.up.left.fill", .cancel), ("chevron.left", .left), ("minus", .knob(-1)),
+        ("circle.fill", .confirm), ("plus", .knob(1)), ("chevron.right", .right), ("square.fill", .record),
+    ]
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(Self.buttons.indices, id: \.self) { index in
+                Button { state.handle(Self.buttons[index].1) } label: {
+                    Image(systemName: Self.buttons[index].0).frame(width: 44, height: 44)
+                }
+                .accessibilityLabel(Self.buttons[index].1.label)
+            }
+        }
+        .font(.headline)
+        .padding(4)
+        .background(.regularMaterial, in: Capsule())
+    }
+}
+#endif

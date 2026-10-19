@@ -113,24 +113,25 @@ struct ControllerPage: View {
     }
 }
 
-/// Settings > Language: a dropdown like Appearance. The change applies at once, on the phone
-/// and the wall.
-struct LanguagePicker: View {
+/// Settings > Language: System or one of the app's languages. Choosing one saves it and goes back
+/// to the list, the same as Select on the projector's Language page.
+struct LanguagePage: View {
     @Environment(AppState.self) private var state
 
     var body: some View {
-        @Bindable var settings = state.settings
-        Picker(selection: $settings.language) {
-            Text("System").tag(AppLanguage.system)
-            ForEach(AppLanguage.allCases.filter { $0 != .system }, id: \.self) { language in
-                Text(verbatim: language.nativeName).tag(language)
-            }
-        } label: {
-            Label {
-                Text("Language")
+        Form {
+            Section {
+                Picker("Language", selection: Binding(get: { state.settings.language },
+                                                      set: { state.chooseLanguage($0) })) {
+                    Text("System").tag(AppLanguage.system)
+                    ForEach(AppLanguage.allCases.filter { $0 != .system }, id: \.self) { language in
+                        Text(verbatim: language.nativeName).tag(language)
+                    }
+                }
+                .pickerStyle(.inline)
+                .labelsHidden()
+            } footer: {
                 Text("For the phone and the wall")
-            } icon: {
-                Image(systemName: "globe")
             }
         }
     }

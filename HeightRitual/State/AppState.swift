@@ -81,6 +81,8 @@ final class AppState {
     private(set) var settingsHighlight: SettingsTile = .setupGuide
     /// The option the controller has chosen on the projector's Units page.
     private(set) var unitHighlight: HeightUnit = .cm
+    /// The option the controller has chosen on the projector's Language page.
+    private(set) var languageHighlight: AppLanguage = .system
 
     var externalDisplayConnected = false
     /// Projector screen size in points. Until a projector is connected, a 1080p picture is assumed.
@@ -181,6 +183,8 @@ final class AppState {
             handleSettingsGrid(event)
         case .settings(.units):
             handleUnits(event)
+        case .settings(.language):
+            handleLanguage(event)
         case .settings(let page):
             if event == .cancel { page == .list ? leaveSettings() : go(to: .settings(.list)) }
         case .wizard:
@@ -625,6 +629,7 @@ final class AppState {
     func openSettingsPage(_ page: SettingsPage) {
         if page == .fitToWall { fitValue = .floor }
         if page == .units { unitHighlight = settings.unit }
+        if page == .language { languageHighlight = settings.language }
         go(to: .settings(page))
     }
 
@@ -658,6 +663,32 @@ final class AppState {
         case .cancel: go(to: .settings(.list))
         default: break
         }
+    }
+
+    /// The projector's Language page: the knob, Left and Right move through the languages; Select
+    /// saves and goes back.
+    private func handleLanguage(_ event: ControlEvent) {
+        switch event {
+        case .knob(let steps): moveLanguageHighlight(by: steps)
+        case .left: moveLanguageHighlight(by: -1)
+        case .right: moveLanguageHighlight(by: 1)
+        case .confirm: chooseLanguage(languageHighlight)
+        case .cancel: go(to: .settings(.list))
+        default: break
+        }
+    }
+
+    private func moveLanguageHighlight(by steps: Int) {
+        let all = AppLanguage.allCases
+        let index = all.firstIndex(of: languageHighlight) ?? 0
+        languageHighlight = all[min(max(index + steps, 0), all.count - 1)]
+    }
+
+    /// Saves the language and goes back to the settings list, from the phone or the controller.
+    func chooseLanguage(_ language: AppLanguage) {
+        settings.language = language
+        languageHighlight = language
+        if route == .settings(.language) { go(to: .settings(.list)) }
     }
 
     /// Saves the unit and goes back to the settings list, from the phone or the controller.

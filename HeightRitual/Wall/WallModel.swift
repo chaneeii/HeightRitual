@@ -19,8 +19,14 @@ struct WallModel: Equatable {
         /// S list: the settings as tiles in two columns, Setup guide as a pill beside the title. Only shown; the
         /// settings are changed on the phone.
         case settingsMenu
-        /// S4 Units: the two units, the controller's choice outlined. Only Units has a page so far.
+        /// S4 Units: the two units, the controller's choice outlined.
         case settingsUnits
+        /// S Language: the languages, the controller's choice outlined.
+        case settingsLanguage
+        /// S5 Permissions: each permission and whether it is allowed. Only shown.
+        case settingsPermissions
+        /// Setup guide: the two pictures the phone shows.
+        case settingsGuide
     }
 
     struct Mark: Equatable {
@@ -111,6 +117,15 @@ extension AppState {
 
         case .settings(.units):
             model.kind = .settingsUnits
+
+        case .settings(.language):
+            model.kind = .settingsLanguage
+
+        case .settings(.permissions):
+            model.kind = .settingsPermissions
+
+        case .settings(.setupGuide):
+            model.kind = .settingsGuide
 
         case .settings:
             model.kind = .idle

@@ -117,7 +117,8 @@ Each step can be reopened from Settings.
 | S2 | Fit to wall | Rotation at the top, two sliders (floor line, size), fine-step toggle | Centimetre ruler: 0, 100, 150 highlighted, dashed line at 170 |
 | S3 | Camera position | Camera preview with two draggable lines: floor and 100 cm. Text: put them on the projected lines | Two bright lines at 0 and 100 cm |
 | S4 | Units | cm or feet and inches; choosing one saves it and goes back to the list | Back icon, "Units", the two units with the saved one ticked and the controller's choice outlined in orange |
-| S5 | Permissions | Camera, Bluetooth, Microphone (only if sound is on): state of each, button to open iOS Settings | Unchanged |
+| S Language | Language | System or one of the app's languages; choosing one saves it and goes back to the list | As S4, with the languages |
+| S5 | Permissions | Camera, Bluetooth, Microphone (only if sound is on): state of each, button to open iOS Settings | Back icon, "Permissions", each permission with Allowed / Not asked yet / Not allowed (display only) |
 | S6 | Controller | Connected or searching, last control used (for testing), Forget this controller | Unchanged |
 | W | First-start wizard | S5, S2, S3 in order with Next and Skip | As in each step |
 
@@ -167,8 +168,9 @@ The controller only reports what was used. The app decides what it means.
 | M3 height | +/- 0.5 cm per step | -1 / +1 cm | Save | Retake (back to M2) | | |
 | R2 wall: manual | Previous / next record | Previous / next record | Replay clip | Back to R1 | | Start auto play |
 | R2 wall: auto play | Stop, then move | Stop, then move | Stop | Stop | | Stop |
-| S list (projector grid) | Move through Setup guide and the tiles | Previous / next | Open (Units only so far) | Close Settings | | |
-| S4 units | Choose a unit | Centimetres / feet and inches | Save, back to the grid | Back to the grid | | |
+| S list (projector grid) | Move through Setup guide and the tiles | Previous / next | Open (Setup guide, Units, Language, Permissions so far) | Close Settings | | |
+| S4 units, Language | Choose an option | Previous / next option | Save, back to the grid | Back to the grid | | |
+| S5 permissions, Setup guide | | | | Back to the grid | | |
 | S2 fit to wall | Change selected value | Select value | Done | Done | | |
 
 Mode switch, on every screen: Make opens M1; Memory opens R1. Leaving Make with an unsaved clip
@@ -215,7 +217,8 @@ IDs 12 (Playback) and 21 (Push) from earlier versions are no longer used.
 
 Two pictures with the steps written below them: the projector lens 2.5 m from the wall and 0.97 m
 above the floor; the phone right next to it at the same distance and height, rear camera facing the
-wall, the parent behind them with the controller. Tapping a picture shows it full size with Done.
+wall, the parent behind them with the controller. Tapping a picture shows it full size with Done. The projector shows the same two pictures, with
+the back icon and the title.
 Sources: `docs/setup-guide/`.
 
 ### S1 Projector placement (removed)

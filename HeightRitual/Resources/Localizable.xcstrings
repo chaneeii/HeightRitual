@@ -188,29 +188,6 @@
         }
       }
     },
-    "2. Place the phone next to it" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "2. 휴대폰을 옆에 놓기"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "2. Placera telefonen bredvid"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "2. 把手机放在旁边"
-          }
-        }
-      }
-    },
     "100 cm" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -252,6 +229,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "100 厘米线"
+          }
+        }
+      }
+    },
+    "2. Place the phone next to it" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. 휴대폰을 옆에 놓기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Placera telefonen bredvid"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. 把手机放在旁边"
           }
         }
       }
@@ -706,6 +706,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "厘米"
+          }
+        }
+      }
+    },
+    "Change permissions on the phone." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "권한은 휴대폰에서 바꿔요."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ändra behörigheter på telefonen."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请在手机上更改权限。"
           }
         }
       }
@@ -2576,6 +2598,28 @@
         }
       }
     },
+    "Not asked yet" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아직 묻지 않음"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inte frågat än"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未询问"
+          }
+        }
+      }
+    },
     "Not built yet" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2758,29 +2802,6 @@
         }
       }
     },
-    "Open permissions" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "권한 설정 열기"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Öppna behörigheter"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "打开权限设置"
-          }
-        }
-      }
-    },
     "Open Settings" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2800,6 +2821,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "打开设置"
+          }
+        }
+      }
+    },
+    "Open permissions" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "권한 설정 열기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öppna behörigheter"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开权限设置"
           }
         }
       }

@@ -246,7 +246,7 @@ struct HeightScreen: View {
 
 // MARK: M4 saved (Figma 223:1017, 223:2150)
 
-/// Saved: the check draws itself, then See growth (Confirm) or Measure someone else (Cancel).
+/// Saved: the check draws itself, then See growth (Confirm) or Return to home (Cancel).
 struct SavedContent: View {
     let surface: Surface
     @Environment(AppState.self) private var state
@@ -256,7 +256,7 @@ struct SavedContent: View {
         let w = surface.canvas.width
         let name = state.currentMember?.name ?? ""
         let height = state.savedRecord.map { HeightFormatter.text($0.heightMM, unit: state.settings.unit) } ?? ""
-        let d = surface.v(138, 227)
+        let d = surface.v(111, 182.6)
 
         ZStack(alignment: .topLeading) {
             ZStack {
@@ -271,7 +271,7 @@ struct SavedContent: View {
             }
             .frame(width: d, height: d)
             .animation(.spring(response: 0.45, dampingFraction: 0.6), value: shown)
-            .position(x: w / 2, y: surface.v(316, 352))
+            .position(x: w / 2, y: surface.v(329.5, 377.4))
 
             Text("Saved")
                 .font(Theme.title(surface.v(26, 40)))
@@ -287,7 +287,7 @@ struct SavedContent: View {
             .confirmSqueeze(state.confirmCount, active: surface == .wall)
             .position(x: w / 2, y: surface.v(738, 896))
 
-            PillButton(surface: surface, title: Text("Measure someone else"), control: .back,
+            PillButton(surface: surface, title: Text("Return to home"), control: .back,
                        style: .secondary, size: surface.s(CGSize(width: 340, height: 56), CGSize(width: 533, height: 86))) {
                 state.measureSomeoneElse()
             }

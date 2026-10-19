@@ -454,7 +454,7 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
     selection). Confirm turns the wall's check green for a moment before the choice opens.
   - Recording has no countdown: Record films five seconds at once, with a bar and the seconds
     left. The height is checked on a dial (knob 0.5 cm, Left / Right 1 cm, dragged on the phone),
-    then a Saved screen offers the member's growth (Confirm) or someone else (Cancel). Lookback on
+    then a Saved screen offers the member's growth (Confirm) or Return to home (Cancel). Lookback on
     the wall lays the date, height, growth and story segments over the life-size clip; its hint
     goes away at the first move. Black and white for now; colours and fonts come from `Theme`.
   - English only: the language setting and the translations are removed (17 Oct).

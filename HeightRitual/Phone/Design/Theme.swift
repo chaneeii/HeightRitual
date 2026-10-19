@@ -42,7 +42,7 @@ enum Theme {
     static let dialBackground = Color(white: 0.985)
     static let dialTick = Color(white: 0.45)
     @MainActor static var dialNeedle: Color { accent }
-    /// Secondary buttons (Retake, Measure someone else).
+    /// Secondary buttons (Retake, Return to home).
     static let secondaryButton = Color(white: 0xF2 / 255)
     /// Secondary buttons on the wall, white text.
     static let wallSecondaryButton = Color(white: 0xB3 / 255)

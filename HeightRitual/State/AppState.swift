@@ -653,7 +653,7 @@ final class AppState {
         }
     }
 
-    /// "Measure someone else": back to the wheel.
+    /// "Return to home": back to the wheel.
     func measureSomeoneElse() {
         guard route == .makeSaved else { return }
         go(to: .home)

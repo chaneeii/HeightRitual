@@ -51,12 +51,14 @@ struct CursorView: View {
     var size: CGFloat
     /// Changes whenever the selection moves.
     var trigger: AnyHashable
+    /// The point colour unless a screen has its own highlight.
+    var color: Color?
 
     var body: some View {
         Image("Cursor")
             .resizable()
             .scaledToFit()
-            .foregroundStyle(Theme.accent)
+            .foregroundStyle(color ?? Theme.accent)
             .frame(width: size, height: size)
             .keyframeAnimator(initialValue: 1.0, trigger: trigger) { content, scale in
                 content.scaleEffect(scale, anchor: .topLeading)

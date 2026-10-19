@@ -29,6 +29,8 @@ enum Theme {
     static let hint = Color(white: 0x6B / 255)
     /// The text cursor in the name field.
     @MainActor static var caret: Color { accent }
+    /// The selection on the member menu (Record or Lookback): a blue of its own.
+    static let menuHighlight = Palette.color(2)
     /// The outline to stand in and the foot marks, on the camera picture and the wall.
     static let guide = Color(white: 0.88)
     /// Record (the one coloured control: it films).

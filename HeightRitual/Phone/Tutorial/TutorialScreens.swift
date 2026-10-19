@@ -232,29 +232,32 @@ struct TutorialContent: View {
         }
     }
 
+    /// Like a page of a height chart: a margin with two pencil lines, then what the app does.
     private var welcomeList: some View {
-        HStack(spacing: 18) {
-            // Two pencil lines, like the marks on a doorframe.
-            HStack(spacing: 10) {
-                Capsule().fill(Theme.track).frame(width: 3)
-                Capsule().fill(Theme.track).frame(width: 3)
+        HStack(spacing: 0) {
+            HStack(spacing: 8) {
+                Rectangle().fill(Theme.card).frame(width: 26)
+                Rectangle().fill(Theme.track).frame(width: 1.5)
+                Rectangle().fill(Theme.track).frame(width: 1.5)
             }
-            .frame(height: 230)
-            VStack(alignment: .leading, spacing: 22) {
-                row("video", "Film five seconds at the wall")
-                row("ruler", "Check the height together")
-                row("clock.arrow.circlepath", "See every year again, life-size")
-                row("lock", "Kept only on this phone")
+            VStack(alignment: .leading, spacing: 14) {
+                row("video", "Film a few seconds")
+                row("ruler", "Check the height")
+                row("clock.arrow.circlepath", "Look back, life-size")
+                row("lock", "Stays on this phone")
             }
+            .padding(.leading, 24)
             Spacer(minLength: 0)
+            Rectangle().fill(Theme.track).frame(width: 1)
         }
-        .padding(.horizontal, 48)
+        .frame(width: 330, height: 260)
     }
 
     private func row(_ symbol: String, _ text: LocalizedStringKey) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: symbol).font(.system(size: 17)).frame(width: 24)
-            Text(text).font(.system(size: 17))
+            Circle().fill(Theme.card).frame(width: 34, height: 34)
+                .overlay(Image(systemName: symbol).font(.system(size: 15, weight: .medium)))
+            Text(text).font(.system(size: 17, weight: .medium))
         }
         .foregroundStyle(Theme.ink)
     }
@@ -340,8 +343,8 @@ struct TutorialContent: View {
                 }
                 .padding(.top, 108)
             }
-            .scaleEffect(0.82)
-            .frame(height: 160)
+            // The same dial as the real height check, full width.
+            .frame(width: 402, height: 180)
         }
     }
 

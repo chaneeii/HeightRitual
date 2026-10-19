@@ -28,7 +28,7 @@ struct MemberMenuOverlay: View {
             if surface == .wall {
                 let cardSize = CGSize(width: 229, height: 320)
                 let center = choice == .record ? CGPoint(x: 177.8, y: 538) : CGPoint(x: 430.2, y: 538)
-                CursorView(size: 65, trigger: choice)
+                CursorView(size: 65, trigger: choice, color: Theme.menuHighlight)
                     .position(x: center.x + cardSize.width / 2 - 54 + 32, y: center.y + cardSize.height / 2 - 33 + 32)
 
                 caption(choice, name: name)
@@ -85,7 +85,7 @@ struct MemberMenuOverlay: View {
         .background(Theme.choice, in: RoundedRectangle(cornerRadius: radius))
         .overlay {
             RoundedRectangle(cornerRadius: radius)
-                .strokeBorder(Theme.accent, lineWidth: surface == .wall && selected ? 8.5 : 0)
+                .strokeBorder(Theme.menuHighlight, lineWidth: surface == .wall && selected ? 8.5 : 0)
         }
         .confirmSqueeze(state.confirmCount, active: selected)
 

@@ -135,51 +135,48 @@ States, not separate screens:
 
 ## 6. Controller
 
-Layout from the team sketch (5 Oct):
+The box, seen from above (19 Oct; replaces the 5 Oct sketch). Powered by a USB power bank.
 
 ```
- (o) recording light    make [==o ] memory        auto play (toggle)
-     ( Record / Stop )                               ( KNOB )
- ( Cancel / Back )   < Left   ( Confirm )   Right >
+ [ Back ]                    ( Knob )
+
+ < Left       ( Confirm )      Right >
 ```
 
-| Control | Type | Sends |
+| Control | Part | Sends |
 |---|---|---|
-| Mode switch | Two-position slide switch | Make or Memory, on change and on connect |
-| Auto play | Latching push switch | "Toggle" on every change |
-| Record / Stop | Momentary button | Press |
-| Knob | Potentiometer, 24 steps end to end | Relative steps |
-| Cancel / Back | Momentary button | Press |
-| Left, Confirm, Right | Momentary buttons | Press |
-| Recording light | Red LED | Driven by the app |
-| Mode lights (optional) | Two LEDs, make and memory | Driven by the app |
+| Back | Momentary push button | Press |
+| Knob | Rotary encoder (EC11 / KY-040), endless, with clicks | Relative clicks, + clockwise |
+| Left, Right | Momentary push buttons | Press |
+| Confirm | Round momentary push button; also starts and stops filming | Press |
+
+No mode switch, Record button, auto play switch or recording light any more. The app shows the
+mode, starts filming on Confirm and auto play is a setting. The light characteristic stays in the
+protocol and drives the LED on the ESP32 board, which is not visible in the closed box.
 
 The controller only reports what was used. The app decides what it means.
 
 ### What each control does on each screen
 
-| Screen | Knob | Left / Right | Confirm | Cancel / Back | Record / Stop | Auto play |
-|---|---|---|---|---|---|---|
-| M1, R1 choose a family member | Move highlight | Move highlight | Open | | | |
-| M2 film: ready | | | Start countdown | Back to M1 | Start countdown | |
-| M2 film: countdown, filming | | | | Discard, back to ready | Stop early | |
-| M3 height: cutting out | | | | Discard, back to M2 | | |
-| M3 height | +/- 0.5 cm per step | -1 / +1 cm | Save | Retake (back to M2) | | |
-| R2 wall: manual | Previous / next record | Previous / next record | Replay clip | Back to R1 | | Start auto play |
-| R2 wall: auto play | Stop, then move | Stop, then move | Stop | Stop | | Stop |
-| S list (projector grid) | Move through Setup guide and the tiles | Previous / next | Open (Units only so far) | Close Settings | | |
-| S4 units | Choose a unit | Centimetres / feet and inches | Save, back to the grid | Back to the grid | | |
-| S2 fit to wall | Change selected value | Select value | Done | Done | | |
-
-Mode switch, on every screen: Make opens M1; Memory opens R1. Leaving Make with an unsaved clip
-discards it and shows "Not saved" for two seconds. Mode can also be changed with the tabs on the
-phone; the most recent input wins.
+| Screen | Knob | Left / Right | Confirm | Back |
+|---|---|---|---|---|
+| Home wheel | Turn the wheel | Previous / next member | Open the member menu | |
+| Member menu | Record or Lookback | Record / Lookback | Choose | Close the menu |
+| Add member (letter wheel) | Move through the keys | Previous / next key | Press the key (a letter, delete or done) | Back to home |
+| Film: ready | | | Start filming (3-2-1, then 5 s) | Back to the member menu |
+| Film: filming | | | Stop early | Discard, back to ready |
+| Height check | +/- 0.1 cm per click | -1 / +1 cm | Save | Retake |
+| Saved | | | See the growth (Lookback) | Return to home |
+| Lookback | Previous / next record | Previous / next record | Replay the clip | Back to the member menu |
+| Lookback, auto play on | Stop, then move | Stop, then move | Stop | Stop |
+| Settings on the wall | Move through the tiles | Previous / next | Open | Close |
+| Onboarding with the controller | As each step says | | Next | Previous step |
 
 In ft/in the knob and Left / Right step by 1/4 inch and 1 inch.
 
 ### Bluetooth LE protocol
 
-Device name `HeightController`. No pairing; found by service UUID.
+Device name `MemoryMeter` (was `HeightController`). No pairing; the app finds it by service UUID.
 
 | Item | UUID | Properties |
 |---|---|---|
@@ -189,14 +186,11 @@ Device name `HeightController`. No pairing; found by service UUID.
 
 | controlId | Event | value (signed 8-bit) |
 |---|---|---|
-| 1 | Knob turn | Steps since the last packet, + clockwise |
-| 11 | Record / Stop | 1 |
+| 1 | Knob turn | Clicks since the last packet, + clockwise |
 | 13 | Confirm | 1 |
-| 23 | Cancel / Back | 1 |
 | 14 | Left | 1 |
 | 15 | Right | 1 |
-| 31 | Mode switch | 0 = Memory, 1 = Make. Sent on change and when the app subscribes |
-| 32 | Auto play | 1 = toggle |
+| 23 | Back | 1 |
 
 | Light byte | Value | Meaning |
 |---|---|---|
@@ -204,10 +198,13 @@ Device name `HeightController`. No pairing; found by service UUID.
 | | 1 | Slow blink: countdown |
 | | 2 | Steady: filming or cutting out |
 | | 3 | Three quick flashes, then off: saved |
-| mode (optional) | 0 / 1 | Memory light on / Make light on |
 
-Debounce (25 ms) is done in the firmware. The app ignores an identical non-knob event within 100 ms.
-IDs 12 (Playback) and 21 (Push) from earlier versions are no longer used.
+Debounce (25 ms) is done in the firmware; knob clicks are summed and sent at most every 20 ms.
+The app ignores an identical non-knob event within 100 ms. The app still understands 11 (Record),
+31 (Mode) and 32 (Auto play) from the older boxes; the v4 box does not send them.
+
+Settings > Controller shows the box drawn as above and a checklist (Back, knob both ways, Left,
+Confirm, Right) that fills in as each packet arrives, plus the raw packets.
 
 ## 7. Setup
 

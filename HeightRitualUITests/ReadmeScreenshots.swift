@@ -59,7 +59,8 @@ final class ReadmeScreenshots: XCTestCase {
         for (label, name, scroll) in [("Setup guide", "S-setup-guide", false), ("Controller", "S6-controller", true),
                                       ("Permissions", "S5-permissions", true)] {
             app.launch()
-            XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 5))
+            if app.buttons["Set up later"].waitForExistence(timeout: 3) { app.buttons["Set up later"].tap() }
+            XCTAssertTrue(app.buttons["Settings"].firstMatch.waitForExistence(timeout: 5))
             app.buttons["Settings"].firstMatch.tap(); pause()
             if scroll { app.swipeUp(); pause() }
             tapFirst("label BEGINSWITH '\(label)'"); pause(1.5); save(name)

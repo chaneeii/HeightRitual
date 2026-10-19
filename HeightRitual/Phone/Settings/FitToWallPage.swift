@@ -8,10 +8,18 @@ struct FitToWallPage: View {
     var body: some View {
         @Bindable var state = state
         let wall = state.settings.wall
-        let logical = wall.logicalSize(for: state.wallSize)
-        let top = Int(wall.visibleTopCM(imageHeight: Double(logical.height)))
 
         Form {
+            Section("Rotation") {
+                Picker("Rotation", selection: Binding(get: { state.settings.wall.rotation },
+                                                      set: { state.settings.wall.rotation = $0 })) {
+                    Text("Upright").tag(0)
+                    Text("Side, 90°").tag(90)
+                    Text("Side, -90°").tag(-90)
+                }
+                .pickerStyle(.segmented)
+            }
+
             Section {
                 WallCopy()
                     .frame(maxHeight: 320)
@@ -44,39 +52,9 @@ struct FitToWallPage: View {
             }
 
             Section {
-                row(.shift, value: String(format: "%.0f pt", wall.shiftPt),
-                    binding: Binding(get: { state.settings.wall.shiftPt },
-                                     set: { state.settings.wall.shiftPt = $0.rounded() }),
-                    range: -600...600)
-            } header: {
-                Text(FitValue.shift.title)
-            } footer: {
-                Text("Moves the marks and the person sideways, to where people stand at the wall.")
-            }
-
-            Section {
                 Toggle("Fine steps", isOn: $state.fitFine)
             } footer: {
                 Text("Each knob turn or - / + moves 5 times less, for the last millimetres. The controller's knob changes the value in bold; Left and Right choose another one.")
-            }
-
-            Section("Rotation") {
-                Picker("Rotation", selection: Binding(get: { state.settings.wall.rotation },
-                                                      set: { state.settings.wall.rotation = $0 })) {
-                    Text("Upright").tag(0)
-                    Text("Side, 90°").tag(90)
-                    Text("Side, -90°").tag(-90)
-                }
-                .pickerStyle(.segmented)
-            }
-
-            Section {
-                LabeledContent("Top of picture", value: "\(top) cm")
-                    .monospacedDigit()
-            } footer: {
-                if top < 170 {
-                    Text("The picture must reach at least 170 cm. Move the projector further from the wall.")
-                }
             }
         }
     }

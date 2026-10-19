@@ -2032,29 +2032,6 @@
         }
       }
     },
-    "Left and right" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "좌우"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vänster och höger"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "左右"
-          }
-        }
-      }
-    },
     "Light" : {
       "localizations" : {
         "ko" : {
@@ -2322,28 +2299,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "麦克风"
-          }
-        }
-      }
-    },
-    "Moves the marks and the person sideways, to where people stand at the wall." : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "눈금과 사람을 좌우로 옮겨요. 벽 앞에서 사람이 서는 자리에 맞추세요."
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Flyttar markeringarna och personen i sidled, dit man står vid väggen."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "左右移动刻度和人像，对准人站在墙前的位置。"
           }
         }
       }
@@ -4272,28 +4227,6 @@
         }
       }
     },
-    "The picture must reach at least 170 cm. Move the projector further from the wall." : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "화면이 최소 170 cm까지 와야 해요. 프로젝터를 벽에서 더 멀리 두세요."
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bilden måste nå minst 170 cm. Flytta projektorn längre från väggen."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "画面至少要达到 170 厘米。请把投影仪移得离墙更远。"
-          }
-        }
-      }
-    },
     "The projector on a stand 2.5 m from the wall, lens around 0.97 m above the floor. A child stands against the wall in the light." : {
       "localizations" : {
         "ko" : {
@@ -4401,29 +4334,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "此操作无法撤销。"
-          }
-        }
-      }
-    },
-    "Top of picture" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "화면 위쪽 끝"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bildens överkant"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "画面顶部"
           }
         }
       }

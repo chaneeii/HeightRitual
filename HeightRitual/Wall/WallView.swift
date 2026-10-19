@@ -13,11 +13,9 @@ struct WallView: View {
             let calibration = state.settings.wall
             let picture = calibration.logicalSize(for: state.wallSize)
             let strip = calibration.stripSize(for: state.wallSize)
-            let offset = calibration.stripOffset(for: state.wallSize)
             let outer = isExternal ? picture : strip
             let scale = isExternal ? 1 : min(geo.size.width / strip.width, geo.size.height / strip.height)
-            // The part of Left and right that moved the strip no longer moves the drawing in it.
-            let model = { var m = state.wallModel; m.calibration.shiftPt -= offset; return m }()
+            let model = state.wallModel
             WallCanvas(model: model)
                 .overlay { WallClipOverlay(model: model, player: state.wallPlayer.player) }
                 .overlay {
@@ -29,7 +27,6 @@ struct WallView: View {
                 }
                 .frame(width: strip.width, height: strip.height)
                 .clipped()
-                .offset(x: isExternal ? CGFloat(offset) : 0)
                 .frame(width: outer.width, height: outer.height)
                 .background(Color.black)
                 .rotationEffect(.degrees(isExternal ? Double(calibration.rotation) : 0))
@@ -55,7 +52,7 @@ struct WallGeometry {
     let size: CGSize
     let calibration: Calibration
 
-    var centerX: CGFloat { size.width / 2 + CGFloat(calibration.shiftPt) }
+    var centerX: CGFloat { size.width / 2 }
     func y(cm: Double) -> CGFloat { CGFloat(calibration.y(cm: cm, imageHeight: Double(size.height))) }
     func y(mm: Int) -> CGFloat { y(cm: Double(mm) / 10) }
     func length(cm: Double) -> CGFloat { CGFloat(cm * calibration.ptPerCM) }

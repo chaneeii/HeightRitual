@@ -114,7 +114,7 @@ Each step can be reopened from Settings.
 | R3 | One record | Clip, date, height, growth since the record before. Change height, Delete | Unchanged |
 | A1 | Add or edit member | Name, colour, Delete member | Unchanged |
 | S | Settings | List: Family, Setup guide, Fit to wall, Camera position, Units, Sound, Controller, Permissions, Sample family, Delete everything | Unchanged |
-| S2 | Fit to wall | Three sliders (floor line, size, left/right), fine-step toggle, rotation, "Top of picture: 176 cm" | Centimetre ruler: 0, 100, 150 highlighted, dashed line at 170 |
+| S2 | Fit to wall | Rotation at the top, two sliders (floor line, size), fine-step toggle | Centimetre ruler: 0, 100, 150 highlighted, dashed line at 170 |
 | S3 | Camera position | Camera preview with two draggable lines: floor and 100 cm. Text: put them on the projected lines | Two bright lines at 0 and 100 cm |
 | S4 | Units | cm or feet and inches | Unchanged |
 | S5 | Permissions | Camera, Bluetooth, Microphone (only if sound is on): state of each, button to open iOS Settings | Unchanged |
@@ -219,13 +219,13 @@ Sources: `docs/setup-guide/`.
 ### S1 Projector placement (removed)
 
 There is no placement page. The projector is placed by hand; the picture must reach at least 170 cm
-(S2 shows "Top of picture"). The wall rotation defaults to -90 degrees, the group's projector on its
+(the ruler on the wall shows "Top of picture" while fitting). The wall rotation defaults to -90 degrees, the group's projector on its
 side, and is changed on S2.
 
 ### S2 Fit to wall
 
-Calibration holds four values: `floorPt` (points from the bottom edge to the floor line),
-`ptPerCM`, `shiftPt` (horizontal offset) and `rotation` (0, 90 or -90 degrees).
+Calibration holds three values: `floorPt` (points from the bottom edge to the floor line),
+`ptPerCM` and `rotation` (0, 90 or -90 degrees). The drawing is always centred left to right.
 `y(cm) = imageHeight - floorPt - cm * ptPerCM`.
 
 Procedure: tape marks on the wall at 0 and 100 cm; move the floor line until the projected 0 sits on
@@ -440,6 +440,6 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
     anyway", which keeps the clip as filmed with the height set by hand (testing without a person).
   - The cut-out writes no sound yet; the clip as filmed keeps it.
   - The wall uses only a portrait strip of the projected picture: 9:16, the picture's full height
-    (so the reach from the floor does not change), black elsewhere. Left and right moves the strip
-    within a wide picture. Every copy of the wall on the phone (R2, M3, S2, full screen) shows
+    (so the reach from the floor does not change), black elsewhere. The strip is centred in a wide
+    picture. Every copy of the wall on the phone (R2, M3, S2, full screen) shows
     exactly that strip, upright, so it reads like the phone itself (decided 12 Oct).

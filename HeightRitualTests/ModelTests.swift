@@ -107,21 +107,18 @@ final class ModelTests: XCTestCase {
     }
 
     func testCalibration() {
-        let wall = Calibration(floorPt: 40, ptPerCM: 5, shiftPt: 0, rotation: 0)
+        let wall = Calibration(floorPt: 40, ptPerCM: 5, rotation: 0)
         XCTAssertEqual(wall.y(cm: 100, imageHeight: 1080), 540)
         XCTAssertEqual(wall.visibleTopCM(imageHeight: 1080), 208)
         XCTAssertEqual(Calibration(rotation: 90).logicalSize(for: CGSize(width: 1920, height: 1080)),
                        CGSize(width: 1080, height: 1920))
     }
 
-    /// Only a full-height 9:16 strip is used; Left and right moves it within a wide picture.
+    /// Only a full-height 9:16 strip is used, centred in a wide picture.
     func testPortraitStrip() {
         let screen = CGSize(width: 1920, height: 1080)
         XCTAssertEqual(Calibration(rotation: 0).stripSize(for: screen), CGSize(width: 607.5, height: 1080))
         XCTAssertEqual(Calibration(rotation: 90).stripSize(for: screen), CGSize(width: 1080, height: 1920))
-        XCTAssertEqual(Calibration(shiftPt: 100, rotation: 0).stripOffset(for: screen), 100)
-        XCTAssertEqual(Calibration(shiftPt: 2000, rotation: 0).stripOffset(for: screen), 656.25)
-        XCTAssertEqual(Calibration(shiftPt: 50, rotation: 90).stripOffset(for: screen), 0)
     }
 
     // Nobody found: Retake, or keep the clip as filmed for testing.

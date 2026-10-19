@@ -25,13 +25,12 @@ enum WizardStep: Int, CaseIterable {
 
 /// The value the knob changes on the fit to wall page (S2).
 enum FitValue: Int, CaseIterable {
-    case floor, size, shift
+    case floor, size
 
     var title: String {
         switch self {
         case .floor: return L("Floor line")
         case .size: return L("Size")
-        case .shift: return L("Left and right")
         }
     }
 }

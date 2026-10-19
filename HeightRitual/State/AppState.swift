@@ -705,7 +705,6 @@ final class AppState {
         switch fitValue {
         case .floor: settings.wall.floorPt = max(0, settings.wall.floorPt + n * (fitFine ? 1 : 5))
         case .size: settings.wall.ptPerCM = min(max(settings.wall.ptPerCM + n * (fitFine ? 0.01 : 0.05), 1), 20)
-        case .shift: settings.wall.shiftPt += n * (fitFine ? 1 : 5)
         }
     }
 

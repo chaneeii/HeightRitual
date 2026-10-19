@@ -5,10 +5,12 @@ import XCTest
 @MainActor
 final class WallModelTests: XCTestCase {
 
-    func testSettingsShowFaintRuler() {
+    func testSettingsShowTiles() {
         let h = Harness()
         h.state.openSettings()
-        XCTAssertEqual(h.state.wallModel.kind, .idle)
+        XCTAssertEqual(h.state.wallModel.kind, .settingsMenu)
+        h.state.openSettingsPage(.family)
+        XCTAssertEqual(h.state.wallModel.kind, .idle, "pages without their own wall leave a faint ruler")
     }
 
     func testHomeShowsTheScreenItself() {

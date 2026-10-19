@@ -12,7 +12,19 @@ enum HeightState: Equatable {
 }
 
 enum SettingsPage: Equatable {
-    case list, family, fitToWall, cameraPosition, units, controller, permissions
+    case list, family, setupGuide, fitToWall, cameraPosition, units, controller, permissions
+}
+
+/// What the controller moves through on the projector's settings grid, in order: Setup guide
+/// (beside the title), then the tiles row by row. Only Units has a projector page so far.
+enum SettingsTile: Int, CaseIterable {
+    case setupGuide, family, fitToWall, cameraPosition, units, appearance, sound,
+         controller, permissions, sampleFamily, deleteEverything
+
+    /// The page Select opens from the projector grid; nil until that page exists on the projector.
+    var page: SettingsPage? {
+        self == .units ? .units : nil
+    }
 }
 
 /// First-start wizard: what the app is, then S5, S2, S3 in order.
@@ -24,13 +36,12 @@ enum WizardStep: Int, CaseIterable {
 
 /// The value the knob changes on the fit to wall page (S2).
 enum FitValue: Int, CaseIterable {
-    case floor, size, shift
+    case floor, size
 
     var title: String {
         switch self {
         case .floor: return L("Floor line")
         case .size: return L("Size")
-        case .shift: return L("Left and right")
         }
     }
 }

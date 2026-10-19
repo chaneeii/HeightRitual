@@ -28,8 +28,6 @@ struct Calibration: Codable, Equatable {
     var floorPt: Double = 40
     /// How many projector points one real centimetre takes on the wall.
     var ptPerCM: Double = 5
-    /// Moves the drawing left or right, in points.
-    var shiftPt: Double = 0
     /// 0 when the projector stands normally; 90 or -90 when it lies on its side. -90 by default:
     /// the group's projector lies on its side that way.
     var rotation: Int = -90
@@ -48,13 +46,6 @@ struct Calibration: Codable, Equatable {
     func stripSize(for screen: CGSize) -> CGSize {
         let picture = logicalSize(for: screen)
         return CGSize(width: min(picture.width, picture.height * Self.stripAspect), height: picture.height)
-    }
-
-    /// How far the strip sits right of the picture's centre. Left and right moves the strip while
-    /// there is room in the picture; what is left over moves the drawing inside the strip.
-    func stripOffset(for screen: CGSize) -> Double {
-        let room = Double(logicalSize(for: screen).width - stripSize(for: screen).width) / 2
-        return min(max(shiftPt, -room), room)
     }
 
     /// `y(cm) = imageHeight - floorPt - cm * ptPerCM`

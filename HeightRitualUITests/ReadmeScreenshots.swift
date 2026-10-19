@@ -56,11 +56,12 @@ final class ReadmeScreenshots: XCTestCase {
 
     /// One settings page per launch, so no back navigation inside the sheet is needed.
     func testCaptureSettingsPages() {
-        for (label, name) in [("Controller", "S6-controller"), ("Permissions", "S5-permissions")] {
+        for (label, name, scroll) in [("Setup guide", "S-setup-guide", false), ("Controller", "S6-controller", true),
+                                      ("Permissions", "S5-permissions", true)] {
             app.launch()
             XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 5))
             app.buttons["Settings"].firstMatch.tap(); pause()
-            app.swipeUp(); pause()
+            if scroll { app.swipeUp(); pause() }
             tapFirst("label BEGINSWITH '\(label)'"); pause(1.5); save(name)
             app.terminate()
         }

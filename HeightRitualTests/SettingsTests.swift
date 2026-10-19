@@ -69,9 +69,12 @@ final class SettingsTests: XCTestCase {
         h.openMemoryWall()
         s.openSettings()
         XCTAssertEqual(s.route, .settings(.list))
+        XCTAssertEqual(s.wallModel.kind, .settingsMenu, "the wall shows the settings as tiles")
         s.openSettingsPage(.units)
+        XCTAssertEqual(s.wallModel.kind, .settingsUnits, "the projector shows its own Units page")
         s.handle(.cancel)
         XCTAssertEqual(s.route, .settings(.list), "Back on a page goes to the list")
+        XCTAssertEqual(s.wallModel.kind, .settingsMenu)
         s.handle(.cancel)
         XCTAssertEqual(s.route, .memoryWall, "Back on the list returns where Settings was opened")
     }

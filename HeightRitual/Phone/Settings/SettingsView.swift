@@ -52,6 +52,7 @@ struct SettingsPageView: View {
         switch page {
         case .list: return "Settings"
         case .family: return "Family"
+        case .setupGuide: return "Setup guide"
         case .fitToWall: return "Fit to wall"
         case .cameraPosition: return "Camera position"
         case .units: return "Units"
@@ -64,6 +65,7 @@ struct SettingsPageView: View {
         switch page {
         case .list: SettingsList()
         case .family: FamilyPage()
+        case .setupGuide: SetupGuidePage()
         case .fitToWall: FitToWallPage()
         case .cameraPosition: CameraPositionPage()
         case .units: UnitsPage()
@@ -76,9 +78,9 @@ struct SettingsPageView: View {
 /// The settings list's dark blue-grey look. The same in light and dark appearance, so the list
 /// is always drawn with dark-appearance text and controls.
 enum SettingsStyle {
-    static let background = Color(red: 0.10, green: 0.13, blue: 0.18)
-    static let row = Color(red: 0.17, green: 0.21, blue: 0.28)
-    static let icon = Color(red: 0.56, green: 0.71, blue: 0.91)
+    static let background = Color(red: 0.20, green: 0.40, blue: 0.23)
+    static let row = Color(red: 0.60, green: 0.75, blue: 0.60)
+    static let icon = Color(red: 0.10, green: 0.10, blue: 0.10)
 }
 
 private struct SettingsList: View {
@@ -95,6 +97,8 @@ private struct SettingsList: View {
             }
             .listRowBackground(SettingsStyle.row)
             Section {
+                link(.setupGuide, "Setup guide", detail: "Where to put the projector and the phone",
+                     systemImage: "book")
                 link(.fitToWall, "Fit to wall", detail: "Make projected centimetres match a tape measure",
                      systemImage: "ruler")
                 link(.cameraPosition, "Camera position", detail: "Where the floor and 100 cm are in the camera picture",
@@ -107,17 +111,10 @@ private struct SettingsList: View {
             }
             .listRowBackground(SettingsStyle.row)
             Section {
-                Picker(selection: $settings.unit) {
-                    Text("Centimetres").tag(HeightUnit.cm)
-                    Text("Feet and inches").tag(HeightUnit.ftin)
-                } label: {
-                    Label {
-                        Text("Units")
-                        Text("For every height on the phone and the wall")
-                    } icon: {
-                        Image(systemName: "textformat.123")
-                    }
-                }
+                // A page of its own, so the projector shows its Units page too (route .settings(.units)).
+                link(.units, "Units", detail: "For every height on the phone and the wall",
+                     systemImage: "textformat.123",
+                     value: settings.unit == .cm ? L("Centimetres") : L("Feet and inches"))
                 AppearancePicker()
                 Toggle(isOn: $settings.soundOn) {
                     Label {

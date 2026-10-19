@@ -19,6 +19,11 @@ struct WallModel: Equatable {
         /// Home, the member menu and adding a member: the wall shows the screen itself
         /// (`WallScreen`), driven by the controller.
         case screen
+        /// S list: the settings as tiles in two columns, Setup guide as a pill beside the title. Only shown; the
+        /// settings are changed on the phone.
+        case settingsMenu
+        /// S4 Units: the two units, the controller's choice outlined. Only Units has a page so far.
+        case settingsUnits
     }
 
     struct Mark: Equatable {
@@ -106,6 +111,12 @@ extension AppState {
 
         case .settings(.cameraPosition), .wizard(.cameraPosition):
             model.kind = .cameraLines
+
+        case .settings(.list):
+            model.kind = .settingsMenu
+
+        case .settings(.units):
+            model.kind = .settingsUnits
 
         case .settings:
             model.kind = .idle

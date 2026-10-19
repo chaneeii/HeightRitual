@@ -113,10 +113,10 @@ Each step can be reopened from Settings.
 | R2 | Memory: wall | Segmented control "Auto play / Manual" at the top. Copy of the wall. Manual: Previous, Next, Replay. Auto play: Stop. No Record: filming is only in Make | Marks for all records; the selected record's clip life-size; caption "Nora, Aug 2025, 121.0 cm". Auto play: each record in order |
 | R3 | One record | Clip, date, height, growth since the record before. Change height, Delete | Unchanged |
 | A1 | Add or edit member | Name, colour, Delete member | Unchanged |
-| S | Settings | List: Family, Fit to wall, Camera position, Units, Sound, Controller, Permissions, Sample family, Delete everything | Unchanged |
-| S2 | Fit to wall | Three sliders (floor line, size, left/right), fine-step toggle, rotation, "Top of picture: 176 cm" | Centimetre ruler: 0, 100, 150 highlighted, dashed line at 170 |
+| S | Settings | List: Family, Setup guide, Fit to wall, Camera position, Units, Sound, Controller, Permissions, Sample family, Delete everything | Back icon top left, the same items as rounded tiles in two columns with their current values, Setup guide as a pill beside the title; the controller's choice outlined in orange |
+| S2 | Fit to wall | Rotation at the top, two sliders (floor line, size), fine-step toggle | Centimetre ruler: 0, 100, 150 highlighted, dashed line at 170 |
 | S3 | Camera position | Camera preview with two draggable lines: floor and 100 cm. Text: put them on the projected lines | Two bright lines at 0 and 100 cm |
-| S4 | Units | cm or feet and inches | Unchanged |
+| S4 | Units | cm or feet and inches; choosing one saves it and goes back to the list | Back icon, "Units", the two units with the saved one ticked and the controller's choice outlined in orange |
 | S5 | Permissions | Camera, Bluetooth, Microphone (only if sound is on): state of each, button to open iOS Settings | Unchanged |
 | S6 | Controller | Connected or searching, last control used (for testing), Forget this controller | Unchanged |
 | W | First-start wizard | S5, S2, S3 in order with Next and Skip | As in each step |
@@ -167,6 +167,8 @@ The controller only reports what was used. The app decides what it means.
 | M3 height | +/- 0.5 cm per step | -1 / +1 cm | Save | Retake (back to M2) | | |
 | R2 wall: manual | Previous / next record | Previous / next record | Replay clip | Back to R1 | | Start auto play |
 | R2 wall: auto play | Stop, then move | Stop, then move | Stop | Stop | | Stop |
+| S list (projector grid) | Move through Setup guide and the tiles | Previous / next | Open (Units only so far) | Close Settings | | |
+| S4 units | Choose a unit | Centimetres / feet and inches | Save, back to the grid | Back to the grid | | |
 | S2 fit to wall | Change selected value | Select value | Done | Done | | |
 
 Mode switch, on every screen: Make opens M1; Memory opens R1. Leaving Make with an unsaved clip
@@ -209,16 +211,23 @@ IDs 12 (Playback) and 21 (Push) from earlier versions are no longer used.
 
 ## 7. Setup
 
+### Setup guide
+
+Two pictures with the steps written below them: the projector lens 2.5 m from the wall and 0.97 m
+above the floor; the phone right next to it at the same distance and height, rear camera facing the
+wall, the parent behind them with the controller. Tapping a picture shows it full size with Done.
+Sources: `docs/setup-guide/`.
+
 ### S1 Projector placement (removed)
 
 There is no placement page. The projector is placed by hand; the picture must reach at least 170 cm
-(S2 shows "Top of picture"). The wall rotation defaults to -90 degrees, the group's projector on its
+(the ruler on the wall shows "Top of picture" while fitting). The wall rotation defaults to -90 degrees, the group's projector on its
 side, and is changed on S2.
 
 ### S2 Fit to wall
 
-Calibration holds four values: `floorPt` (points from the bottom edge to the floor line),
-`ptPerCM`, `shiftPt` (horizontal offset) and `rotation` (0, 90 or -90 degrees).
+Calibration holds three values: `floorPt` (points from the bottom edge to the floor line),
+`ptPerCM` and `rotation` (0, 90 or -90 degrees). The drawing is always centred left to right.
 `y(cm) = imageHeight - floorPt - cm * ptPerCM`.
 
 Procedure: tape marks on the wall at 0 and 100 cm; move the floor line until the projected 0 sits on
@@ -433,8 +442,8 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
     anyway", which keeps the clip as filmed with the height set by hand (testing without a person).
   - The cut-out writes no sound yet; the clip as filmed keeps it.
   - The wall uses only a portrait strip of the projected picture: 9:16, the picture's full height
-    (so the reach from the floor does not change), black elsewhere. Left and right moves the strip
-    within a wide picture. Every copy of the wall on the phone (R2, M3, S2, full screen) shows
+    (so the reach from the floor does not change), black elsewhere. The strip is centred in a wide
+    picture. Every copy of the wall on the phone (R2, M3, S2, full screen) shows
     exactly that strip, upright, so it reads like the phone itself (decided 12 Oct).
   - Redesign (17 Oct, Figma "Ritual", branch feature/new-design). Members come first: Home is a
     wheel of member cards with an Add card last (knob and Left / Right turn it, Confirm opens).

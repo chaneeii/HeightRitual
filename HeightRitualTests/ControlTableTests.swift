@@ -297,6 +297,61 @@ final class ControlTableTests: XCTestCase {
         }
     }
 
+    // Rows: S list on the projector grid and S4 units — knob / Left / Right choose, Select opens
+    // or saves, Back goes back.
+    func testSettingsGridAndUnits() {
+        let h = Harness()
+        let s = h.state
+        s.settings.unit = .cm
+        h.openMemoryWall()
+        s.openSettings()
+        XCTAssertEqual(s.settingsHighlight, .setupGuide)
+        s.handle(.right)
+        XCTAssertEqual(s.settingsHighlight, .family)
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.list), "tiles without a projector page do nothing yet")
+        s.handle(.knob(3))
+        XCTAssertEqual(s.settingsHighlight, .units)
+        s.handle(.left)
+        s.handle(.right)
+        XCTAssertEqual(s.settingsHighlight, .units)
+        s.handle(.knob(-20))
+        XCTAssertEqual(s.settingsHighlight, .setupGuide, "stops at the first tile")
+        s.handle(.knob(4))
+
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.units))
+        XCTAssertEqual(s.wallModel.kind, .settingsUnits)
+        XCTAssertEqual(s.unitHighlight, .cm, "starts on the saved unit")
+        s.handle(.right)
+        XCTAssertEqual(s.unitHighlight, .ftin)
+        XCTAssertEqual(s.settings.unit, .cm, "nothing is saved before Select")
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.list), "Back leaves the unit unchanged")
+        XCTAssertEqual(s.settings.unit, .cm)
+
+        s.handle(.confirm)
+        s.handle(.knob(1))
+        s.handle(.confirm)
+        XCTAssertEqual(s.settings.unit, .ftin)
+        XCTAssertEqual(s.route, .settings(.list), "back to the grid after choosing")
+        XCTAssertEqual(s.settingsHighlight, .units, "the grid keeps its place")
+
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .memoryWall, "Back on the grid closes Settings")
+    }
+
+    func testUnitChosenOnThePhoneGoesBack() {
+        let h = Harness()
+        let s = h.state
+        s.settings.unit = .cm
+        s.openSettings()
+        s.openSettingsPage(.units)
+        s.chooseUnit(.ftin)
+        XCTAssertEqual(s.settings.unit, .ftin)
+        XCTAssertEqual(s.route, .settings(.list))
+    }
+
     // Row: S2 fit to wall — knob changes the value, Left / Right select it, Confirm / Cancel done.
     func testFitToWall() {
         let h = Harness()
@@ -316,12 +371,9 @@ final class ControlTableTests: XCTestCase {
         s.handle(.knob(1))
         XCTAssertEqual(s.settings.wall.ptPerCM, start.ptPerCM + 0.06, accuracy: 1e-9)
         s.handle(.right)
-        s.handle(.right)
-        XCTAssertEqual(s.fitValue, .shift)
-        s.handle(.knob(-1))
-        XCTAssertEqual(s.settings.wall.shiftPt, start.shiftPt - 1)
+        XCTAssertEqual(s.fitValue, .size, "the last value stays selected")
         s.handle(.left)
-        XCTAssertEqual(s.fitValue, .size)
+        XCTAssertEqual(s.fitValue, .floor)
 
         s.handle(.confirm)
         XCTAssertEqual(s.route, .settings(.list))

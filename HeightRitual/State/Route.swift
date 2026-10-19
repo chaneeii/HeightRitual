@@ -86,6 +86,21 @@ enum TutorialStep: Int, CaseIterable {
     var next: TutorialStep? { TutorialStep(rawValue: rawValue + 1) }
 }
 
+/// A control of the box, as the onboarding teaches it. Left and Right are one lesson.
+enum TutorialLesson: Hashable, CaseIterable {
+    case confirm, knob, arrows, back
+
+    init?(_ event: ControlEvent) {
+        switch event {
+        case .confirm: self = .confirm
+        case .knob: self = .knob
+        case .left, .right: self = .arrows
+        case .cancel: self = .back
+        default: return nil
+        }
+    }
+}
+
 /// Every screen of the app (SPEC 5). Changed only through `AppState.go(to:)`.
 /// Home is a wheel of member cards; choosing one opens the member menu (Record or Lookback).
 enum Route: Equatable {

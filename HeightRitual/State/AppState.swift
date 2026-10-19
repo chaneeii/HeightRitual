@@ -78,6 +78,11 @@ final class AppState {
     private(set) var tutorialMemberID: UUID?
     private(set) var tutorialMM = 1200
     private(set) var tutorialFilmLeft: Int?
+    /// Controls used at least once in the onboarding: filled with colour on its drawing.
+    private(set) var tutorialLearned: Set<TutorialLesson> = []
+    /// The lesson just learned, shown as a little toast for a moment.
+    private(set) var tutorialToast: TutorialLesson?
+    @ObservationIgnored private var toastTimer: ScheduledTask?
     /// The record just saved, for the "Saved" screen.
     private(set) var savedRecordID: UUID?
     /// "Turn the knob or press ◀ ▶ to look back" on the wall, until the first move.
@@ -954,6 +959,8 @@ final class AppState {
 
     /// Settings > Onboarding with controller.
     func startTutorial() {
+        tutorialLearned = []
+        tutorialToast = nil
         tutorialMemberID = nil
         tutorialFilmLeft = nil
         go(to: .tutorial(.welcome))
@@ -973,6 +980,7 @@ final class AppState {
 
     private func handleTutorial(_ event: ControlEvent, _ step: TutorialStep) {
         guard !confirmFlash else { return }
+        learn(event, on: step)
         if event == .cancel {
             // Back is a step back everywhere, which is also what the "Saved" step teaches.
             if step == .saved {
@@ -1063,6 +1071,17 @@ final class AppState {
         case .ready:
             if event == .confirm { confirmThen { [weak self] in self?.endTutorial() } }
         }
+    }
+
+    /// The first use of a control fills it in on the drawing and says so in a toast.
+    private func learn(_ event: ControlEvent, on step: TutorialStep) {
+        guard let lesson = TutorialLesson(event), !tutorialLearned.contains(lesson) else { return }
+        // Back on the first page leaves the onboarding; that does not count as learning it.
+        if lesson == .back && step == .welcome { return }
+        tutorialLearned.insert(lesson)
+        tutorialToast = lesson
+        toastTimer?.cancel()
+        toastTimer = scheduler.after(1.8) { [weak self] in self?.tutorialToast = nil }
     }
 
     /// Phone: tapping a key on the onboarding's letter wheel.

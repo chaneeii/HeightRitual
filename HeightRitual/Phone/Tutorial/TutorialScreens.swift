@@ -2,11 +2,13 @@ import SwiftUI
 
 /// The controller box drawn on the onboarding (Figma 238:5280 and on): Back top left, the knob
 /// top right, Left, Confirm and Right underneath. The controls a step uses are in colour, the rest
-/// gray. The pressed control squeezes. On the phone the drawing can be tapped like the box.
+/// gray, and every control already learned stays filled in. The pressed control squeezes. On the
+/// phone the drawing can be tapped like the box.
 struct ControllerDiagram: View {
     enum Control: Hashable { case back, knob, left, right, confirm }
 
     let active: Set<Control>
+    var learned: Set<TutorialLesson> = []
     var interactive = true
     var muted = false
     @Environment(AppState.self) private var state
@@ -25,9 +27,22 @@ struct ControllerDiagram: View {
                 .position(x: 212, y: 144)
         }
         .frame(width: 275, height: 195)
+        .animation(.easeInOut(duration: 0.35), value: learned)
     }
 
-    private func isOn(_ control: Control) -> Bool { !muted && active.contains(control) }
+    private func isOn(_ control: Control) -> Bool {
+        guard !muted else { return false }
+        return active.contains(control) || learned.contains(Self.lesson(control))
+    }
+
+    static func lesson(_ control: Control) -> TutorialLesson {
+        switch control {
+        case .back: return .back
+        case .knob: return .knob
+        case .left, .right: return .arrows
+        case .confirm: return .confirm
+        }
+    }
 
     private func pressed(_ control: Control) -> Bool {
         switch (control, state.lastControl) {
@@ -98,7 +113,7 @@ struct TutorialContent: View {
                     .foregroundStyle(Theme.ink)
                     .frame(width: w - 32)
                     .position(x: w / 2, y: 572)
-                ControllerDiagram(active: active, interactive: !onWall)
+                ControllerDiagram(active: active, learned: state.tutorialLearned, interactive: !onWall)
                     .position(x: w / 2, y: 697)
             } else {
                 Button { state.handle(.confirm) } label: {
@@ -114,10 +129,18 @@ struct TutorialContent: View {
                 .position(x: w / 2, y: 778)
             }
 
+            if let lesson = state.tutorialToast {
+                LessonToast(lesson: lesson)
+                    .id(lesson)
+                    .position(x: w / 2, y: 520)
+                    .transition(.scale(scale: 0.6).combined(with: .opacity))
+            }
+
             if !onWall {
                 TutorialBar()
             }
         }
+        .animation(.spring(response: 0.35, dampingFraction: 0.6), value: state.tutorialToast)
         .frame(width: Surface.phone.canvas.width, height: Surface.phone.canvas.height)
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: state.menuChoice)
     }
@@ -381,7 +404,8 @@ struct TutorialContent: View {
 
     private var ready: some View {
         VStack(spacing: 24) {
-            ControllerDiagram(active: [], interactive: false, muted: true)
+            // Everything learned: the whole box in colour.
+            ControllerDiagram(active: [], learned: state.tutorialLearned, interactive: false)
                 .scaleEffect(0.72)
                 .frame(width: 198, height: 140)
             VStack(spacing: 10) {
@@ -394,6 +418,49 @@ struct TutorialContent: View {
         }
         .foregroundStyle(Theme.ink)
         .offset(y: 40)
+    }
+}
+
+/// "You learned Confirm!": a little toast the first time a control is used.
+private struct LessonToast: View {
+    let lesson: TutorialLesson
+
+    var body: some View {
+        HStack(spacing: 10) {
+            icon
+            Text(message)
+                .font(Theme.label(17))
+                .foregroundStyle(Theme.paper)
+        }
+        .padding(.leading, 10)
+        .padding(.trailing, 18)
+        .padding(.vertical, 9)
+        .background(Theme.ink, in: Capsule())
+        .shadow(color: .black.opacity(0.2), radius: 10, y: 4)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var message: String {
+        switch lesson {
+        case .confirm: return "You learned Confirm!"
+        case .knob: return "You learned the knob!"
+        case .arrows: return "You learned Left and Right!"
+        case .back: return "You learned Back!"
+        }
+    }
+
+    @ViewBuilder private var icon: some View {
+        switch lesson {
+        case .confirm: ControlIcon(glyph: .confirm, size: 26, confirmed: true)
+        case .knob: ControlIcon(glyph: .knob, size: 26).foregroundStyle(Theme.paper)
+        case .arrows:
+            HStack(spacing: 2) {
+                ControlIcon(glyph: .left, size: 22)
+                ControlIcon(glyph: .right, size: 22)
+            }
+            .foregroundStyle(Theme.controllerArrow)
+        case .back: ControlIcon(glyph: .back, size: 26).foregroundStyle(Theme.controllerBack)
+        }
     }
 }
 

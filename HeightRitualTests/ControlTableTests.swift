@@ -399,8 +399,13 @@ final class ControlTableTests: XCTestCase {
         XCTAssertFalse(s.showsSettings, "the Settings sheet closes")
         h.confirm()
         XCTAssertEqual(s.route, .tutorial(.family))
+        XCTAssertEqual(s.tutorialLearned, [.confirm], "the first Confirm teaches it")
+        XCTAssertEqual(s.tutorialToast, .confirm)
+        h.scheduler.advance(2)
+        XCTAssertNil(s.tutorialToast, "the toast goes by itself")
         h.confirm()
         XCTAssertEqual(s.route, .tutorial(.name))
+        XCTAssertNil(s.tutorialToast, "only the first use shows a toast")
 
         s.handle(.knob(13))                 // A + 13 = N
         s.handle(.confirm)
@@ -452,6 +457,7 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.selectedRecord?.heightMM, 1245)
         h.confirm()
         XCTAssertEqual(s.route, .tutorial(.ready))
+        XCTAssertEqual(s.tutorialLearned, Set(TutorialLesson.allCases), "every control learned")
         h.confirm()
         XCTAssertEqual(s.route, .home)
         XCTAssertEqual(s.highlightedMember?.name, "A", "Home opens on the member just added")

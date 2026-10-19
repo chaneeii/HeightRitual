@@ -53,6 +53,9 @@ struct WallModel: Equatable {
     var caption: String?
     /// False where the wall's screen draws its own text over the picture (Lookback).
     var showsText = true
+    /// Lookback with a clip: the clip fills the whole wall picture, the text lies over it, and
+    /// the pencil marks are left out (they would not line up with a filled clip).
+    var fullBleedClip = false
     /// Large name or message near the top of the picture.
     var headline: String?
     /// Dashed coral line of a record being made.
@@ -85,6 +88,7 @@ extension AppState {
         func showMemoryWall() {
             model.kind = .marks
             model.showsText = false
+            model.fullBleedClip = selectedRecord.map { clipURL($0) != nil } ?? false
             model.accent = Palette.color(currentMember?.colorIndex ?? 0)
             model.marks = marks(of: memberID, selecting: recordIndex)
             if let record = selectedRecord, let member = currentMember {

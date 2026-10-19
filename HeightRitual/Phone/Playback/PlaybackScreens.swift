@@ -36,7 +36,7 @@ struct RecordFigure: View {
             ZStack(alignment: .topLeading) {
                 Color.black
                 if let record, state.clipURL(record) != nil {
-                    PlayerLayerView(player: state.wallPlayer.player)
+                    PlayerLayerView(player: state.wallPlayer.player, fill: true)
                 } else if let record {
                     let full = floor * share
                     let h = full * CGFloat(record.heightMM) / CGFloat(max(tallestMM, 1))
@@ -160,6 +160,12 @@ struct WallPlaybackOverlay: View {
         let unit = state.settings.unit
 
         DesignCanvas(surface: .wall, background: .clear) {
+            // Keeps the text readable over a bright clip.
+            LinearGradient(colors: [Color.black.opacity(0.75), Color.black.opacity(0)],
+                           startPoint: .top, endPoint: .bottom)
+                .frame(width: 608, height: 380)
+                .position(x: 304, y: 190)
+                .opacity(state.wallModel.fullBleedClip ? 1 : 0)
             ControlIcon(glyph: .back, size: 49)
                 .foregroundStyle(Theme.paper)
                 .position(x: 56, y: 58)

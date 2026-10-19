@@ -77,6 +77,9 @@ final class SettingsStore {
     /// Memory shows clips as filmed, with their background, instead of the cut-out.
     var showBackground: Bool { didSet { save(showBackground, "showBackground") } }
     var appearance: Appearance { didSet { save(appearance, "appearance") } }
+    /// The point colour of the redesign (`Theme.accent`): an index into `Palette.memberColors`,
+    /// or nil for the default black.
+    var accentIndex: Int? { didSet { save(accentIndex, "accentIndex") } }
     var wall: Calibration { didSet { save(wall, "wall") } }
     var camera: CameraPosition? { didSet { save(camera, "camera") } }
     /// The first-start wizard has been finished or skipped through.
@@ -90,6 +93,7 @@ final class SettingsStore {
             guard let data = defaults.data(forKey: "settings." + key) else { return nil }
             return try? JSONDecoder().decode(T.self, from: data)
         }
+        accentIndex = load("accentIndex")
         unit = load("unit") ?? .cm
         soundOn = load("soundOn") ?? false
         autoPlay = load("autoPlay") ?? false

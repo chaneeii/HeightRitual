@@ -467,3 +467,6 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
     first record; the last step opens Home on that member. Back is a step back throughout.
   - On the height check the knob steps 0.1 cm (Left / Right stay 1 cm); the dial has a tick per
     millimetre (17 Oct).
+  - Settings > Point colour (19 Oct): black by default, or one of the member colours. Used for
+    selection borders, the main button, the dial's needle, the filming bar, the saved check and
+    the cursor; text stays black.

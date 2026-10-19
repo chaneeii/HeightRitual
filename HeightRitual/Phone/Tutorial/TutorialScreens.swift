@@ -69,7 +69,8 @@ struct ControllerDiagram: View {
             .confirmSqueeze(state.inputCount, active: on && pressed(control))
         }
         .buttonStyle(PressStyle())
-        .disabled(!interactive)
+        // Not `.disabled`: that would draw the icon gray (`ControlIcon` follows isEnabled).
+        .allowsHitTesting(interactive)
         .accessibilityLabel(Text(verbatim: "\(control)"))
     }
 
@@ -124,7 +125,7 @@ struct TutorialContent: View {
                         .background(Theme.controllerConfirm, in: Capsule())
                 }
                 .buttonStyle(PressStyle())
-                .disabled(onWall)
+                .allowsHitTesting(!onWall)
                 .confirmSqueeze(state.confirmCount)
                 .position(x: w / 2, y: 778)
             }
@@ -274,7 +275,7 @@ struct TutorialContent: View {
         }
         .frame(width: 122, height: 170)
         .background(Theme.choice, in: RoundedRectangle(cornerRadius: 18))
-        .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(Theme.ink, lineWidth: selected ? 5 : 0))
+        .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(Theme.accent, lineWidth: selected ? 5 : 0))
         .overlay(alignment: .bottomTrailing) {
             if selected {
                 CursorView(size: 40, trigger: action)
@@ -348,7 +349,7 @@ struct TutorialContent: View {
         let height = state.savedRecord.map { HeightFormatter.text($0.heightMM, unit: state.settings.unit) } ?? ""
         return VStack(spacing: 10) {
             ZStack {
-                Circle().fill(Theme.ink)
+                Circle().fill(Theme.accent)
                 CheckShape().stroke(Theme.paper, style: StrokeStyle(lineWidth: 8, lineCap: .round, lineJoin: .round))
                     .frame(width: 38, height: 28)
             }
@@ -367,10 +368,10 @@ struct TutorialContent: View {
                 .font(Theme.label(18))
                 .foregroundStyle(Theme.paper)
                 .frame(width: 310, height: 50)
-                .background(Theme.ink, in: Capsule())
+                .background(Theme.accent, in: Capsule())
             }
             .buttonStyle(PressStyle())
-            .disabled(onWall)
+            .allowsHitTesting(!onWall)
             .padding(.top, 14)
         }
         .foregroundStyle(Theme.ink)

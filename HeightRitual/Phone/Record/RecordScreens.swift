@@ -131,7 +131,7 @@ struct HeightContent: View {
                 ScreenHeading(surface: surface, title: Text("Preparing the clip"),
                               subtitle: Text("This takes a few seconds"))
                 ProgressView(value: progress)
-                    .tint(Theme.ink)
+                    .tint(Theme.accent)
                     .frame(width: surface.v(260, 380))
                     .scaleEffect(y: 2)
                     .position(x: w / 2, y: surface.v(440, 560))
@@ -260,7 +260,7 @@ struct SavedContent: View {
 
         ZStack(alignment: .topLeading) {
             ZStack {
-                Circle().fill(Theme.ink)
+                Circle().fill(Theme.accent)
                     .scaleEffect(shown ? 1 : 0.3)
                     .opacity(shown ? 1 : 0)
                 CheckShape()

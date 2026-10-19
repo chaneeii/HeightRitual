@@ -85,7 +85,7 @@ struct MemberMenuOverlay: View {
         .background(Theme.choice, in: RoundedRectangle(cornerRadius: radius))
         .overlay {
             RoundedRectangle(cornerRadius: radius)
-                .strokeBorder(Theme.ink, lineWidth: surface == .wall && selected ? 8.5 : 0)
+                .strokeBorder(Theme.accent, lineWidth: surface == .wall && selected ? 8.5 : 0)
         }
         .confirmSqueeze(state.confirmCount, active: selected)
 

@@ -50,7 +50,7 @@ struct PillButton: View {
 
     private var background: Color {
         switch style {
-        case .primary: return Theme.ink
+        case .primary: return Theme.accent
         case .record: return Theme.record
         case .secondary: return surface == .wall ? Theme.wallSecondaryButton : Theme.secondaryButton
         }

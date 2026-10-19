@@ -116,6 +116,7 @@ private struct SettingsList: View {
                      systemImage: "textformat.123",
                      value: settings.unit == .cm ? L("Centimetres") : L("Feet and inches"))
                 AppearancePicker()
+                PointColourPicker()
                 Toggle(isOn: $settings.soundOn) {
                     Label {
                         Text("Sound")

@@ -6,6 +6,12 @@ enum Theme {
     // MARK: Colours
 
     static let ink = Color.black
+    /// The point colour, chosen in Settings (black by default): selection borders, the main
+    /// button, the dial's needle, the filming bar, the saved check, the cursor. Read through the
+    /// settings so every screen redraws when it changes.
+    @MainActor static var accent: Color {
+        AppState.shared.settings.accentIndex.map(Palette.color) ?? ink
+    }
     static let paper = Color.white
     /// The ring of the Home wheel.
     static let track = Color(white: 0xE0 / 255)
@@ -22,18 +28,18 @@ enum Theme {
     static let scrim = Color.black.opacity(0.6)
     static let hint = Color(white: 0x6B / 255)
     /// The text cursor in the name field.
-    static let caret = Color.black
+    @MainActor static var caret: Color { accent }
     /// The outline to stand in and the foot marks, on the camera picture and the wall.
     static let guide = Color(white: 0.88)
     /// Record (the one coloured control: it films).
     static let record = Color(red: 0.98, green: 0.24, blue: 0.27)
     /// The bar that fills while filming.
-    static let progress = Color.black
+    @MainActor static var progress: Color { accent }
     static let progressTrack = Color(white: 0xCC / 255)
     /// Behind the height dial.
     static let dialBackground = Color(white: 0.985)
     static let dialTick = Color(white: 0.45)
-    static let dialNeedle = Color.black
+    @MainActor static var dialNeedle: Color { accent }
     /// Secondary buttons (Retake, Measure someone else).
     static let secondaryButton = Color(white: 0xF2 / 255)
     /// Secondary buttons on the wall, white text.

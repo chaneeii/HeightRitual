@@ -23,7 +23,7 @@ final class TutorialScreenshots: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 3))
         row.tap(); pause(1.5)
         save("T01-welcome")
-        press("confirm"); pause(1); save("T02-family")
+        press("confirm"); pause(0.5); save("T01-toast"); pause(0.5); save("T02-family")
         press("confirm"); pause(1); save("T03-name")
         press("confirm"); for _ in 0..<13 { press("right", wait: 0.05) }; press("confirm")
         for _ in 0..<13 { press("left", wait: 0.05) }; press("confirm"); pause(0.6); save("T03-name-typed")

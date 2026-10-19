@@ -56,7 +56,7 @@ struct CursorView: View {
         Image("Cursor")
             .resizable()
             .scaledToFit()
-            .foregroundStyle(Theme.ink)
+            .foregroundStyle(Theme.accent)
             .frame(width: size, height: size)
             .keyframeAnimator(initialValue: 1.0, trigger: trigger) { content, scale in
                 content.scaleEffect(scale, anchor: .topLeading)

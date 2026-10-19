@@ -63,7 +63,7 @@ struct HomeContent: View {
     private var pointer: some View {
         let top = surface.v(523.9, 721.5), length = surface.v(58.5, 77.5)
         return Capsule()
-            .fill(Theme.ink)
+            .fill(Theme.accent)
             .frame(width: surface.v(5, 6.6), height: length)
             .position(x: surface.canvas.width / 2, y: top + length / 2)
     }
@@ -215,7 +215,7 @@ struct CardFace: View {
         .frame(width: size.width, height: size.height)
         .overlay {
             RoundedRectangle(cornerRadius: radius)
-                .strokeBorder(Theme.ink, lineWidth: surface.v(5, 6.6))
+                .strokeBorder(Theme.accent, lineWidth: surface.v(5, 6.6))
                 .opacity(isCenter ? 1 : 0)
         }
         .shadow(color: .black.opacity(isCenter ? 0.1 : 0), radius: surface.v(16, 21))

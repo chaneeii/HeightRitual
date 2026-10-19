@@ -157,7 +157,7 @@ private struct KeyFace: View {
         .background(Theme.key, in: RoundedRectangle(cornerRadius: size * 0.2))
         .overlay {
             RoundedRectangle(cornerRadius: size * 0.2)
-                .strokeBorder(Theme.ink, lineWidth: surface == .wall && selected ? 6 : 0)
+                .strokeBorder(Theme.accent, lineWidth: surface == .wall && selected ? 6 : 0)
         }
         .confirmSqueeze(squeeze, active: selected)
     }

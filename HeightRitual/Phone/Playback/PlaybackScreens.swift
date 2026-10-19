@@ -41,7 +41,11 @@ struct RecordFigure: View {
                     let full = floor * share
                     let h = full * CGFloat(record.heightMM) / CGFloat(max(tallestMM, 1))
                     let outline = PersonOutline.path(heightPt: h, centerX: geo.size.width / 2, floorY: floor)
-                    outline.stroke(Theme.guide, style: StrokeStyle(lineWidth: 1.5, dash: [5, 3]))
+                    // A record without a clip (the sample family): a white figure at 80 %.
+                    ZStack {
+                        outline.fill(Color.white.opacity(0.8))
+                        outline.stroke(Theme.guide, style: StrokeStyle(lineWidth: 1.5, dash: [5, 3]))
+                    }
                         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: record.id)
                 }
                 Path { p in

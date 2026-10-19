@@ -116,7 +116,7 @@ struct WallCanvas: View {
 
         // 1. Life-size figure, feet on the floor line. Cut off at the top when taller than the picture.
         if !marksOnly, let figure = model.figure, !figure.hasClip {
-            drawOutline(ctx, g, heightCM: Double(figure.heightMM) / 10, centerX: figureX)
+            drawOutline(ctx, g, heightCM: Double(figure.heightMM) / 10, centerX: figureX, filled: true)
         }
 
         // 2. A pencil mark for every record; the selected one in the member's colour.
@@ -219,9 +219,12 @@ struct WallCanvas: View {
     }
 
     /// Soft outline of a person, used for records without a clip.
-    private func drawOutline(_ ctx: GraphicsContext, _ g: WallGeometry, heightCM: Double, centerX: CGFloat) {
+    /// `filled`: a record without a clip (the sample family), drawn as a white figure at 80 % so it
+    /// shows; the outline to stand in while filming stays see-through.
+    private func drawOutline(_ ctx: GraphicsContext, _ g: WallGeometry, heightCM: Double, centerX: CGFloat,
+                             filled: Bool = false) {
         let shape = PersonOutline.path(heightPt: g.length(cm: heightCM), centerX: centerX, floorY: g.y(cm: 0))
-        ctx.fill(shape, with: .color(model.accent.opacity(0.18)))
+        ctx.fill(shape, with: .color(filled ? Color.white.opacity(0.8) : model.accent.opacity(0.18)))
         ctx.stroke(shape, with: .color(model.accent.opacity(0.5)), lineWidth: 1.5)
     }
 

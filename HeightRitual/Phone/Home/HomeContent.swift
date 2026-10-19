@@ -98,7 +98,7 @@ struct HomeContent: View {
     @ViewBuilder
     private func bottomHint(empty: Bool) -> some View {
         if empty && !state.confirmFlash {
-            Text("Press \(inlineIcon(.confirm, size: 30)) to add")
+            Text("Press \(inlineIcon(.confirm, size: 30).foregroundColor(Theme.success)) to add")
                 .font(Theme.subtitle(30))
                 .foregroundStyle(Theme.hint)
         } else {

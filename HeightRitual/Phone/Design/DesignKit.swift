@@ -70,14 +70,16 @@ struct CursorView: View {
     }
 }
 
-/// The round check at the bottom of the wall: gray until Confirm, then green with a pop.
+/// The round check at the bottom of the wall: a green outline (easy to see on the gray wall)
+/// until Confirm, then filled green with a pop.
 struct ConfirmCheck: View {
     var size: CGFloat
     var confirmed: Bool
 
     var body: some View {
         ZStack {
-            ControlIcon(glyph: .confirmOutline, size: size, isEnabled: false)
+            ControlIcon(glyph: .confirmOutline, size: size)
+                .foregroundStyle(Theme.success)
                 .opacity(confirmed ? 0 : 1)
             ControlIcon(glyph: .confirm, size: size, confirmed: true)
                 .scaleEffect(confirmed ? 1 : 0.4)

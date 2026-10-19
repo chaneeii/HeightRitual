@@ -17,12 +17,13 @@ struct WallView: View {
             let scale = isExternal ? 1 : min(geo.size.width / strip.width, geo.size.height / strip.height)
             let model = state.wallModel
             WallCanvas(model: model)
+                .overlay { if model.kind == .screen { WallScreen() } }
                 .overlay { WallClipOverlay(model: model, player: state.wallPlayer.player) }
+                .overlay { WallScreenOverlay(route: state.route) }
                 .overlay {
                     switch model.kind {
                     case .settingsMenu: WallSettingsMenu()
                     case .settingsUnits: WallUnitsPage()
-                    case .settingsLanguage: WallLanguagePage()
                     case .settingsPermissions: WallPermissionsPage()
                     case .settingsGuide: WallSetupGuidePage()
                     default: EmptyView()
@@ -94,7 +95,8 @@ struct WallCanvas: View {
             case .footGuide: drawFootGuide(ctx, g)
             case .dark: drawNumber(ctx, g)
             case .cameraLines: drawCameraLines(ctx, g)
-            case .settingsMenu, .settingsUnits, .settingsLanguage, .settingsPermissions, .settingsGuide:
+            case .screen: ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Theme.paper))
+            case .settingsMenu, .settingsUnits, .settingsPermissions, .settingsGuide:
                 break    // views above the canvas: WallSettingsMenu and the settings pages below it
             }
         }
@@ -117,7 +119,7 @@ struct WallCanvas: View {
 
         // 1. Life-size figure, feet on the floor line. Cut off at the top when taller than the picture.
         if !marksOnly, let figure = model.figure, !figure.hasClip {
-            drawOutline(ctx, g, heightCM: Double(figure.heightMM) / 10, centerX: figureX)
+            drawOutline(ctx, g, heightCM: Double(figure.heightMM) / 10, centerX: figureX, filled: true)
         }
 
         // 2. A pencil mark for every record; the selected one in the member's colour.
@@ -135,7 +137,7 @@ struct WallCanvas: View {
 
         // Caption just above the selected mark's left end, inside the narrow strip; kept inside
         // the picture for members taller than its top.
-        if let caption = model.caption, let figure = model.figure {
+        if model.showsText, let caption = model.caption, let figure = model.figure {
             let y = max(g.y(mm: figure.heightMM) - size * 0.9, size * 1.5)
             let text = Text(caption)
                 .font(.system(size: size * 1.1, design: .serif)).italic()
@@ -156,7 +158,7 @@ struct WallCanvas: View {
             }
         }
 
-        if let headline = model.headline {
+        if model.showsText, let headline = model.headline {
             let text = Text(headline)
                 .font(.system(size: g.length(cm: 7), design: .serif)).italic()
                 .foregroundColor(model.marks.isEmpty && model.figure == nil ? pencil.opacity(0.8) : model.accent)
@@ -220,9 +222,12 @@ struct WallCanvas: View {
     }
 
     /// Soft outline of a person, used for records without a clip.
-    private func drawOutline(_ ctx: GraphicsContext, _ g: WallGeometry, heightCM: Double, centerX: CGFloat) {
+    /// `filled`: a record without a clip (the sample family), drawn as a white figure at 80 % so it
+    /// shows; the outline to stand in while filming stays see-through.
+    private func drawOutline(_ ctx: GraphicsContext, _ g: WallGeometry, heightCM: Double, centerX: CGFloat,
+                             filled: Bool = false) {
         let shape = PersonOutline.path(heightPt: g.length(cm: heightCM), centerX: centerX, floorY: g.y(cm: 0))
-        ctx.fill(shape, with: .color(model.accent.opacity(0.18)))
+        ctx.fill(shape, with: .color(filled ? Color.white.opacity(0.8) : model.accent.opacity(0.18)))
         ctx.stroke(shape, with: .color(model.accent.opacity(0.5)), lineWidth: 1.5)
     }
 
@@ -289,11 +294,13 @@ private struct WallClipOverlay: View {
 /// An AVPlayerLayer on a clear background, so the cut-out's transparent parts show the wall.
 struct PlayerLayerView: UIViewRepresentable {
     let player: AVPlayer
+    /// Fill the frame and crop, instead of fitting the whole clip.
+    var fill = false
 
     func makeUIView(context: Context) -> LayerView {
         let view = LayerView()
         view.playerLayer.player = player
-        view.playerLayer.videoGravity = .resizeAspect
+        view.playerLayer.videoGravity = fill ? .resizeAspectFill : .resizeAspect
         view.playerLayer.pixelBufferAttributes = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
         view.backgroundColor = .clear
         view.isOpaque = false
@@ -301,12 +308,26 @@ struct PlayerLayerView: UIViewRepresentable {
     }
 
     func updateUIView(_ view: LayerView, context: Context) {
+        view.playerLayer.videoGravity = fill ? .resizeAspectFill : .resizeAspect
         if view.playerLayer.player !== player { view.playerLayer.player = player }
     }
 
     final class LayerView: UIView {
         override class var layerClass: AnyClass { AVPlayerLayer.self }
         var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
+    }
+}
+
+/// The wall's own screen text laid over the life-size picture: while filming and in Lookback.
+private struct WallScreenOverlay: View {
+    let route: Route
+
+    var body: some View {
+        switch route {
+        case .makeFilm(let film): WallFilmOverlay(film: film)
+        case .memoryWall, .record: WallPlaybackOverlay()
+        default: EmptyView()
+        }
     }
 }
 
@@ -339,8 +360,9 @@ private struct WallSettingsMenu: View {
             Tile(id: .units, title: "Units", detail: "For every height on the phone and the wall",
                  systemImage: "textformat.123",
                  value: settings.unit == .cm ? L("Centimetres") : L("Feet and inches")),
-            Tile(id: .language, title: "Language", detail: "For the phone and the wall", systemImage: "globe",
-                 value: settings.language == .system ? L("System") : settings.language.nativeName),
+            Tile(id: .pointColour, title: "Point colour", detail: "Borders, buttons and the dial, on the phone and the wall",
+                 systemImage: "paintpalette",
+                 value: settings.accentIndex.map { "Colour \($0 + 1)" } ?? "Black"),
             Tile(id: .sound, title: "Sound", detail: "Record and play sound with each clip",
                  systemImage: "speaker.wave.2", value: settings.soundOn ? L("On") : L("Off")),
             Tile(id: .controller, title: "Controller", detail: "Connection, and a test of every button",
@@ -564,22 +586,6 @@ private struct WallUnitsPage: View {
             },
             saved: units.firstIndex(of: state.settings.unit) ?? 0,
             highlighted: units.firstIndex(of: state.unitHighlight) ?? 0)
-    }
-}
-
-/// Settings > Language on the projector, the same way as Units.
-private struct WallLanguagePage: View {
-    @Environment(AppState.self) private var state
-
-    var body: some View {
-        let languages = AppLanguage.allCases
-        WallChoicePage(
-            title: "Language", subtitle: "For the phone and the wall",
-            choices: languages.enumerated().map { index, language in
-                WallChoice(id: index, title: language == .system ? Text("System") : Text(verbatim: language.nativeName))
-            },
-            saved: languages.firstIndex(of: state.settings.language) ?? 0,
-            highlighted: languages.firstIndex(of: state.languageHighlight) ?? 0)
     }
 }
 

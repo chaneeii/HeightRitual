@@ -113,11 +113,10 @@ Each step can be reopened from Settings.
 | R2 | Memory: wall | Segmented control "Auto play / Manual" at the top. Copy of the wall. Manual: Previous, Next, Replay. Auto play: Stop. No Record: filming is only in Make | Marks for all records; the selected record's clip life-size; caption "Nora, Aug 2025, 121.0 cm". Auto play: each record in order |
 | R3 | One record | Clip, date, height, growth since the record before. Change height, Delete | Unchanged |
 | A1 | Add or edit member | Name, colour, Delete member | Unchanged |
-| S | Settings | List: Family, Setup guide, Fit to wall, Camera position, Units, Language, Sound, Controller, Permissions, Sample family, Delete everything | Back icon top left, the same items as rounded tiles in two columns with their current values, Setup guide as a pill beside the title; the controller's choice outlined in orange |
+| S | Settings | List: Family, Setup guide, Fit to wall, Camera position, Units, Point colour, Sound, Controller, Permissions, Sample family, Delete everything | Back icon top left, the same items as rounded tiles in two columns with their current values, Setup guide as a pill beside the title; the controller's choice outlined in orange |
 | S2 | Fit to wall | Two sliders (floor line, size), fine-step toggle | Centimetre ruler: 0, 100, 150 highlighted, dashed line at 170 |
 | S3 | Camera position | Camera preview with two draggable lines: floor and 100 cm. Text: put them on the projected lines | Two bright lines at 0 and 100 cm |
 | S4 | Units | cm or feet and inches; choosing one saves it and goes back to the list | Back icon, "Units", the two units with the saved one ticked and the controller's choice outlined in orange |
-| S Language | Language | System or one of the app's languages; choosing one saves it and goes back to the list | As S4, with the languages |
 | S5 | Permissions | Camera, Bluetooth, Microphone (only if sound is on): state of each, button to open iOS Settings | Back icon, "Permissions", each permission with Allowed / Not asked yet / Not allowed (display only) |
 | S6 | Controller | Connected or searching, last control used (for testing), Forget this controller | Unchanged |
 | W | First-start wizard | S5, S2, S3 in order with Next and Skip | As in each step |
@@ -136,52 +135,51 @@ States, not separate screens:
 
 ## 6. Controller
 
-Layout from the team sketch (5 Oct):
+The box, seen from above (19 Oct; replaces the 5 Oct sketch). Powered by a USB power bank.
 
 ```
- (o) recording light    make [==o ] memory        auto play (toggle)
-     ( Record / Stop )                               ( KNOB )
- ( Cancel / Back )   < Left   ( Confirm )   Right >
+ [ Back ]                    ( Knob )
+
+ < Left       ( Confirm )      Right >
 ```
 
-| Control | Type | Sends |
+| Control | Part | Sends |
 |---|---|---|
-| Mode switch | Two-position slide switch | Make or Memory, on change and on connect |
-| Auto play | Latching push switch | "Toggle" on every change |
-| Record / Stop | Momentary button | Press |
-| Knob | Potentiometer, 24 steps end to end | Relative steps |
-| Cancel / Back | Momentary button | Press |
-| Left, Confirm, Right | Momentary buttons | Press |
-| Recording light | Red LED | Driven by the app |
-| Mode lights (optional) | Two LEDs, make and memory | Driven by the app |
+| Back | Momentary push button | Press |
+| Knob | Rotary encoder (EC11 / KY-040), endless, with clicks | Relative clicks, + clockwise |
+| Left, Right | Momentary push buttons | Press |
+| Confirm | Round momentary push button; also starts and stops filming | Press |
+
+No mode switch, Record button, auto play switch or recording light any more. The app shows the
+mode, starts filming on Confirm and auto play is a setting. The light characteristic stays in the
+protocol and drives the LED on the ESP32 board, which is not visible in the closed box.
 
 The controller only reports what was used. The app decides what it means.
 
 ### What each control does on each screen
 
-| Screen | Knob | Left / Right | Confirm | Cancel / Back | Record / Stop | Auto play |
-|---|---|---|---|---|---|---|
-| M1, R1 choose a family member | Move highlight | Move highlight | Open | | | |
-| M2 film: ready | | | Start countdown | Back to M1 | Start countdown | |
-| M2 film: countdown, filming | | | | Discard, back to ready | Stop early | |
-| M3 height: cutting out | | | | Discard, back to M2 | | |
-| M3 height | +/- 0.5 cm per step | -1 / +1 cm | Save | Retake (back to M2) | | |
-| R2 wall: manual | Previous / next record | Previous / next record | Replay clip | Back to R1 | | Start auto play |
-| R2 wall: auto play | Stop, then move | Stop, then move | Stop | Stop | | Stop |
-| S list (projector grid) | Move through Setup guide and the tiles | Previous / next | Open (Setup guide, Fit to wall, Units, Language, Permissions so far) | Close Settings | | |
-| S4 units, Language | Choose an option | Previous / next option | Save, back to the grid | Back to the grid | | |
-| S5 permissions, Setup guide | | | | Back to the grid | | |
-| S2 fit to wall | Change selected value | Select value | Done | Done | | |
-
-Mode switch, on every screen: Make opens M1; Memory opens R1. Leaving Make with an unsaved clip
-discards it and shows "Not saved" for two seconds. Mode can also be changed with the tabs on the
-phone; the most recent input wins.
+| Screen | Knob | Left / Right | Confirm | Back |
+|---|---|---|---|---|
+| Home wheel | Turn the wheel | Previous / next member | Open the member menu | |
+| Member menu | Record or Lookback | Record / Lookback | Choose | Close the menu |
+| Add member (letter wheel) | Move through the keys | Previous / next key | Press the key (a letter, delete or done) | Back to home |
+| Film: ready | | | Start filming (3-2-1, then 5 s) | Back to the member menu |
+| Film: filming | | | Stop early | Discard, back to ready |
+| Height check | +/- 0.1 cm per click | -1 / +1 cm | Save | Retake |
+| Saved | | | See the growth (Lookback) | Return to home |
+| Lookback | Previous / next record | Previous / next record | Replay the clip | Back to the member menu |
+| Lookback, auto play on | Stop, then move | Stop, then move | Stop | Stop |
+| Settings on the wall (grid) | Move through Setup guide and the tiles | Previous / next | Open (Setup guide, Fit to wall, Units, Permissions so far) | Close Settings |
+| Settings: Units | Choose a unit | Centimetres / feet and inches | Save, back to the grid | Back to the grid |
+| Settings: Permissions, Setup guide | | | | Back to the grid |
+| Settings: Fit to wall | Change selected value | Floor line / Size | Done | Done |
+| Onboarding with the controller | As each step says | | Next | Previous step |
 
 In ft/in the knob and Left / Right step by 1/4 inch and 1 inch.
 
 ### Bluetooth LE protocol
 
-Device name `HeightController`. No pairing; found by service UUID.
+Device name `MemoryMeter` (was `HeightController`). No pairing; the app finds it by service UUID.
 
 | Item | UUID | Properties |
 |---|---|---|
@@ -191,14 +189,11 @@ Device name `HeightController`. No pairing; found by service UUID.
 
 | controlId | Event | value (signed 8-bit) |
 |---|---|---|
-| 1 | Knob turn | Steps since the last packet, + clockwise |
-| 11 | Record / Stop | 1 |
+| 1 | Knob turn | Clicks since the last packet, + clockwise |
 | 13 | Confirm | 1 |
-| 23 | Cancel / Back | 1 |
 | 14 | Left | 1 |
 | 15 | Right | 1 |
-| 31 | Mode switch | 0 = Memory, 1 = Make. Sent on change and when the app subscribes |
-| 32 | Auto play | 1 = toggle |
+| 23 | Back | 1 |
 
 | Light byte | Value | Meaning |
 |---|---|---|
@@ -206,10 +201,13 @@ Device name `HeightController`. No pairing; found by service UUID.
 | | 1 | Slow blink: countdown |
 | | 2 | Steady: filming or cutting out |
 | | 3 | Three quick flashes, then off: saved |
-| mode (optional) | 0 / 1 | Memory light on / Make light on |
 
-Debounce (25 ms) is done in the firmware. The app ignores an identical non-knob event within 100 ms.
-IDs 12 (Playback) and 21 (Push) from earlier versions are no longer used.
+Debounce (25 ms) is done in the firmware; knob clicks are summed and sent at most every 20 ms.
+The app ignores an identical non-knob event within 100 ms. The app still understands 11 (Record),
+31 (Mode) and 32 (Auto play) from the older boxes; the v4 box does not send them.
+
+Settings > Controller shows the box drawn as above and a checklist (Back, knob both ways, Left,
+Confirm, Right) that fills in as each packet arrives, plus the raw packets.
 
 ## 7. Setup
 
@@ -448,3 +446,28 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
     (so the reach from the floor does not change), black elsewhere. The strip is centred in a wide
     picture. Every copy of the wall on the phone (R2, M3, S2, full screen) shows
     exactly that strip, upright, so it reads like the phone itself (decided 12 Oct).
+  - Redesign (17 Oct, Figma "Ritual", branch feature/new-design). Members come first: Home is a
+    wheel of member cards with an Add card last (knob and Left / Right turn it, Confirm opens).
+    Choosing a member darkens Home and offers Record or Lookback; Cancel goes back to the wheel.
+    A member is added from an endless letter wheel (Delete, Save, A to Z). The mode switch only
+    preselects Record (Make) or Lookback (Memory) on that menu. Every screen has a phone version
+    (touch) and a wall version (608 x 1080 strip, controller only, cursor and thick border on the
+    selection). Confirm turns the wall's check green for a moment before the choice opens.
+  - Recording has no countdown: Record films five seconds at once, with a bar and the seconds
+    left. The height is checked on a dial (knob 0.5 cm, Left / Right 1 cm, dragged on the phone),
+    then a Saved screen offers the member's growth (Confirm) or Return to home (Cancel). Lookback on
+    the wall lays the date, height, growth and story segments over the life-size clip; its hint
+    goes away at the first move. Black and white for now; colours and fonts come from `Theme`.
+  - English only: the language setting and the translations are removed (17 Oct).
+  - The controller now has five controls: Back (Cancel), the knob, Left, Right and the round
+    Confirm. Record, the mode switch and the auto play switch are gone; Confirm starts filming
+    and stops it early. The app still accepts their old codes, so older firmware keeps working.
+  - Settings > Onboarding with controller (demo, 17 Oct): ten guided steps on the phone and the
+    wall, with the controller drawn underneath and only the controls of that step in colour (the
+    drawing can be tapped like the box). The name picked becomes a member, the dial's height its
+    first record; the last step opens Home on that member. Back is a step back throughout.
+  - On the height check the knob steps 0.1 cm (Left / Right stay 1 cm); the dial has a tick per
+    millimetre (17 Oct).
+  - Settings > Point colour (19 Oct): black by default, or one of the member colours. Used for
+    selection borders, the main button, the dial's needle, the filming bar, the saved check and
+    the cursor; text stays black.

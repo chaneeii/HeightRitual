@@ -16,6 +16,7 @@ final class ModelTests: XCTestCase {
 
     func testHeightStepsAndLimits() {
         XCTAssertEqual(HeightFormatter.step(1212, by: 1, unit: .cm, coarse: false), 1215, "snaps to 0.5 cm")
+        XCTAssertEqual(HeightFormatter.step(1212, by: 1, unit: .cm, coarse: false, fineMM: 1), 1213, "the knob: 0.1 cm")
         XCTAssertEqual(HeightFormatter.step(1210, by: -1, unit: .cm, coarse: true), 1200)
         XCTAssertEqual(HeightFormatter.step(405, by: -3, unit: .cm, coarse: true), 400)
         XCTAssertEqual(HeightFormatter.step(2195, by: 5, unit: .cm, coarse: false), 2200)
@@ -32,6 +33,16 @@ final class ModelTests: XCTestCase {
         XCTAssertEqual(h.state.draft?.heightMM, 1226, "knob steps 1/4 in")
         h.state.handle(.right)
         XCTAssertEqual(h.state.draft?.heightMM, 1251, "Right steps 1 in")
+    }
+
+    func testHeightStepHintUntilFirstUse() {
+        let h = Harness()
+        h.openHeight(estimateMM: 1219)
+        XCTAssertFalse(h.state.settings.heightStepsLearned, "hint shows on first use")
+        h.state.setDraftHeight(1230)
+        XCTAssertFalse(h.state.settings.heightStepsLearned, "dragging the dial does not count")
+        h.state.handle(.knob(1))
+        XCTAssertTrue(h.state.settings.heightStepsLearned)
     }
 
     func testEstimate() {
@@ -53,11 +64,11 @@ final class ModelTests: XCTestCase {
 
         let first = Harness()
         first.state.store.addMember(name: "Ada")
-        first.state.handle(.mode(.make))
         first.state.handle(.knob(2))
-        first.state.handle(.confirm)
+        first.confirm()
+        first.confirm()
         first.state.handle(.record)
-        first.scheduler.advance(3)
+        first.scheduler.advance(1)
         first.state.handle(.record)
         first.state.finishProcessing(ProcessedClip())
         XCTAssertNil(first.state.draft?.heightMM, "first record without an estimate starts empty")

@@ -37,6 +37,24 @@ struct ControllerPage: View {
             }
 
             Section {
+                ControllerDiagram(active: Set(testedControls.compactMap(\.control)), interactive: false)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                ForEach(ControlCheck.allCases, id: \.self) { check in
+                    LabeledContent {
+                        Image(systemName: testedControls.contains(check) ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(testedControls.contains(check) ? Theme.success : Color.secondary)
+                    } label: {
+                        Text(verbatim: check.title)
+                    }
+                }
+            } header: {
+                Text("Test each control")
+            } footer: {
+                Text("Press every button and turn the knob both ways on the box. Each one turns green once the app has received it. Clear list starts again.")
+            }
+
+            Section {
                 if state.controlLog.isEmpty {
                     Text("Nothing yet").foregroundStyle(.secondary)
                 }
@@ -80,8 +98,16 @@ struct ControllerPage: View {
         .confirmationDialog("Forget this controller?", isPresented: $confirmForget, titleVisibility: .visible) {
             Button("Forget", role: .destructive) { state.forgetController() }
         } message: {
-            Text("The app searches again and connects to the first Height Ritual controller it finds.")
+            Text("The app searches again and connects to the first Memory Meter controller it finds.")
         }
+    }
+
+    /// What the box has sent since the list was cleared, from the raw packets (SPEC 6).
+    private var testedControls: Set<ControlCheck> {
+        Set(state.controlLog.compactMap { entry in
+            guard entry.note == nil, entry.bytes.count >= 2 else { return nil }
+            return ControlCheck(id: entry.bytes[0], value: Int8(bitPattern: entry.bytes[1]))
+        })
     }
 
     private func lightButton(_ title: LocalizedStringKey, _ recording: LightState.Recording) -> some View {
@@ -89,30 +115,6 @@ struct ControllerPage: View {
             .buttonStyle(.bordered)
             .frame(maxWidth: .infinity)
             .disabled(state.controllerStatus != .connected)
-    }
-}
-
-/// Settings > Language: System or one of the app's languages. Choosing one saves it and goes back
-/// to the list, the same as Select on the projector's Language page.
-struct LanguagePage: View {
-    @Environment(AppState.self) private var state
-
-    var body: some View {
-        Form {
-            Section {
-                Picker("Language", selection: Binding(get: { state.settings.language },
-                                                      set: { state.chooseLanguage($0) })) {
-                    Text("System").tag(AppLanguage.system)
-                    ForEach(AppLanguage.allCases.filter { $0 != .system }, id: \.self) { language in
-                        Text(verbatim: language.nativeName).tag(language)
-                    }
-                }
-                .pickerStyle(.inline)
-                .labelsHidden()
-            } footer: {
-                Text("For the phone and the wall")
-            }
-        }
     }
 }
 
@@ -196,6 +198,85 @@ private struct EnlargedPictureView: View {
                     Button("Done") { dismiss() }
                 }
             }
+        }
+    }
+}
+
+/// Settings > Point colour: the colour of selection borders, the main button, the dial and the
+/// saved check (`Theme.accent`). Black is the default.
+struct PointColourPicker: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        let current = state.settings.accentIndex
+        VStack(alignment: .leading, spacing: 12) {
+            Label {
+                Text("Point colour")
+                Text("Borders, buttons and the dial, on the phone and the wall")
+            } icon: {
+                Image(systemName: "paintpalette")
+            }
+            HStack(spacing: 0) {
+                swatch(nil, color: Theme.ink, selected: current == nil, label: "Black")
+                ForEach(Palette.memberColors.indices, id: \.self) { index in
+                    swatch(index, color: Palette.color(index), selected: current == index, label: "Colour \(index + 1)")
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func swatch(_ index: Int?, color: Color, selected: Bool, label: String) -> some View {
+        Button {
+            state.settings.accentIndex = index
+        } label: {
+            Circle()
+                .fill(color)
+                .frame(width: 30, height: 30)
+                .overlay(Circle().stroke(Color.primary, lineWidth: selected ? 3 : 0).padding(-4))
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(verbatim: label))
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+/// The six things to try on the box: four buttons and the knob in both directions.
+private enum ControlCheck: CaseIterable {
+    case back, knobClockwise, knobCounterclockwise, left, confirm, right
+
+    init?(id: UInt8, value: Int8) {
+        switch id {
+        case 23: self = .back
+        case 1 where value > 0: self = .knobClockwise
+        case 1 where value < 0: self = .knobCounterclockwise
+        case 14: self = .left
+        case 13: self = .confirm
+        case 15: self = .right
+        default: return nil
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .back: return "Back"
+        case .knobClockwise: return "Knob clockwise"
+        case .knobCounterclockwise: return "Knob counter-clockwise"
+        case .left: return "Left"
+        case .confirm: return "Confirm"
+        case .right: return "Right"
+        }
+    }
+
+    var control: ControllerDiagram.Control? {
+        switch self {
+        case .back: return .back
+        case .knobClockwise, .knobCounterclockwise: return .knob
+        case .left: return .left
+        case .confirm: return .confirm
+        case .right: return .right
         }
     }
 }

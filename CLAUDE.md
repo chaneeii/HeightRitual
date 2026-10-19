@@ -1,4 +1,4 @@
-# Height Ritual
+# Height Ritual (app name: Memory Meter)
 
 iOS app plus ESP32 controller firmware for a KTH interaction design course prototype (DM2601, Group 6).
 A family member is filmed at the wall for a few seconds; the app suggests their height, the parent
@@ -16,14 +16,20 @@ fallback for risk 1), M5 camera, M6 `Capture/VideoCutout.swift` (Vision segmenta
 head-top estimate), M7 `Playback/WallPlayer.swift` (clip on the wall and in the wall copy), the
 controller light. P1 live foot check and the camera position auto-detect are not built.
 
+- Redesign in progress (feature/new-design): member-first Home wheel, member menu, letter-wheel
+  add, Record (film, dial, saved) and Lookback, each with a phone and a wall version
+  (`Phone/Home`, `Phone/Record`, `Phone/Playback`, `Phone/Design`). Colours and fonts only from
+  `Theme`; controller buttons only as `ControlIcon`. Debug builds: the projector button on every
+  page shows the wall on the phone with the controller's buttons; `-DebugFakeClip` fakes a
+  filmed clip in the simulator.
 - The phone UI follows Apple's HIG: system TabView (Make / Memory, hidden on pushed screens),
   NavigationStacks drawn from `AppState.route` (`State/Navigation.swift`; the system back button
   sends Cancel), Settings and A1 as sheets with Forms.
 - iPhone and iPad, portrait, full screen. Follows the phone's light or dark appearance.
-- English, Korean, Simplified Chinese, Swedish (`Resources/*.xcstrings`), chosen in Settings.
-  Strings built in code go through `L(_:)` so they follow that choice.
-- The controller connects on a device; buttons-only firmware in `Firmware/controller_buttons/`.
-- 53 unit tests in `HeightRitualTests/` pass in the simulator (scheme runs them in English).
+- English only (localization removed 17 Oct). Strings built in code still go through `L(_:)`,
+  dates use `Locale.english`.
+- The controller connects on a device. The v4 box (Back, knob encoder, Left, Confirm, Right; power bank) runs `Firmware/controller/`; it compiles but has not run on the box yet. `Firmware/controller_buttons/` is the old breadboard build.
+- 56 unit tests in `HeightRitualTests/` pass in the simulator (scheme runs them in English).
 
 ## Commands
 
@@ -48,8 +54,9 @@ Run `xcodegen` after adding, removing or moving source files. The `.xcodeproj` i
 - One decision per screen, one obvious next action. Follow Apple's HIG: system controls, targets at least 44 pt. No hidden gestures.
 - Keep `Firmware/controller/controller.ino`, `ControllerManager` and the protocol table in SPEC section 6 in sync.
 - Clips of family members never leave the device.
-- UI text: English source strings, sentence case, no emoji. Add every new string to
-  `Resources/Localizable.xcstrings` with ko, zh-Hans and sv translations.
+- UI text: English only, sentence case, no emoji. No string catalogs or translations.
+- The controller has five controls: Back (Cancel), the knob, Left, Right and the round Confirm.
+  Confirm also starts and stops filming. Show them only with `ControlIcon`.
 - Camera, Bluetooth, video writing and the external display cannot be tested in the simulator.
   Say so when a change touches them and has not been run on a device. Never claim they work untested.
 - Finish one milestone, build, and report before starting the next.

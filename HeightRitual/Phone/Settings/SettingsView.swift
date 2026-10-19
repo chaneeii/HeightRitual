@@ -13,6 +13,9 @@ struct SettingsSheet: View {
                 .toolbarBackground(SettingsStyle.background, for: .navigationBar)
                 .toolbarColorScheme(.light, for: .navigationBar)
                 .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        DebugWallButton(color: .white)
+                    }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Done") { state.dismissSettings() }
                     }
@@ -26,7 +29,12 @@ struct SettingsSheet: View {
                     }
                 }
         }
-        .virtualController()
+        .overlay {
+            #if DEBUG
+            // The sheet covers the root view's preview, so it shows its own.
+            if state.debugShowsWall { DebugWallPreview() }
+            #endif
+        }
     }
 }
 
@@ -48,7 +56,6 @@ struct SettingsPageView: View {
         case .fitToWall: return "Fit to wall"
         case .cameraPosition: return "Camera position"
         case .units: return "Units"
-        case .language: return "Language"
         case .controller: return "Controller"
         case .permissions: return "Permissions"
         }
@@ -62,7 +69,6 @@ struct SettingsPageView: View {
         case .fitToWall: FitToWallPage()
         case .cameraPosition: CameraPositionPage()
         case .units: UnitsPage()
-        case .language: LanguagePage()
         case .controller: ControllerPage()
         case .permissions: PermissionsPage()
         }
@@ -110,8 +116,7 @@ private struct SettingsList: View {
                 link(.units, "Units", detail: "For every height on the phone and the wall",
                      systemImage: "textformat.123",
                      value: settings.unit == .cm ? L("Centimetres") : L("Feet and inches"))
-                link(.language, "Language", detail: "For the phone and the wall", systemImage: "globe",
-                     value: settings.language == .system ? L("System") : settings.language.nativeName)
+                PointColourPicker()
                 Toggle(isOn: $settings.soundOn) {
                     Label {
                         Text("Sound")
@@ -127,6 +132,16 @@ private struct SettingsList: View {
             }
             .listRowBackground(SettingsStyle.row)
             Section {
+                Button {
+                    state.startTutorial()
+                } label: {
+                    Label {
+                        Text("Onboarding with controller")
+                        Text("Demo: a guided first use to learn the controller")
+                    } icon: {
+                        Image(systemName: "gamecontroller")
+                    }
+                }
                 Button {
                     confirmSample = true
                 } label: {

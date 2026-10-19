@@ -8,10 +8,16 @@ struct WizardView: View {
     @Environment(AppState.self) private var state
 
     var body: some View {
-        if step == .welcome {
-            WelcomeView()
-        } else {
-            setup
+        Group {
+            if step == .welcome {
+                WelcomeView()
+            } else {
+                setup
+            }
+        }
+        .overlay(alignment: .topTrailing) {
+            DebugWallButton()
+                .padding(.trailing, 8)
         }
     }
 
@@ -58,7 +64,7 @@ struct WizardView: View {
     }
 }
 
-/// What Height Ritual is, in three pages, before any setup.
+/// What Memory Meter is, in three pages, before any setup.
 private struct WelcomeView: View {
     @Environment(AppState.self) private var state
     @State private var page = 0
@@ -70,7 +76,7 @@ private struct WelcomeView: View {
     }
 
     private let pages = [
-        Page(symbol: "figure.and.child.holdinghands", title: "Height Ritual",
+        Page(symbol: "figure.and.child.holdinghands", title: "Memory Meter",
              text: "Families mark a child's height on a wall. Here every mark is a short film, shown life-size at the real height, and it moves with you when you move."),
         Page(symbol: "record.circle", title: "Make",
              text: "Choose who it is, stand with your heels on the line and film five seconds. Check the height and save."),

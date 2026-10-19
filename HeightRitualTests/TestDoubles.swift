@@ -7,7 +7,7 @@ final class FakeCamera: CameraProviding {
     var recording = false
     var movie: URL?
 
-    func startPreview() { previewing = true }
+    func startPreview(askMicrophone: Bool) { previewing = true }
     func stopPreview() { previewing = false }
     func startRecording(sound: Bool) { recording = true }
     func stopRecording(_ done: @escaping @MainActor (URL?) -> Void) {
@@ -101,17 +101,24 @@ struct Harness {
 
     var nora: Member { state.store.members[0] }
 
-    /// M1 -> Nora -> M2 ready.
-    func openFilm() {
-        state.handle(.mode(.make))
+    /// Confirm, then let the green check finish so the choice opens.
+    func confirm() {
         state.handle(.confirm)
+        scheduler.advance(AppState.confirmSeconds)
     }
 
-    /// M2 -> countdown -> filming -> stop early -> M3 cutting out.
+    /// Home -> Nora -> member menu -> Record -> M2 ready.
+    func openFilm() {
+        confirm()
+        state.handle(.left)
+        confirm()
+    }
+
+    /// M2 -> filming -> stop early -> M3 cutting out.
     func filmAndStop() {
         openFilm()
         state.handle(.record)
-        scheduler.advance(3)
+        scheduler.advance(1)
         state.handle(.record)
     }
 
@@ -121,9 +128,10 @@ struct Harness {
         state.finishProcessing(ProcessedClip(estimatedMM: estimateMM))
     }
 
-    /// R1 -> Nora -> R2 manual, newest record selected.
+    /// Home -> Nora -> member menu -> Lookback -> R2 manual, newest record selected.
     func openMemoryWall() {
-        state.handle(.mode(.memory))
-        state.handle(.confirm)
+        confirm()
+        state.handle(.right)
+        confirm()
     }
 }

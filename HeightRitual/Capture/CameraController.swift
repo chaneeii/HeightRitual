@@ -30,10 +30,13 @@ final class CameraController: NSObject, CameraProviding {
     /// screen within the delay does not leave the camera running behind other screens.
     private var wantsPreview = false
 
-    func startPreview() {
+    /// `askMicrophone`: with sound on, the microphone is asked for right after the camera,
+    /// not later in the middle of filming.
+    func startPreview(askMicrophone: Bool) {
         wantsPreview = true
         Task {
             guard await Self.authorize(.video) else { return }
+            if askMicrophone { _ = await Self.authorize(.audio) }
             try? await Task.sleep(for: .seconds(Self.startDelay))
             guard wantsPreview else { return }
             queue.async { [self] in
@@ -112,6 +115,8 @@ final class CameraController: NSObject, CameraProviding {
     }
 
     private nonisolated func configure() {
+        // Keep the app's own audio session (AudioRoute): playback stays on the phone speaker.
+        session.automaticallyConfiguresApplicationAudioSession = false
         session.beginConfiguration()
         if session.canSetSessionPreset(.hd1920x1080) { session.sessionPreset = .hd1920x1080 }
         if let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),

@@ -10,7 +10,7 @@ struct HeightRitualApp: App {
             RootView()
                 .environment(state)
                 .modifier(ProjectorAccessory(state: state))
-                .environment(\.locale, state.settings.language.locale)
+                .environment(\.locale, .english)
                 .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
         }
     }

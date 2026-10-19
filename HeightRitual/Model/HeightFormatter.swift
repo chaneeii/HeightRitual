@@ -25,6 +25,14 @@ enum HeightFormatter {
         }
     }
 
+    /// A height as a large number and a small unit: ("121.0", "cm"); ft and in stay in one piece.
+    static func parts(_ mm: Int, unit: HeightUnit) -> (number: String, unit: String?) {
+        switch unit {
+        case .cm: return (String(format: "%.1f", Double(mm) / 10), "cm")
+        case .ftin: return (text(mm, unit: .ftin), nil)
+        }
+    }
+
     /// Growth between two records, "+5.0 cm" or "+2 in".
     static func difference(_ mm: Int, unit: HeightUnit) -> String {
         let sign = mm < 0 ? "-" : "+"
@@ -39,11 +47,14 @@ enum HeightFormatter {
         }
     }
 
-    /// Moves a height by knob steps (fine: 0.5 cm or 1/4 in) or by Left / Right steps
+    /// Moves a height by knob steps (fine: 0.5 cm, 0.1 cm with `fineMM: 1`, or 1/4 in) or by Left / Right steps
     /// (coarse: 1 cm or 1 in). The result snaps to the unit's grid and stays in 40 to 220 cm.
-    static func step(_ mm: Int, by steps: Int, unit: HeightUnit, coarse: Bool) -> Int {
+    static func step(_ mm: Int, by steps: Int, unit: HeightUnit, coarse: Bool, fineMM: Int = 5) -> Int {
         let result: Int
         switch unit {
+        case .cm where !coarse && fineMM == 1:
+            // The knob on the height check: one millimetre (0.1 cm) a step, no snapping.
+            result = mm + steps
         case .cm:
             let halfCM = Int((Double(mm) / 5).rounded()) + steps * (coarse ? 2 : 1)
             result = halfCM * 5

@@ -8,11 +8,23 @@ struct Member: Identifiable, Codable, Hashable {
     var colorIndex: Int
     /// Profile photo in Documents/media; nil shows the first letter in the member's colour.
     var photoFile: String?
+    /// What the member's card on Home shows. Optional so older saved members still load.
+    var cardStyle: CardStyle?
+
+    /// The latest photo by default, so a new record shows on the card at once.
+    var card: CardStyle { cardStyle ?? .photo }
 
     /// "N" for Nora: the avatar without a photo.
     var initial: String {
         name.trimmingCharacters(in: .whitespaces).first.map { String($0).uppercased() } ?? "?"
     }
+}
+
+/// The picture area of a member's card: their colour, or the newest photo from a record
+/// (the colour until there is one).
+enum CardStyle: String, Codable, CaseIterable {
+    case colour
+    case photo
 }
 
 /// What A1 does with the profile photo on Save.
@@ -69,6 +81,6 @@ enum Palette {
 extension Date {
     /// "Aug 2025", in the app's language.
     var monthYear: String {
-        formatted(.dateTime.month(.abbreviated).year().locale(AppLanguage.current.locale))
+        formatted(.dateTime.month(.abbreviated).year().locale(.english))
     }
 }

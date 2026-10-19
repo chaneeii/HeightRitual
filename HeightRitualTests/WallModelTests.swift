@@ -13,14 +13,11 @@ final class WallModelTests: XCTestCase {
         XCTAssertEqual(h.state.wallModel.kind, .idle, "pages without their own wall leave a faint ruler")
     }
 
-    func testWhoShowsHighlightedMember() {
+    func testHomeShowsTheScreenItself() {
         let h = Harness()
-        h.state.handle(.mode(.memory))
-        h.state.handle(.right)
-        let wall = h.state.wallModel
-        XCTAssertEqual(wall.headline, "Leo")
-        XCTAssertEqual(wall.marks.count, 4)
-        XCTAssertFalse(wall.marks.contains { $0.selected })
+        XCTAssertEqual(h.state.wallModel.kind, .screen)
+        h.confirm()
+        XCTAssertEqual(h.state.wallModel.kind, .screen, "the member menu too")
     }
 
     func testMemoryWallMarksFigureAndCaption() {
@@ -46,9 +43,10 @@ final class WallModelTests: XCTestCase {
     func testMemoryWallWithoutRecords() {
         let h = Harness()
         h.state.store.addMember(name: "Ada")
-        h.state.handle(.mode(.memory))
         h.state.handle(.knob(2))
-        h.state.handle(.confirm)
+        h.confirm()
+        h.state.handle(.right)
+        h.confirm()
         XCTAssertEqual(h.state.route, .memoryWall)
         XCTAssertEqual(h.state.wallModel.headline, "No records yet")
         XCTAssertNil(h.state.wallModel.figure)
@@ -63,18 +61,16 @@ final class WallModelTests: XCTestCase {
         XCTAssertEqual(wall.kind, .footGuide)
         XCTAssertEqual(wall.guideMM, 1310, "last height plus 10 cm")
         h.state.handle(.record)
-        wall = h.state.wallModel
-        XCTAssertEqual(wall.kind, .dark)
-        XCTAssertEqual(wall.bigNumber, 3)
+        XCTAssertEqual(h.state.wallModel.kind, .footGuide, "the outline stays while filming")
     }
 
-    func testHeightLineFollowsTheNumber() {
+    func testHeightAndSavedShowTheScreen() {
         let h = Harness()
         h.openHeight(estimateMM: 1250)
-        XCTAssertEqual(h.state.wallModel.liveMM, 1250)
-        h.state.handle(.knob(1))
-        XCTAssertEqual(h.state.wallModel.liveMM, 1255)
-        XCTAssertEqual(h.state.wallModel.figure?.heightMM, 1255)
+        XCTAssertEqual(h.state.wallModel.kind, .screen)
+        h.state.handle(.confirm)
+        XCTAssertEqual(h.state.route, .makeSaved)
+        XCTAssertEqual(h.state.wallModel.kind, .screen)
     }
 
     func testFitToWallShowsRuler() {

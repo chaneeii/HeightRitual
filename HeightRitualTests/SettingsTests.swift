@@ -57,11 +57,10 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(s.wallModel.kind, .cameraLines)
         XCTAssertFalse(s.settings.wizardDone)
         s.wizardNext()
-        XCTAssertEqual(s.route, .memoryWho)
-        XCTAssertEqual(s.mode, .memory)
+        XCTAssertEqual(s.route, .home)
         XCTAssertTrue(s.settings.wizardDone)
 
-        XCTAssertEqual(Harness(setupDone: true).state.route, .memoryWho, "not again once done")
+        XCTAssertEqual(Harness(setupDone: true).state.route, .home, "not again once done")
     }
 
     func testSettingsPagesAndBack() {
@@ -107,18 +106,6 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(s.route, .settings(.family))
     }
 
-    func testAddMemberFromMakeOpensFilmForThem() {
-        let h = Harness()
-        let s = h.state
-        s.handle(.mode(.make))
-        s.handle(.knob(2))
-        s.handle(.confirm)
-        XCTAssertEqual(s.route, .memberEdit(nil))
-        s.saveMember(id: nil, name: "Ada", colorIndex: 2)
-        XCTAssertEqual(s.route, .makeWho)
-        XCTAssertEqual(s.highlight, 2, "the new member is highlighted")
-    }
-
     // D2: delete everything keeps setup values; the sample family can be loaded again.
     func testDeleteEverythingAndSampleFamily() throws {
         let h = Harness()
@@ -139,8 +126,8 @@ final class SettingsTests: XCTestCase {
         XCTAssertNotNil(s.settings.camera)
 
         s.handle(.cancel)
-        XCTAssertEqual(s.route, .memoryWho)
-        XCTAssertEqual(s.whoTileCount, 0)
+        XCTAssertEqual(s.route, .home)
+        XCTAssertEqual(s.homeCardCount, 1, "only the Add card")
 
         s.loadSampleFamily()
         XCTAssertEqual(s.store.members.map(\.name), ["Nora", "Leo"])
@@ -153,7 +140,7 @@ final class SettingsTests: XCTestCase {
         s.openSettings()
         s.deleteEverything()
         s.handle(.cancel)
-        XCTAssertEqual(s.route, .memoryWho, "the member shown before is gone")
+        XCTAssertEqual(s.route, .home, "the member shown before is gone")
     }
 
     func testLastControlForTheControllerPage() {
@@ -169,13 +156,15 @@ final class SettingsTests: XCTestCase {
         h.openFilm()
         XCTAssertEqual(s.makePath, [.film])
         s.popped(1)
-        XCTAssertEqual(s.route, .makeWho)
+        XCTAssertEqual(s.route, .memberMenu)
         XCTAssertEqual(s.makePath, [])
+        s.handle(.cancel)
 
         h.openMemoryWall()
         XCTAssertEqual(s.memoryPath, [.wall])
         s.popped(1)
-        XCTAssertEqual(s.route, .memoryWho)
+        XCTAssertEqual(s.route, .memberMenu)
+        s.handle(.cancel)
 
         s.openSettings()
         XCTAssertTrue(s.showsSettings)
@@ -190,22 +179,53 @@ final class SettingsTests: XCTestCase {
         s.setSettingsPath([])
         XCTAssertEqual(s.route, .settings(.list))
         s.dismissSettings()
-        XCTAssertEqual(s.route, .memoryWho)
+        XCTAssertEqual(s.route, .home)
         XCTAssertFalse(s.showsSettings)
 
-        s.handle(.mode(.make))
         s.openTile(s.store.members.count)
-        XCTAssertTrue(s.showsMemberSheet, "A1 from the + tile is a sheet")
-        s.dismissMemberSheet()
-        XCTAssertEqual(s.route, .makeWho)
+        h.scheduler.advance(AppState.confirmSeconds)
+        XCTAssertEqual(s.navigationPath, [.addMember], "adding a member is pushed above Home")
+        s.popped(1)
+        XCTAssertEqual(s.route, .home)
+    }
+
+    func testPointColourIsRemembered() {
+        let suite = "test." + UUID().uuidString
+        let defaults = UserDefaults(suiteName: suite)!
+        XCTAssertNil(SettingsStore(defaults: defaults).accentIndex, "black by default")
+        SettingsStore(defaults: defaults).accentIndex = 4
+        XCTAssertEqual(SettingsStore(defaults: defaults).accentIndex, 4)
+        defaults.removePersistentDomain(forName: suite)
     }
 
     func testSetUpLater() {
         let h = Harness(setupDone: false)
         h.state.skipWizard()
-        XCTAssertEqual(h.state.route, .memoryWho)
+        XCTAssertEqual(h.state.route, .home)
         XCTAssertTrue(h.state.settings.wizardDone)
         h.state.startWizard()
         XCTAssertEqual(h.state.route, .wizard(.permissions), "the banner goes straight to the setup steps")
+    }
+
+    // The gear on the member menu edits that member; the card shows a colour or the newest photo.
+    func testMemberCardStyle() throws {
+        let h = Harness()
+        let s = h.state
+        h.confirm()
+        s.openMemberEdit(s.currentMember?.id)
+        XCTAssertEqual(s.route, .memberEdit(h.nora.id))
+        XCTAssertTrue(s.showsMemberSheet)
+        XCTAssertEqual(h.nora.card, .photo, "the newest photo by default")
+        XCTAssertNil(s.store.latestPhotoURL(for: h.nora.id), "sample records have no photo")
+
+        s.saveMember(id: h.nora.id, name: "Nora", colorIndex: 3, cardStyle: .colour)
+        XCTAssertEqual(s.route, .memberMenu, "back to the menu")
+        XCTAssertEqual(h.nora.card, .colour)
+        XCTAssertEqual(h.nora.colorIndex, 3)
+
+        let poster = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".jpg")
+        try Data([1]).write(to: poster)
+        s.store.addRecord(memberID: h.nora.id, heightMM: 1250, source: .edited, clip: ProcessedClip(posterURL: poster))
+        XCTAssertNotNil(s.store.latestPhotoURL(for: h.nora.id), "a new record brings a photo")
     }
 }

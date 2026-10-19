@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Phone screen. The Make / Memory tab bar is Home (SPEC 4); each tab is a NavigationStack drawn
-/// from `AppState.route`. Settings and A1 are sheets. The first-start wizard covers everything.
+/// Phone screen. Home is the wheel of members; one NavigationStack drawn from `AppState.route`
+/// pushes adding a member, Record and Lookback above it. Settings and A1 are sheets. The
+/// first-start wizard covers everything. Debug builds can show the wall picture instead.
 struct RootView: View {
     @Environment(AppState.self) private var state
 
@@ -9,9 +10,16 @@ struct RootView: View {
         Group {
             if case .wizard(let step) = state.route {
                 WizardView(step: step)
+            } else if case .tutorial(let step) = state.route {
+                TutorialScreen(step: step)
             } else {
-                MainTabs()
+                MainStack()
             }
+        }
+        .overlay {
+            #if DEBUG
+            if state.debugShowsWall { DebugWallPreview() }
+            #endif
         }
         .overlay(alignment: .top) {
             if let notice = state.notice {
@@ -25,7 +33,6 @@ struct RootView: View {
             }
         }
         .animation(.default, value: state.notice)
-        .virtualController(bottomPadding: 90)
         .overlay(alignment: .bottomLeading) {
             // UI tests read the route here to check the screen and AppState agree.
             if ProcessInfo.processInfo.arguments.contains("-UITestRoute") {
@@ -38,40 +45,24 @@ struct RootView: View {
     }
 }
 
-/// One NavigationStack around the Make / Memory TabView: screens pushed from either tab cover the
-/// whole TabView, tab bar included, and popping brings it back. No tab bar hiding is needed, so it
-/// cannot get stuck hidden (as it did with a stack per tab on iOS 26).
-private struct MainTabs: View {
+/// One NavigationStack above Home. Pushed screens cover Home completely and popping brings it back.
+private struct MainStack: View {
     @Environment(AppState.self) private var state
 
     var body: some View {
         // Read here, in body, so Observation re-renders this view whenever they change. Values read
         // only inside a Binding's closure are not tracked: the route could move on while the stack
-        // stayed put (a push lost, the tab bar left hidden), until something else redrew the view.
+        // stayed put, until something else redrew the view.
         let path = state.navigationPath
-        let selectedTab = state.mode ?? .memory
         let showsSettings = state.showsSettings
         let showsMemberSheet = state.showsMemberSheet
 
         NavigationStack(path: Binding(get: { path },
                                       set: { state.popped(path.count - $0.count) })) {
-            TabView(selection: Binding(get: { selectedTab },
-                                       set: { state.handle(.mode($0)) })) {
-                MemberGridView(mode: .make)
-                    .tabItem { Label("Make", systemImage: "record.circle") }
-                    .tag(Mode.make)
-                MemberGridView(mode: .memory)
-                    .tabItem { Label("Memory", systemImage: "clock.arrow.circlepath") }
-                    .tag(Mode.memory)
-            }
-            // The tabs draw their own large titles (a shared title flickered when switching tabs);
-            // the bar keeps only the Settings button.
-            .navigationTitle("")
-            .navigationBarTitleDisplayMode(.inline)
-            .screenChrome(statusInContent: true)
-            .navigationDestination(for: NavStep.self) { step in
-                destination(step)
-            }
+            HomeScreen()
+                .navigationDestination(for: NavStep.self) { step in
+                    destination(step)
+                }
         }
         .sheet(isPresented: Binding(get: { showsSettings },
                                     set: { if !$0 { state.dismissSettings() } })) {
@@ -87,9 +78,11 @@ private struct MainTabs: View {
 
     @ViewBuilder private func destination(_ step: NavStep) -> some View {
         switch step {
-        case .film: FilmView(film: state.filmState)
-        case .height: HeightView(height: state.heightState)
-        case .wall: MemoryWallView()
+        case .addMember: AddMemberScreen()
+        case .film: FilmScreen(film: state.filmState)
+        case .height: HeightScreen(height: state.heightState)
+        case .saved: SavedScreen()
+        case .wall: PlaybackScreen()
         case .record(let id): RecordDetailView(recordID: id)
         }
     }
@@ -100,38 +93,66 @@ private struct MainTabs: View {
     }
 }
 
-/// Temporary mockup, debug builds only: an on-screen stand-in for the controller, for testing on
-/// the phone and the projector without the box. Each button sends the same event as the real one.
-extension View {
-    func virtualController(bottomPadding: CGFloat = 0) -> some View {
-        #if DEBUG
-        overlay(alignment: .bottom) { VirtualController().padding(.bottom, bottomPadding) }
-        #else
-        self
-        #endif
-    }
-}
-
 #if DEBUG
-private struct VirtualController: View {
+/// Debug builds: the wall picture on the phone, with the controller's buttons underneath so the
+/// wall's screens can be driven without the box.
+struct DebugWallPreview: View {
     @Environment(AppState.self) private var state
-    private static let buttons: [(String, ControlEvent)] = [
-        ("arrowshape.turn.up.left.fill", .cancel), ("chevron.left", .left), ("minus", .knob(-1)),
-        ("circle.fill", .confirm), ("plus", .knob(1)), ("chevron.right", .right), ("square.fill", .record),
-    ]
 
     var body: some View {
-        HStack(spacing: 2) {
-            ForEach(Self.buttons.indices, id: \.self) { index in
-                Button { state.handle(Self.buttons[index].1) } label: {
-                    Image(systemName: Self.buttons[index].0).frame(width: 44, height: 44)
-                }
-                .accessibilityLabel(Self.buttons[index].1.label)
+        VStack(spacing: 0) {
+            HStack {
+                Text(verbatim: "Wall preview")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.7))
+                Spacer()
+                DebugWallButton(color: .white)
             }
+            .padding(.horizontal, 12)
+
+            WallView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            HStack(spacing: 18) {
+                pad(.back, "Back") { state.handle(.cancel) }
+                pad(.left, "Left") { state.handle(.left) }
+                pad(.confirm, "Confirm") { state.handle(.confirm) }
+                pad(.right, "Right") { state.handle(.right) }
+                knob
+            }
+            .padding(.vertical, 10)
         }
-        .font(.headline)
-        .padding(4)
-        .background(.regularMaterial, in: Capsule())
+        .padding(.top, 50)
+        .padding(.bottom, 20)
+        .background(Color.black)
+        .ignoresSafeArea()
+    }
+
+    /// The knob: one step either way.
+    private var knob: some View {
+        HStack(spacing: 2) {
+            Button { state.handle(.knob(-1)) } label: {
+                Image(systemName: "arrow.counterclockwise").font(.system(size: 16, weight: .bold))
+                    .frame(width: 28, height: 44)
+            }
+            .accessibilityLabel(Text(verbatim: "Debug pad Knob down"))
+            ControlIcon(glyph: .knob, size: 36)
+            Button { state.handle(.knob(1)) } label: {
+                Image(systemName: "arrow.clockwise").font(.system(size: 16, weight: .bold))
+                    .frame(width: 28, height: 44)
+            }
+            .accessibilityLabel(Text(verbatim: "Debug pad Knob up"))
+        }
+        .foregroundStyle(.white)
+        .buttonStyle(PressStyle())
+    }
+
+    private func pad(_ glyph: ControlIcon.Glyph, _ name: String, _ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            ControlIcon(glyph: glyph, size: 44).foregroundStyle(.white)
+        }
+        .buttonStyle(PressStyle())
+        .accessibilityLabel(Text(verbatim: "Debug pad \(name)"))
     }
 }
 #endif

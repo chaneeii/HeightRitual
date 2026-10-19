@@ -2,7 +2,6 @@ import Foundation
 
 enum FilmState: Equatable {
     case ready
-    case countdown(Int)
     case filming(secondsLeft: Int)
 }
 
@@ -13,14 +12,14 @@ enum HeightState: Equatable {
 }
 
 enum SettingsPage: Equatable {
-    case list, family, setupGuide, fitToWall, cameraPosition, units, language, controller, permissions
+    case list, family, setupGuide, fitToWall, cameraPosition, units, controller, permissions
 }
 
 /// What the controller moves through on the projector's settings grid, in order: Setup guide
-/// (beside the title), then the tiles row by row. Setup guide, Fit to wall, Units, Language and
+/// (beside the title), then the tiles row by row. Setup guide, Fit to wall, Units and
 /// Permissions open from the grid so far.
 enum SettingsTile: Int, CaseIterable {
-    case setupGuide, family, fitToWall, cameraPosition, units, language, sound,
+    case setupGuide, family, fitToWall, cameraPosition, units, pointColour, sound,
          controller, permissions, sampleFamily, deleteEverything
 
     /// The page Select opens from the projector grid; nil until that page exists on the projector.
@@ -29,7 +28,6 @@ enum SettingsTile: Int, CaseIterable {
         case .setupGuide: return .setupGuide
         case .fitToWall: return .fitToWall
         case .units: return .units
-        case .language: return .language
         case .permissions: return .permissions
         default: return nil
         }
@@ -55,24 +53,82 @@ enum FitValue: Int, CaseIterable {
     }
 }
 
+/// What to do with the chosen member, on the overlay above Home.
+enum MemberAction: Equatable {
+    case record                   // film a new record (M2)
+    case lookback                 // the memory wall (R2)
+}
+
+/// One position on the letter wheel of the add-member screen: Delete, Save, then A to Z.
+/// The wheel has no ends; turning past Z comes back to Delete.
+enum LetterKey: Equatable {
+    case delete
+    case save
+    case letter(Character)
+
+    static let all: [LetterKey] = [.delete, .save] + "ABCDEFGHIJKLMNOPQRSTUVWXYZ".map { .letter($0) }
+    /// The wheel starts on A.
+    static let startIndex = 2
+
+    static func at(_ index: Int) -> LetterKey {
+        all[((index % all.count) + all.count) % all.count]
+    }
+}
+
+/// The guided first use from Settings (a demo feature): the app's real steps, one control at a
+/// time, with the controller drawn underneath.
+enum TutorialStep: Int, CaseIterable {
+    case welcome = 1      // what Memory Meter is
+    case family           // add someone
+    case name             // pick letters, Save
+    case chooseRecord     // Left / Right to Record, Confirm
+    case film             // five seconds
+    case height           // knob and Left / Right on the dial, Confirm saves
+    case saved            // Back goes back
+    case chooseLookback   // Left / Right to Lookback, Confirm
+    case lookback         // every record, life-size
+    case ready            // Confirm: Home, on the new member
+
+    var previous: TutorialStep? { TutorialStep(rawValue: rawValue - 1) }
+    var next: TutorialStep? { TutorialStep(rawValue: rawValue + 1) }
+}
+
+/// A control of the box, as the onboarding teaches it. Left and Right are one lesson.
+enum TutorialLesson: Hashable, CaseIterable {
+    case confirm, knob, arrows, back
+
+    init?(_ event: ControlEvent) {
+        switch event {
+        case .confirm: self = .confirm
+        case .knob: self = .knob
+        case .left, .right: self = .arrows
+        case .cancel: self = .back
+        default: return nil
+        }
+    }
+}
+
 /// Every screen of the app (SPEC 5). Changed only through `AppState.go(to:)`.
-/// The Make / Memory tab bar is Home; the app opens on R1.
+/// Home is a wheel of member cards; choosing one opens the member menu (Record or Lookback).
 enum Route: Equatable {
-    case makeWho                  // M1
+    case home                     // H: wheel of members, Add card at the end
+    case memberMenu               // H1: overlay above Home for the chosen member
+    case addMember                // A2: name from the letter wheel
     case makeFilm(FilmState)      // M2
     case makeHeight(HeightState)  // M3
-    case memoryWho                // R1
+    case makeSaved                // M4: saved, then growth or someone else
     case memoryWall               // R2
     case record(UUID)             // R3
     case memberEdit(UUID?)        // A1, nil = new member
     case settings(SettingsPage)   // S, S1 to S6
     case wizard(WizardStep)       // W
+    case tutorial(TutorialStep)   // T: onboarding with the controller
 
     /// The mode a route belongs to; nil for screens outside both modes.
     var mode: Mode? {
         switch self {
-        case .makeWho, .makeFilm, .makeHeight: return .make
-        case .memoryWho, .memoryWall, .record: return .memory
+        case .makeFilm, .makeHeight, .makeSaved: return .make
+        case .memoryWall, .record: return .memory
         default: return nil
         }
     }
@@ -88,7 +144,7 @@ enum Route: Equatable {
     /// Countdown, filming and the height step hold work that is lost when going anywhere else.
     var holdsMakeSession: Bool {
         switch self {
-        case .makeFilm(.countdown), .makeFilm(.filming), .makeHeight: return true
+        case .makeFilm(.filming), .makeHeight: return true
         default: return false
         }
     }

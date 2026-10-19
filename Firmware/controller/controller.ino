@@ -1,151 +1,135 @@
-// Height Ritual controller v3 -> iPhone app over Bluetooth Low Energy
-// Layout from the team sketch (5 Oct 2026):
-//   top:    recording light, mode switch (make / memory), auto play toggle
-//   middle: Record/Stop button, knob
-//   bottom: Cancel/Back, Left, Confirm, Right
+// Memory Meter controller v4 -> iPhone app over Bluetooth Low Energy
+// The box (19 Oct 2026), seen from above:
 //
-// Board:     classic ESP32 DevKit or ESP32-S3-DevKitC (pins are chosen automatically)
-// Libraries: NimBLE-Arduino 2.x (h2zero). ESP32Encoder only if USE_POT is 0.
+//   [ Back ]                 ( Knob )
 //
-// The controller only reports what was used. The app decides what it means on each screen.
+//   < Left      ( Confirm )     Right >
+//
+// Five controls: Back, a rotary encoder knob, Left, the round Confirm, Right.
+// Confirm also starts and stops filming. Powered by a USB power bank.
+//
+// Board:     classic ESP32 DevKit (ESP32-WROOM-32) or ESP32-S3-DevKitC (pins are chosen automatically)
+// Library:   NimBLE-Arduino 2.x by h2zero (Library Manager). The knob needs no library.
+// Serial Monitor at 115200 baud shows every press and turn.
+//
+// The controller only reports what was used. The app decides what it means on each screen
+// (docs/SPEC.md section 6).
 //
 // Input characteristic (notify), 2 bytes [controlId, value]:
-//   1  knob turn      value = signed steps (+ clockwise)
-//   11 Record/Stop    1
+//   1  knob turn      value = signed detents since the last packet (+ clockwise)
 //   13 Confirm        1
-//   23 Cancel/Back    1
 //   14 Left           1
 //   15 Right          1
-//   31 mode switch    0 = Memory, 1 = Make (sent on change and when the app subscribes)
-//   32 auto play      1 = toggle
-// Light characteristic (write), 1 or 2 bytes [recording, mode]:
-//   recording: 0 off, 1 slow blink, 2 on, 3 three quick flashes then off
-//   mode (optional): 0 = memory light on, 1 = make light on
+//   23 Back           1
+// Light characteristic (write), 1 or 2 bytes [recording, mode]; only the first byte is used:
+//   0 off, 1 slow blink, 2 on, 3 three quick flashes then off
+//   The box has no light of its own, so this drives the LED on the board (not visible when closed).
 
-// Knob type: 1 = potentiometer (3 pins, about 300 degrees), 0 = rotary encoder EC11
-#define USE_POT 1
-// Auto play control: 1 = latching push switch (every change is a toggle), 0 = momentary button
-#define AUTOPLAY_LATCHING 1
-// Two extra LEDs that show the mode: 1 = fitted, 0 = not fitted
-#define MODE_LEDS 0
-// Print pin changes and sent packets to the Serial Monitor (115200 baud): 1 = on, 0 = off
+// Encoder steps per click you feel. Most EC11 / KY-040 knobs: 4.
+// If one click moves the height by 0.2 cm, set 2. If it takes two clicks to move once, set 4 -> 2.
+#define COUNTS_PER_DETENT 4
+// Turn the knob clockwise: the height should go up. If it goes down, set 1.
+#define REVERSE_KNOB 0
+// Print presses, turns and sent packets to the Serial Monitor (115200 baud): 1 = on, 0 = off
 #define SERIAL_DEBUG 1
 
 #include <NimBLEDevice.h>
-#if !USE_POT
-#include <ESP32Encoder.h>
-#endif
 
-#define DEVICE_NAME  "HeightController"
+#define DEVICE_NAME  "MemoryMeter"
 #define SERVICE_UUID "6f1d0001-8a3c-4b6e-9a51-2c7e0b1d4a01"
 #define INPUT_UUID   "6f1d0002-8a3c-4b6e-9a51-2c7e0b1d4a01"
 #define LED_UUID     "6f1d0003-8a3c-4b6e-9a51-2c7e0b1d4a01"
 
-// ---- Pins (all inputs use internal pull-ups; the other leg goes to GND) ----
+// ---- Pins. Every button: one leg to the pin, the other leg to GND (internal pull-up). ----
 #if CONFIG_IDF_TARGET_ESP32S3
-const int PIN_POT      = 1;   // potentiometer middle pin (ADC1)
-const int PIN_ENC_A    = 4;
-const int PIN_ENC_B    = 5;
-const int PIN_RECORD   = 7;
-const int PIN_AUTOPLAY = 15;
-const int PIN_CANCEL   = 6;
-const int PIN_LEFT     = 16;
-const int PIN_CONFIRM  = 17;
-const int PIN_RIGHT    = 18;
-const int PIN_MODE     = 8;   // slide switch: middle to GND, Make side to this pin
-const int PIN_LED      = 9;   // recording LED through a resistor, short leg to GND
-const int PIN_LED_MAKE = 10;
-const int PIN_LED_MEMORY = 11;
+const int PIN_BACK    = 6;
+const int PIN_LEFT    = 16;
+const int PIN_CONFIRM = 17;
+const int PIN_RIGHT   = 18;
+const int PIN_ENC_A   = 4;    // encoder CLK
+const int PIN_ENC_B   = 5;    // encoder DT
+const int PIN_LED     = 48;   // RGB LED on most S3 DevKitC boards; any free pin works
 #else
-// Classic ESP32 DevKit (ESP32-WROOM-32). Same wiring as the breadboard guide:
-// the old Playback button (19) is now auto play, the old Push button (25) is now Cancel.
-const int PIN_POT      = 34;  // potentiometer middle pin (ADC1, input only). Outer pins: 3V3 and GND
-const int PIN_ENC_A    = 32;
-const int PIN_ENC_B    = 33;
-const int PIN_RECORD   = 18;
-const int PIN_AUTOPLAY = 19;
-const int PIN_CANCEL   = 25;
-const int PIN_LEFT     = 26;
-const int PIN_CONFIRM  = 27;
-const int PIN_RIGHT    = 14;
-const int PIN_MODE     = 16;  // slide switch: middle to GND, Make side to this pin
-const int PIN_LED      = 17;  // recording LED through a resistor, short leg to GND
-const int PIN_LED_MAKE = 22;
-const int PIN_LED_MEMORY = 23;
+// Same pins as the breadboard (5 Oct): Back 25, Left 26, Confirm 27, Right 14.
+// The old Record button on 18 is gone; Confirm films now.
+const int PIN_BACK    = 25;
+const int PIN_LEFT    = 26;
+const int PIN_CONFIRM = 27;
+const int PIN_RIGHT   = 14;
+const int PIN_ENC_A   = 32;   // encoder CLK. 32 and 33 have internal pull-ups; 34 to 39 do not
+const int PIN_ENC_B   = 33;   // encoder DT
+const int PIN_LED     = 2;    // blue LED on the board
 #endif
 
-enum : uint8_t {
-  ID_KNOB = 1, ID_RECORD = 11, ID_CONFIRM = 13, ID_LEFT = 14, ID_RIGHT = 15,
-  ID_CANCEL = 23, ID_MODE = 31, ID_AUTOPLAY = 32
-};
+enum : uint8_t { ID_KNOB = 1, ID_CONFIRM = 13, ID_LEFT = 14, ID_RIGHT = 15, ID_BACK = 23 };
 
 const unsigned long DEBOUNCE_MS = 25;
-const int POT_STEPS = 24;         // the turn range is split into this many steps
-const int POT_MARGIN = 30;        // extra ADC counts needed to leave a step, stops flicker
-const int COUNTS_PER_DETENT = 4;  // encoder only
+const unsigned long KNOB_SEND_MS = 20;   // turns are summed and sent at most every 20 ms
 
-// ---- Debounced input ----
-struct Input {
+// ---- Buttons, debounced ----
+struct Button {
   int pin;
   uint8_t id;
+  const char* name;
   bool stable;          // debounced level, HIGH = released
   bool lastRead;
   unsigned long changedAt;
 };
 
-Input record   = {PIN_RECORD,   ID_RECORD};
-Input cancel   = {PIN_CANCEL,   ID_CANCEL};
-Input btnLeft  = {PIN_LEFT,     ID_LEFT};
-Input confirm  = {PIN_CONFIRM,  ID_CONFIRM};
-Input btnRight = {PIN_RIGHT,    ID_RIGHT};
-Input autoplay = {PIN_AUTOPLAY, ID_AUTOPLAY};
-Input mode     = {PIN_MODE,     ID_MODE};
-Input* pressButtons[] = {&record, &cancel, &btnLeft, &confirm, &btnRight};
+Button buttons[] = {
+  {PIN_BACK,    ID_BACK,    "Back"},
+  {PIN_LEFT,    ID_LEFT,    "Left"},
+  {PIN_CONFIRM, ID_CONFIRM, "Confirm"},
+  {PIN_RIGHT,   ID_RIGHT,   "Right"},
+};
 
-#if USE_POT
-int potStep = 0;
-float potSmooth = 0;
-#else
-ESP32Encoder encoder;
-long lastDetent = 0;
-#endif
-
-NimBLEServer* server = nullptr;
-NimBLECharacteristic* inputChar = nullptr;
-volatile bool sendModeSoon = false;
-volatile uint8_t ledMode = 0;
-volatile unsigned long ledModeSince = 0;
-
-void setupInput(Input& in) {
-  pinMode(in.pin, INPUT_PULLUP);
-  in.stable = in.lastRead = digitalRead(in.pin);
-  in.changedAt = 0;
-}
-
-// Returns true when the debounced level changed.
-bool updateInput(Input& in) {
-  bool reading = digitalRead(in.pin);
-  if (reading != in.lastRead) {
-    in.lastRead = reading;
-    in.changedAt = millis();
+// Returns true once per press (the debounced level went to LOW).
+bool pressed(Button& b) {
+  bool reading = digitalRead(b.pin);
+  if (reading != b.lastRead) {
+    b.lastRead = reading;
+    b.changedAt = millis();
   }
-  if (reading != in.stable && millis() - in.changedAt > DEBOUNCE_MS) {
-    in.stable = reading;
-#if SERIAL_DEBUG
-    Serial.printf("pin %d -> %s\n", in.pin, reading == LOW ? "LOW (pressed)" : "HIGH (released)");
-#endif
-    return true;
+  if (reading != b.stable && millis() - b.changedAt > DEBOUNCE_MS) {
+    b.stable = reading;
+    return reading == LOW;
   }
   return false;
 }
 
-bool isConnected() {
-  return server && server->getConnectedCount() > 0;
+// ---- Knob: quadrature decoding in an interrupt, no library ----
+// Each valid change of the two pins moves the count by one; invalid ones (bounce) are ignored.
+volatile long encCount = 0;
+volatile uint8_t encState = 0;
+const int8_t ENC_TABLE[16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
+
+void IRAM_ATTR onEncoder() {
+  encState = ((encState << 2) | (digitalRead(PIN_ENC_A) << 1) | digitalRead(PIN_ENC_B)) & 0x0F;
+  encCount += ENC_TABLE[encState];
 }
 
-void send(uint8_t id, int8_t value) {
+long lastDetent = 0;
+unsigned long lastKnobSend = 0;
+
+long detents() {
+  noInterrupts();
+  long count = encCount;
+  interrupts();
+  long d = count / COUNTS_PER_DETENT;
+  return REVERSE_KNOB ? -d : d;
+}
+
+// ---- Bluetooth ----
+NimBLEServer* server = nullptr;
+NimBLECharacteristic* inputChar = nullptr;
+volatile uint8_t ledMode = 0;
+volatile unsigned long ledSince = 0;
+
+bool isConnected() { return server && server->getConnectedCount() > 0; }
+
+void send(uint8_t id, int8_t value, const char* name) {
 #if SERIAL_DEBUG
-  Serial.printf("send [%d, %d]%s\n", id, value, isConnected() ? "" : "  (not sent: no app connected)");
+  Serial.printf("[%s] %-8s [%d, %d]\n", isConnected() ? "SEND" : "----", name, id, value);
 #endif
   if (!isConnected() || !inputChar) return;
   uint8_t packet[2] = {id, (uint8_t)value};
@@ -153,65 +137,31 @@ void send(uint8_t id, int8_t value) {
   inputChar->notify();
 }
 
-#if USE_POT
-int readPot() {
-  long sum = 0;
-  for (int i = 0; i < 8; i++) sum += analogRead(PIN_POT);
-  return sum / 8;                                   // 0..4095
-}
-
-// Turns the absolute position into steps, so the app sees the same packets as with an encoder.
-void updatePot() {
-  potSmooth += (readPot() - potSmooth) * 0.2f;
-  const float width = 4096.0f / POT_STEPS;
-  float center = (potStep + 0.5f) * width;
-  if (fabsf(potSmooth - center) > width * 0.5f + POT_MARGIN) {
-    int next = constrain((int)(potSmooth / width), 0, POT_STEPS - 1);
-    if (next != potStep) {
-      send(ID_KNOB, (int8_t)(next - potStep));
-      potStep = next;
-    }
-  }
-}
-#endif
-
-void setLed(uint8_t pattern) {
-  ledMode = pattern;
-  ledModeSince = millis();
-}
-
-void setModeLeds(uint8_t makeMode) {
-#if MODE_LEDS
-  digitalWrite(PIN_LED_MAKE, makeMode ? HIGH : LOW);
-  digitalWrite(PIN_LED_MEMORY, makeMode ? LOW : HIGH);
-#endif
-}
+void setLed(uint8_t pattern) { ledMode = pattern; ledSince = millis(); }
 
 void updateLed() {
-  unsigned long t = millis() - ledModeSince;
+  unsigned long t = millis() - ledSince;
   bool on = false;
-  switch (ledMode) {
-    case 1: on = (millis() / 500) % 2 == 0; break;          // slow blink
-    case 2: on = true; break;                                // steady
-    case 3:                                                  // three flashes, then off
-      if (t >= 900) { ledMode = 0; on = false; }
-      else on = (t / 150) % 2 == 0;
-      break;
-    default: on = false;
-  }
+  if (!isConnected()) on = (millis() % 2000) < 60;            // short blip every 2 s: waiting for the phone
+  else if (ledMode == 1) on = (millis() / 500) % 2 == 0;      // slow blink
+  else if (ledMode == 2) on = true;                           // steady
+  else if (ledMode == 3) { if (t >= 900) ledMode = 0; else on = (t / 150) % 2 == 0; }
   digitalWrite(PIN_LED, on ? HIGH : LOW);
 }
 
 class ServerCallbacks : public NimBLEServerCallbacks {
+  void onConnect(NimBLEServer* s, NimBLEConnInfo& info) override {
+    setLed(3);
+#if SERIAL_DEBUG
+    Serial.println("[BLE] phone connected");
+#endif
+  }
   void onDisconnect(NimBLEServer* s, NimBLEConnInfo& info, int reason) override {
     setLed(0);
+#if SERIAL_DEBUG
+    Serial.println("[BLE] phone disconnected, advertising again");
+#endif
     NimBLEDevice::startAdvertising();
-  }
-};
-
-class InputCallbacks : public NimBLECharacteristicCallbacks {
-  void onSubscribe(NimBLECharacteristic* c, NimBLEConnInfo& info, uint16_t subValue) override {
-    if (subValue > 0) sendModeSoon = true;  // tell the app where the switch is
   }
 };
 
@@ -219,36 +169,30 @@ class LedCallbacks : public NimBLECharacteristicCallbacks {
   void onWrite(NimBLECharacteristic* c, NimBLEConnInfo& info) override {
     NimBLEAttValue value = c->getValue();
     if (value.size() > 0) setLed(value.data()[0]);
-    if (value.size() > 1) setModeLeds(value.data()[1]);
   }
 };
 
 void setup() {
 #if SERIAL_DEBUG
   Serial.begin(115200);
-  Serial.printf("Height controller. Left %d, Right %d, Confirm %d, Cancel %d, Record %d\n",
-                PIN_LEFT, PIN_RIGHT, PIN_CONFIRM, PIN_CANCEL, PIN_RECORD);
+  Serial.println();
+  Serial.printf("Memory Meter controller v4. Back %d, Left %d, Confirm %d, Right %d, knob %d/%d\n",
+                PIN_BACK, PIN_LEFT, PIN_CONFIRM, PIN_RIGHT, PIN_ENC_A, PIN_ENC_B);
 #endif
   pinMode(PIN_LED, OUTPUT);
   digitalWrite(PIN_LED, LOW);
-#if MODE_LEDS
-  pinMode(PIN_LED_MAKE, OUTPUT);
-  pinMode(PIN_LED_MEMORY, OUTPUT);
-#endif
 
-#if USE_POT
-  potSmooth = readPot();
-  potStep = constrain((int)(potSmooth / (4096.0f / POT_STEPS)), 0, POT_STEPS - 1);
-#else
-  ESP32Encoder::useInternalWeakPullResistors = puType::up;
-  encoder.attachFullQuad(PIN_ENC_A, PIN_ENC_B);
-  encoder.clearCount();
-#endif
+  for (Button& b : buttons) {
+    pinMode(b.pin, INPUT_PULLUP);
+    b.stable = b.lastRead = digitalRead(b.pin);
+    b.changedAt = 0;
+  }
 
-  for (Input* b : pressButtons) setupInput(*b);
-  setupInput(autoplay);
-  setupInput(mode);
-  setModeLeds(mode.stable == LOW ? 1 : 0);
+  pinMode(PIN_ENC_A, INPUT_PULLUP);
+  pinMode(PIN_ENC_B, INPUT_PULLUP);
+  encState = (digitalRead(PIN_ENC_A) << 1) | digitalRead(PIN_ENC_B);
+  attachInterrupt(digitalPinToInterrupt(PIN_ENC_A), onEncoder, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PIN_ENC_B), onEncoder, CHANGE);
 
   NimBLEDevice::init(DEVICE_NAME);
   server = NimBLEDevice::createServer();
@@ -256,7 +200,6 @@ void setup() {
 
   NimBLEService* service = server->createService(SERVICE_UUID);
   inputChar = service->createCharacteristic(INPUT_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
-  inputChar->setCallbacks(new InputCallbacks());
   NimBLECharacteristic* ledChar =
       service->createCharacteristic(LED_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_NR);
   ledChar->setCallbacks(new LedCallbacks());
@@ -264,42 +207,28 @@ void setup() {
 
   NimBLEAdvertising* adv = NimBLEDevice::getAdvertising();
   adv->addServiceUUID(SERVICE_UUID);
+  adv->enableScanResponse(true);   // the name does not fit next to the long UUID, so it goes in the scan response
   adv->setName(DEVICE_NAME);
   adv->start();
+#if SERIAL_DEBUG
+  Serial.println("[BLE] advertising as " DEVICE_NAME ", waiting for the phone");
+#endif
 }
 
 void loop() {
-#if USE_POT
-  updatePot();
-#else
-  long detent = encoder.getCount() / COUNTS_PER_DETENT;
-  if (detent != lastDetent) {
-    long delta = constrain(detent - lastDetent, -127, 127);
-    send(ID_KNOB, (int8_t)delta);
-    lastDetent = detent;
-  }
-#endif
-
-  // Momentary buttons: send on press.
-  for (Input* b : pressButtons) {
-    if (updateInput(*b) && b->stable == LOW) send(b->id, 1);
+  for (Button& b : buttons) {
+    if (pressed(b)) send(b.id, 1, b.name);
   }
 
-  // Auto play: a latching switch toggles on every change, a momentary button on press.
-  if (updateInput(autoplay)) {
-#if AUTOPLAY_LATCHING
-    send(ID_AUTOPLAY, 1);
-#else
-    if (autoplay.stable == LOW) send(ID_AUTOPLAY, 1);
-#endif
-  }
-
-  // Mode switch: LOW = Make side.
-  if (updateInput(mode) || sendModeSoon) {
-    sendModeSoon = false;
-    send(ID_MODE, mode.stable == LOW ? 1 : 0);
+  // Knob: send the clicks turned since the last packet, as one signed number.
+  long now = detents();
+  if (now != lastDetent && millis() - lastKnobSend >= KNOB_SEND_MS) {
+    long delta = constrain(now - lastDetent, -127, 127);
+    send(ID_KNOB, (int8_t)delta, delta > 0 ? "Knob +" : "Knob -");
+    lastDetent += delta;
+    lastKnobSend = millis();
   }
 
   updateLed();
-  delay(5);
+  delay(2);
 }

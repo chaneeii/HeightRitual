@@ -113,10 +113,10 @@ Each step can be reopened from Settings.
 | R2 | Memory: wall | Segmented control "Auto play / Manual" at the top. Copy of the wall. Manual: Previous, Next, Replay. Auto play: Stop. No Record: filming is only in Make | Marks for all records; the selected record's clip life-size; caption "Nora, Aug 2025, 121.0 cm". Auto play: each record in order |
 | R3 | One record | Clip, date, height, growth since the record before. Change height, Delete | Unchanged |
 | A1 | Add or edit member | Name, colour, Delete member | Unchanged |
-| S | Settings | List: Family, Setup guide, Fit to wall, Camera position, Units, Sound, Controller, Permissions, Sample family, Delete everything | Unchanged |
+| S | Settings | List: Family, Setup guide, Fit to wall, Camera position, Units, Sound, Controller, Permissions, Sample family, Delete everything | Back icon top left, the same items as rounded tiles in two columns with their current values, Setup guide as a pill beside the title; the controller's choice outlined in orange |
 | S2 | Fit to wall | Rotation at the top, two sliders (floor line, size), fine-step toggle | Centimetre ruler: 0, 100, 150 highlighted, dashed line at 170 |
 | S3 | Camera position | Camera preview with two draggable lines: floor and 100 cm. Text: put them on the projected lines | Two bright lines at 0 and 100 cm |
-| S4 | Units | cm or feet and inches | Unchanged |
+| S4 | Units | cm or feet and inches; choosing one saves it and goes back to the list | Back icon, "Units", the two units with the saved one ticked and the controller's choice outlined in orange |
 | S5 | Permissions | Camera, Bluetooth, Microphone (only if sound is on): state of each, button to open iOS Settings | Unchanged |
 | S6 | Controller | Connected or searching, last control used (for testing), Forget this controller | Unchanged |
 | W | First-start wizard | S5, S2, S3 in order with Next and Skip | As in each step |
@@ -167,6 +167,8 @@ The controller only reports what was used. The app decides what it means.
 | M3 height | +/- 0.5 cm per step | -1 / +1 cm | Save | Retake (back to M2) | | |
 | R2 wall: manual | Previous / next record | Previous / next record | Replay clip | Back to R1 | | Start auto play |
 | R2 wall: auto play | Stop, then move | Stop, then move | Stop | Stop | | Stop |
+| S list (projector grid) | Move through Setup guide and the tiles | Previous / next | Open (Units only so far) | Close Settings | | |
+| S4 units | Choose a unit | Centimetres / feet and inches | Save, back to the grid | Back to the grid | | |
 | S2 fit to wall | Change selected value | Select value | Done | Done | | |
 
 Mode switch, on every screen: Make opens M1; Memory opens R1. Leaving Make with an unsaved clip

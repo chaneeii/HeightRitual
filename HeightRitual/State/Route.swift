@@ -16,6 +16,18 @@ enum SettingsPage: Equatable {
     case list, family, setupGuide, fitToWall, cameraPosition, units, controller, permissions
 }
 
+/// What the controller moves through on the projector's settings grid, in order: Setup guide
+/// (beside the title), then the tiles row by row. Only Units has a projector page so far.
+enum SettingsTile: Int, CaseIterable {
+    case setupGuide, family, fitToWall, cameraPosition, units, language, appearance, sound,
+         controller, permissions, sampleFamily, deleteEverything
+
+    /// The page Select opens from the projector grid; nil until that page exists on the projector.
+    var page: SettingsPage? {
+        self == .units ? .units : nil
+    }
+}
+
 /// First-start wizard: what the app is, then S5, S2, S3 in order.
 enum WizardStep: Int, CaseIterable {
     case welcome, permissions, fitToWall, cameraPosition

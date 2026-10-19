@@ -1,14 +1,15 @@
 import SwiftUI
 
-/// S4: centimetres or feet and inches (stored heights never change), and the phone's appearance.
+/// S4: centimetres or feet and inches (stored heights never change). Choosing one saves it and
+/// goes back to the list, the same as Select on the projector's Units page.
 struct UnitsPage: View {
     @Environment(AppState.self) private var state
 
     var body: some View {
-        @Bindable var settings = state.settings
         Form {
             Section {
-                Picker("Units", selection: $settings.unit) {
+                Picker("Units", selection: Binding(get: { state.settings.unit },
+                                                   set: { state.chooseUnit($0) })) {
                     LabeledContent("Centimetres", value: HeightFormatter.text(1210, unit: .cm)).tag(HeightUnit.cm)
                     LabeledContent("Feet and inches", value: HeightFormatter.text(1210, unit: .ftin)).tag(HeightUnit.ftin)
                 }

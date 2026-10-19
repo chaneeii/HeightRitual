@@ -102,17 +102,10 @@ private struct SettingsList: View {
             }
             .listRowBackground(SettingsStyle.row)
             Section {
-                Picker(selection: $settings.unit) {
-                    Text("Centimetres").tag(HeightUnit.cm)
-                    Text("Feet and inches").tag(HeightUnit.ftin)
-                } label: {
-                    Label {
-                        Text("Units")
-                        Text("For every height on the phone and the wall")
-                    } icon: {
-                        Image(systemName: "textformat.123")
-                    }
-                }
+                // A page of its own, so the projector shows its Units page too (route .settings(.units)).
+                link(.units, "Units", detail: "For every height on the phone and the wall",
+                     systemImage: "textformat.123",
+                     value: settings.unit == .cm ? L("Centimetres") : L("Feet and inches"))
                 LanguagePicker()
                 AppearancePicker()
                 Toggle(isOn: $settings.soundOn) {

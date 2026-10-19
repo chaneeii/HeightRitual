@@ -16,6 +16,11 @@ struct WallModel: Equatable {
         case ruler
         /// S3: two bright lines at 0 and 100 cm for the camera position.
         case cameraLines
+        /// S list: the settings as tiles in two columns, Setup guide as a pill beside the title. Only shown; the
+        /// settings are changed on the phone.
+        case settingsMenu
+        /// S4 Units: the two units, the controller's choice outlined. Only Units has a page so far.
+        case settingsUnits
     }
 
     struct Mark: Equatable {
@@ -100,6 +105,12 @@ extension AppState {
 
         case .settings(.cameraPosition), .wizard(.cameraPosition):
             model.kind = .cameraLines
+
+        case .settings(.list):
+            model.kind = .settingsMenu
+
+        case .settings(.units):
+            model.kind = .settingsUnits
 
         case .settings:
             model.kind = .idle

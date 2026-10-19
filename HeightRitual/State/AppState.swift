@@ -77,6 +77,10 @@ final class AppState {
 
     private(set) var fitValue: FitValue = .floor
     var fitFine = false
+    /// The tile the controller has chosen on the projector's settings grid.
+    private(set) var settingsHighlight: SettingsTile = .setupGuide
+    /// The option the controller has chosen on the projector's Units page.
+    private(set) var unitHighlight: HeightUnit = .cm
 
     var externalDisplayConnected = false
     /// Projector screen size in points. Until a projector is connected, a 1080p picture is assumed.
@@ -173,6 +177,10 @@ final class AppState {
             if event == .cancel { closeMemberEdit() }
         case .settings(.fitToWall), .wizard(.fitToWall):
             handleFit(event)
+        case .settings(.list):
+            handleSettingsGrid(event)
+        case .settings(.units):
+            handleUnits(event)
         case .settings(let page):
             if event == .cancel { page == .list ? leaveSettings() : go(to: .settings(.list)) }
         case .wizard:
@@ -610,12 +618,53 @@ final class AppState {
         case .settings, .wizard, .memberEdit: break
         default: settingsReturn = route
         }
+        settingsHighlight = .setupGuide
         go(to: .settings(.list))
     }
 
     func openSettingsPage(_ page: SettingsPage) {
         if page == .fitToWall { fitValue = .floor }
+        if page == .units { unitHighlight = settings.unit }
         go(to: .settings(page))
+    }
+
+    /// The projector's settings grid: the knob, Left and Right move through the tiles; Select opens
+    /// a tile that has a projector page; Back closes Settings.
+    private func handleSettingsGrid(_ event: ControlEvent) {
+        switch event {
+        case .knob(let steps): moveSettingsHighlight(by: steps)
+        case .left: moveSettingsHighlight(by: -1)
+        case .right: moveSettingsHighlight(by: 1)
+        case .confirm:
+            if let page = settingsHighlight.page { openSettingsPage(page) }
+        case .cancel: leaveSettings()
+        default: break
+        }
+    }
+
+    private func moveSettingsHighlight(by steps: Int) {
+        let all = SettingsTile.allCases
+        settingsHighlight = all[min(max(settingsHighlight.rawValue + steps, 0), all.count - 1)]
+    }
+
+    /// The projector's Units page: the knob, Left and Right choose; Select saves and goes back.
+    private func handleUnits(_ event: ControlEvent) {
+        switch event {
+        case .knob(let steps) where steps < 0: unitHighlight = .cm
+        case .knob: unitHighlight = .ftin
+        case .left: unitHighlight = .cm
+        case .right: unitHighlight = .ftin
+        case .confirm: chooseUnit(unitHighlight)
+        case .cancel: go(to: .settings(.list))
+        default: break
+        }
+    }
+
+    /// Saves the unit and goes back to the settings list, from the phone or the controller.
+    func chooseUnit(_ unit: HeightUnit) {
+        settings.unit = unit
+        unitHighlight = unit
+        if route == .settings(.units) { go(to: .settings(.list)) }
     }
 
     func leaveSettings() {

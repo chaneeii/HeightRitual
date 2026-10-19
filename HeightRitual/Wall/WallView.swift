@@ -19,6 +19,13 @@ struct WallView: View {
             WallCanvas(model: model)
                 .overlay { WallClipOverlay(model: model, player: state.wallPlayer.player) }
                 .overlay {
+                    switch model.kind {
+                    case .settingsMenu: WallSettingsMenu()
+                    case .settingsUnits: WallUnitsPage()
+                    default: EmptyView()
+                    }
+                }
+                .overlay {
                     // Layers (SPEC 10): wall, marks, clip. A clip with its background would hide
                     // the marks, so they are drawn once more above it.
                     if model.figure?.hasClip == true, model.figure?.opaque == true {
@@ -84,6 +91,7 @@ struct WallCanvas: View {
             case .footGuide: drawFootGuide(ctx, g)
             case .dark: drawNumber(ctx, g)
             case .cameraLines: drawCameraLines(ctx, g)
+            case .settingsMenu, .settingsUnits: break    // views above the canvas: WallSettingsMenu, WallUnitsPage
             }
         }
     }
@@ -295,5 +303,225 @@ struct PlayerLayerView: UIViewRepresentable {
     final class LayerView: UIView {
         override class var layerClass: AnyClass { AVPlayerLayer.self }
         var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
+    }
+}
+
+/// The settings list on the wall while Settings is open on the phone: the same items and values
+/// as rounded tiles in two columns, with Setup guide as a pill beside the title. Sized from the picture's width, so it
+/// fills the projector and still reads in the phone's small wall copy.
+private struct WallSettingsMenu: View {
+    @Environment(AppState.self) private var state
+
+    private struct Tile: Identifiable {
+        let id: SettingsTile
+        let title: LocalizedStringKey
+        var detail: LocalizedStringKey?
+        let systemImage: String
+        var value: String?
+        var destructive = false
+    }
+
+    private static let text = Color(red: 0.08, green: 0.10, blue: 0.08)
+
+    private var rows: [[Tile]] {
+        let settings = state.settings
+        let appearance: String
+        switch settings.appearance {
+        case .system: appearance = L("System")
+        case .light: appearance = L("Light")
+        case .dark: appearance = L("Dark")
+        }
+        let tiles = [
+            Tile(id: .family, title: "Family", detail: "Add, rename or remove the people you measure",
+                 systemImage: "person.2", value: "\(state.store.members.count)"),
+            Tile(id: .fitToWall, title: "Fit to wall", detail: "Make projected centimetres match a tape measure",
+                 systemImage: "ruler"),
+            Tile(id: .cameraPosition, title: "Camera position", detail: "Where the floor and 100 cm are in the camera picture",
+                 systemImage: "camera.viewfinder", value: settings.camera == nil ? L("Not set") : L("Set")),
+            Tile(id: .units, title: "Units", detail: "For every height on the phone and the wall",
+                 systemImage: "textformat.123",
+                 value: settings.unit == .cm ? L("Centimetres") : L("Feet and inches")),
+            Tile(id: .language, title: "Language", detail: "For the phone and the wall", systemImage: "globe",
+                 value: settings.language == .system ? L("System") : settings.language.nativeName),
+            Tile(id: .appearance, title: "Appearance", detail: "Light or dark phone screens. The wall stays black.",
+                 systemImage: "circle.lefthalf.filled", value: appearance),
+            Tile(id: .sound, title: "Sound", detail: "Record and play sound with each clip",
+                 systemImage: "speaker.wave.2", value: settings.soundOn ? L("On") : L("Off")),
+            Tile(id: .controller, title: "Controller", detail: "Connection, and a test of every button",
+                 systemImage: "gamecontroller",
+                 value: state.controllerStatus == .connected ? L("Connected") : state.controllerStatus.label),
+            Tile(id: .permissions, title: "Permissions", detail: "Camera, Bluetooth and microphone",
+                 systemImage: "hand.raised"),
+            Tile(id: .sampleFamily, title: "Load sample family", detail: "Nora and Leo, to try Memory without filming",
+                 systemImage: "person.3"),
+            Tile(id: .deleteEverything, title: "Delete everything", systemImage: "trash", destructive: true),
+        ]
+        // Two per row; an odd last tile stands alone on the left.
+        return stride(from: 0, to: tiles.count, by: 2).map { Array(tiles[$0..<min($0 + 2, tiles.count)]) }
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            let unit = geo.size.width / 100
+            let rowCount = CGFloat(rows.count)
+            // Padding, the title and the gaps, then six rows of the same height.
+            let tileHeight = (geo.size.height - unit * 8 - unit * 7.5 - unit * 2.5 - unit * 2.5 * (rowCount - 1)) / rowCount
+            VStack(alignment: .leading, spacing: unit * 2.5) {
+                HStack(alignment: .center, spacing: unit * 3) {
+                    WallBackIcon(unit: unit)
+                    Text("Settings")
+                        .font(.system(size: unit * 6, weight: .bold))
+                        .foregroundStyle(.white)
+                    Spacer(minLength: unit * 2)
+                    setupGuide(unit: unit)
+                }
+                Grid(horizontalSpacing: unit * 2.5, verticalSpacing: unit * 2.5) {
+                    ForEach(rows.indices, id: \.self) { row in
+                        GridRow {
+                            ForEach(rows[row]) { tile in
+                                tileView(tile, unit: unit)
+                                    .frame(height: max(0, tileHeight))
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(unit * 4)
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
+        }
+        .background(Color.black)
+    }
+
+    /// Setup guide sits apart from the tiles, as a pill beside the title.
+    private func setupGuide(unit: CGFloat) -> some View {
+        Label {
+            Text("Setup guide")
+                .font(.system(size: unit * 3.4, weight: .semibold))
+        } icon: {
+            Image(systemName: "book")
+                .font(.system(size: unit * 3.4))
+        }
+        .foregroundStyle(Self.text)
+        .padding(.horizontal, unit * 3)
+        .padding(.vertical, unit * 1.6)
+        .background(SettingsStyle.row, in: Capsule())
+        .overlay {
+            if state.settingsHighlight == .setupGuide {
+                Capsule().strokeBorder(WallBackIcon.orange, lineWidth: unit * 1.2)
+            }
+        }
+    }
+
+    private func tileView(_ tile: Tile, unit: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: unit * 0.8) {
+            HStack(alignment: .top) {
+                Image(systemName: tile.systemImage)
+                    .font(.system(size: unit * 4.5))
+                    .foregroundStyle(tile.destructive ? Color.red : SettingsStyle.icon)
+                Spacer(minLength: unit)
+                if let value = tile.value {
+                    Text(verbatim: value)
+                        .font(.system(size: unit * 3, weight: .semibold))
+                        .foregroundStyle(Self.text.opacity(0.75))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                }
+            }
+            Spacer(minLength: 0)
+            Text(tile.title)
+                .font(.system(size: unit * 3.8, weight: .semibold))
+                .foregroundStyle(tile.destructive ? Color.red : Self.text)
+                .lineLimit(1)
+                .fixedSize(horizontal: false, vertical: true)
+            if let detail = tile.detail {
+                Text(detail)
+                    .font(.system(size: unit * 2.6))
+                    .foregroundStyle(Self.text.opacity(0.65))
+                    .lineLimit(2, reservesSpace: true)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(unit * 2.5)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(SettingsStyle.row, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
+        .overlay {
+            if state.settingsHighlight == tile.id {
+                RoundedRectangle(cornerRadius: unit * 4, style: .continuous)
+                    .strokeBorder(WallBackIcon.orange, lineWidth: unit * 1.2)
+            }
+        }
+    }
+}
+
+/// The back icon on the projector's settings pages: the controller's Back button goes back.
+/// Only shown; the projector cannot be touched.
+private struct WallBackIcon: View {
+    let unit: CGFloat
+    /// The orange of the back icon, also used to outline the controller's choice.
+    static let orange = Color(red: 0.93, green: 0.42, blue: 0.18)
+
+    var body: some View {
+        Image(systemName: "arrowshape.turn.up.left.fill")
+            .font(.system(size: unit * 4.6, weight: .bold))
+            .foregroundStyle(.white)
+            .frame(width: unit * 9.5, height: unit * 9.5)
+            .background(Self.orange, in: RoundedRectangle(cornerRadius: unit * 2.6, style: .continuous))
+    }
+}
+
+/// S4 Units on the projector: the two units, the saved one ticked, the controller's choice outlined.
+/// The knob, Left and Right choose; Select saves and goes back to the grid; Back goes back.
+private struct WallUnitsPage: View {
+    @Environment(AppState.self) private var state
+    private static let text = Color(red: 0.08, green: 0.10, blue: 0.08)
+
+    var body: some View {
+        GeometryReader { geo in
+            let unit = geo.size.width / 100
+            VStack(alignment: .leading, spacing: unit * 4) {
+                HStack(alignment: .center, spacing: unit * 3) {
+                    WallBackIcon(unit: unit)
+                    Text("Units")
+                        .font(.system(size: unit * 6, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+                Text("For every height on the phone and the wall")
+                    .font(.system(size: unit * 3.4))
+                    .foregroundStyle(.white.opacity(0.75))
+                option(.cm, title: "Centimetres", unit: unit)
+                option(.ftin, title: "Feet and inches", unit: unit)
+                Spacer(minLength: 0)
+            }
+            .padding(unit * 4)
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
+        }
+        .background(Color.black)
+    }
+
+    private func option(_ value: HeightUnit, title: LocalizedStringKey, unit: CGFloat) -> some View {
+        HStack(spacing: unit * 3) {
+            VStack(alignment: .leading, spacing: unit * 1) {
+                Text(title)
+                    .font(.system(size: unit * 5, weight: .semibold))
+                Text(verbatim: HeightFormatter.text(1210, unit: value))
+                    .font(.system(size: unit * 3.6))
+                    .opacity(0.7)
+            }
+            Spacer(minLength: 0)
+            if state.settings.unit == value {
+                Image(systemName: "checkmark")
+                    .font(.system(size: unit * 5, weight: .bold))
+            }
+        }
+        .foregroundStyle(Self.text)
+        .padding(unit * 4)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(SettingsStyle.row, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
+        .overlay {
+            if state.unitHighlight == value {
+                RoundedRectangle(cornerRadius: unit * 4, style: .continuous)
+                    .strokeBorder(WallBackIcon.orange, lineWidth: unit * 1.2)
+            }
+        }
     }
 }

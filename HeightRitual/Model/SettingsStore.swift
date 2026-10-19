@@ -84,6 +84,8 @@ final class SettingsStore {
     var camera: CameraPosition? { didSet { save(camera, "camera") } }
     /// The first-start wizard has been finished or skipped through.
     var wizardDone: Bool { didSet { save(wizardDone, "wizardDone") } }
+    /// The knob or Left / Right has been used on the height check, so its step hint is gone.
+    var heightStepsLearned: Bool { didSet { save(heightStepsLearned, "heightStepsLearned") } }
 
     @ObservationIgnored private let defaults: UserDefaults
 
@@ -102,6 +104,7 @@ final class SettingsStore {
         wall = load("wall") ?? Calibration()
         camera = load("camera") as CameraPosition?
         wizardDone = load("wizardDone") ?? false
+        heightStepsLearned = load("heightStepsLearned") ?? false
     }
 
     private func save<T: Encodable>(_ value: T, _ key: String) {

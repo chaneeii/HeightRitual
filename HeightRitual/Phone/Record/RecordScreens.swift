@@ -161,6 +161,7 @@ struct HeightContent: View {
             }
         }
         .frame(width: surface.canvas.width, height: surface.canvas.height)
+        .animation(.easeOut(duration: 0.3), value: state.settings.heightStepsLearned)
     }
 
     @ViewBuilder private var editing: some View {
@@ -172,7 +173,7 @@ struct HeightContent: View {
 
         ScreenHeading(surface: surface, title: Text("Check \(name)'s height"),
                       subtitle: surface == .phone ? Text("Drag the dial to adjust, then tap Save")
-                                                  : Text("Turn the knob to fine-tune"),
+                              : state.settings.heightStepsLearned ? Text("Turn the knob to fine-tune") : stepHint,
                       top: surface.v(121, 100))
 
         DraftPreview(size: surface.s(CGSize(width: 178, height: 318), CGSize(width: 236, height: 420)))
@@ -200,6 +201,14 @@ struct HeightContent: View {
                    size: buttonSize(single: false)) { state.handle(.confirm) }
             .confirmSqueeze(state.confirmCount, active: surface == .wall)
             .position(x: surface.v(296.5, 448), y: surface.v(825, 1000))
+    }
+
+    /// Wall, first use only, until the knob or Left / Right is used: how big each step is.
+    private var stepHint: Text {
+        let icon: CGFloat = 26
+        let fine = state.settings.unit == .cm ? "0.1 cm" : "1/4 in"
+        let coarse = state.settings.unit == .cm ? "1 cm" : "1 in"
+        return Text("Turn \(inlineIcon(.knob, size: icon)) for \(fine), press \(inlineIcon(.left, size: icon)) \(inlineIcon(.right, size: icon)) for \(coarse)")
     }
 
     private func retake(primary: Bool, single: Bool) -> some View {
@@ -260,7 +269,7 @@ struct SavedContent: View {
 
         ZStack(alignment: .topLeading) {
             ZStack {
-                Circle().fill(Theme.accent)
+                Circle().fill(Theme.success)
                     .scaleEffect(shown ? 1 : 0.3)
                     .opacity(shown ? 1 : 0)
                 CheckShape()

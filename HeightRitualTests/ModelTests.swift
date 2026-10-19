@@ -35,6 +35,16 @@ final class ModelTests: XCTestCase {
         XCTAssertEqual(h.state.draft?.heightMM, 1251, "Right steps 1 in")
     }
 
+    func testHeightStepHintUntilFirstUse() {
+        let h = Harness()
+        h.openHeight(estimateMM: 1219)
+        XCTAssertFalse(h.state.settings.heightStepsLearned, "hint shows on first use")
+        h.state.setDraftHeight(1230)
+        XCTAssertFalse(h.state.settings.heightStepsLearned, "dragging the dial does not count")
+        h.state.handle(.knob(1))
+        XCTAssertTrue(h.state.settings.heightStepsLearned)
+    }
+
     func testEstimate() {
         let camera = CameraPosition(floorY: 0.9, y100: 0.5)
         // Head at 0.42: (0.9 - 0.42) * 100 / 0.4 = 120 cm

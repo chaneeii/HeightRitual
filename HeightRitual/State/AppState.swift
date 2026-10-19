@@ -616,6 +616,7 @@ final class AppState {
 
     private func adjustDraft(by steps: Int, coarse: Bool, fineMM: Int = 5) {
         guard var draft else { return }
+        if !settings.heightStepsLearned { settings.heightStepsLearned = true }
         let base = draft.heightMM ?? HeightFormatter.emptyFieldStartMM
         draft.heightMM = HeightFormatter.step(base, by: steps, unit: settings.unit, coarse: coarse, fineMM: fineMM)
         draft.fromEstimate = false

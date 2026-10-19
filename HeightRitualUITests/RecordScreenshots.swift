@@ -16,6 +16,7 @@ final class RecordScreenshots: XCTestCase {
 
     func testCaptureRecordAndLookback() {
         app.launch()
+        if app.buttons["Set up later"].waitForExistence(timeout: 3) { app.buttons["Set up later"].tap() }
         pause(1.5)
         tap(201, 367); pause(1)            // Nora -> menu
         tap(124, 414); pause(1.5)          // Record

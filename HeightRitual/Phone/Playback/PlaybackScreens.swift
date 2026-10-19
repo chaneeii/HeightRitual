@@ -36,7 +36,7 @@ struct RecordFigure: View {
             ZStack(alignment: .topLeading) {
                 Color.black
                 if let record, state.clipURL(record) != nil {
-                    PlayerLayerView(player: state.wallPlayer.player, fill: true)
+                    PlayerLayerView(player: state.wallPlayer.player)
                 } else if let record {
                     let full = floor * share
                     let h = full * CGFloat(record.heightMM) / CGFloat(max(tallestMM, 1))
@@ -159,29 +159,27 @@ struct WallPlaybackOverlay: View {
         let index = state.recordIndex
         let unit = state.settings.unit
 
-        DesignCanvas(surface: .wall, background: .clear) {
-            // Keeps the text readable over a bright clip.
-            LinearGradient(colors: [Color.black.opacity(0.75), Color.black.opacity(0)],
-                           startPoint: .top, endPoint: .bottom)
-                .frame(width: 608, height: 380)
-                .position(x: 304, y: 190)
-                .opacity(state.wallModel.fullBleedClip ? 1 : 0)
-            ControlIcon(glyph: .back, size: 49)
-                .foregroundStyle(Theme.paper)
-                .position(x: 56, y: 58)
-            Text("\(name)'s growth")
-                .font(Theme.title(37))
-                .foregroundStyle(Theme.paper)
-                .position(x: 304, y: 58)
-            StoryIndicator(count: records.count, index: index, width: 548, height: 4, gap: 10)
-                .position(x: 304, y: 111)
+        let hasClip = state.selectedRecord.map { state.clipURL($0) != nil } ?? false
 
-            if let record = state.selectedRecord {
-                let parts = HeightFormatter.parts(record.heightMM, unit: unit)
-                VStack(spacing: 4) {
+        // The person stands life-size in the middle, so nothing covers the face: the segments sit
+        // at the very top; the record and the title sit at the bottom, by the feet.
+        DesignCanvas(surface: .wall, background: .clear) {
+            StoryIndicator(count: records.count, index: index, width: 548, height: 4, gap: 10)
+                .position(x: 304, y: 30)
+
+            // Keeps the text readable over the clip's legs.
+            LinearGradient(colors: [Color.black.opacity(0), Color.black.opacity(0.75)],
+                           startPoint: .top, endPoint: .bottom)
+                .frame(width: 608, height: 360)
+                .position(x: 304, y: 900)
+                .opacity(hasClip ? 1 : 0)
+
+            VStack(spacing: 4) {
+                if let record = state.selectedRecord {
+                    let parts = HeightFormatter.parts(record.heightMM, unit: unit)
                     Text(verbatim: record.date.formatted(.dateTime.year().month(.twoDigits).day(.twoDigits).locale(.english)))
                         .font(.system(size: 20))
-                        .foregroundStyle(Color.white.opacity(0.7))
+                        .foregroundStyle(Color.white.opacity(0.75))
                     HStack(alignment: .lastTextBaseline, spacing: 2) {
                         Text(verbatim: parts.number)
                             .font(.system(size: 58, weight: .bold).monospacedDigit())
@@ -193,11 +191,20 @@ struct WallPlaybackOverlay: View {
                     .foregroundStyle(Theme.paper)
                     Text(verbatim: growth(records: records, index: index, unit: unit))
                         .font(.system(size: 20))
-                        .foregroundStyle(Color.white.opacity(0.7))
+                        .foregroundStyle(Color.white.opacity(0.75))
                 }
-                .position(x: 304, y: 237)
-                .animation(.snappy, value: index)
+                HStack(spacing: 14) {
+                    ControlIcon(glyph: .back, size: 40)
+                        .foregroundStyle(Theme.paper)
+                    Text("\(name)'s growth")
+                        .font(Theme.title(34))
+                        .foregroundStyle(Theme.paper)
+                }
+                .padding(.top, 14)
             }
+            .animation(.snappy, value: index)
+            .frame(width: 608, height: 320, alignment: .bottom)
+            .position(x: 304, y: 1080 - 24 - 160)
 
             if state.showsLookbackHint && records.count > 1 {
                 HStack(spacing: 8) {
@@ -209,7 +216,7 @@ struct WallPlaybackOverlay: View {
                 .padding(.horizontal, 22)
                 .padding(.vertical, 14)
                 .background(Color.white.opacity(0.18), in: Capsule())
-                .position(x: 304, y: 330)
+                .position(x: 304, y: 720)
                 .transition(.opacity)
             }
         }

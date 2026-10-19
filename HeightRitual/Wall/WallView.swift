@@ -108,7 +108,6 @@ struct WallCanvas: View {
     // MARK: Marks, figure, captions
 
     private func drawMarks(_ ctx: GraphicsContext, _ g: WallGeometry) {
-        guard !model.fullBleedClip else { return }
         let figureX = g.centerX - g.length(cm: 8)
         let lineLeft = g.centerX - g.length(cm: 30)
         let lineRight = g.centerX + g.length(cm: 22)
@@ -270,11 +269,7 @@ private struct WallClipOverlay: View {
 
     var body: some View {
         GeometryReader { geo in
-            if model.fullBleedClip {
-                // Lookback: the clip fills the picture; the overlay's text sits on top.
-                PlayerLayerView(player: player, fill: true)
-                    .frame(width: geo.size.width, height: geo.size.height)
-            } else if let figure = model.figure, figure.hasClip {
+            if let figure = model.figure, figure.hasClip {
                 let g = WallGeometry(size: geo.size, calibration: model.calibration)
                 let bodyPt = g.length(cm: Double(figure.heightMM) / 10)
                 // Without layout numbers (clip kept without a person) the frame is the body.

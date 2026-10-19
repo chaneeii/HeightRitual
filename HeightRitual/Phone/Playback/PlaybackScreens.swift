@@ -166,7 +166,7 @@ struct WallPlaybackOverlay: View {
         let hasClip = state.selectedRecord.map { state.clipURL($0) != nil } ?? false
 
         // The person stands life-size in the middle, so nothing covers the face: the segments sit
-        // at the very top; the record and the title sit at the bottom, by the feet.
+        // at the very top, the record at the bottom by the feet. Back is on the box.
         DesignCanvas(surface: .wall, background: .clear) {
             StoryIndicator(count: records.count, index: index, width: 548, height: 4, gap: 10)
                 .position(x: 304, y: 30)
@@ -174,8 +174,8 @@ struct WallPlaybackOverlay: View {
             // Keeps the text readable over the clip's legs.
             LinearGradient(colors: [Color.black.opacity(0), Color.black.opacity(0.75)],
                            startPoint: .top, endPoint: .bottom)
-                .frame(width: 608, height: 360)
-                .position(x: 304, y: 900)
+                .frame(width: 608, height: 300)
+                .position(x: 304, y: 930)
                 .opacity(hasClip ? 1 : 0)
 
             VStack(spacing: 4) {
@@ -197,18 +197,10 @@ struct WallPlaybackOverlay: View {
                         .font(.system(size: 20))
                         .foregroundStyle(Color.white.opacity(0.75))
                 }
-                HStack(spacing: 14) {
-                    ControlIcon(glyph: .back, size: 40)
-                        .foregroundStyle(Theme.paper)
-                    Text("\(name)'s growth")
-                        .font(Theme.title(34))
-                        .foregroundStyle(Theme.paper)
-                }
-                .padding(.top, 14)
             }
             .animation(.snappy, value: index)
-            .frame(width: 608, height: 320, alignment: .bottom)
-            .position(x: 304, y: 1080 - 24 - 160)
+            .frame(width: 608, height: 240, alignment: .bottom)
+            .position(x: 304, y: 1080 - 30 - 120)
 
             if state.showsLookbackHint && records.count > 1 {
                 HStack(spacing: 8) {

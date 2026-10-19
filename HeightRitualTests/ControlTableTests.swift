@@ -55,9 +55,11 @@ final class ControlTableTests: XCTestCase {
         h.confirm()
         XCTAssertEqual(s.currentMember?.name, "Leo")
         s.handle(.right)
+        let replays = s.replayCount
         h.confirm()
         XCTAssertEqual(s.route, .memoryWall)
         XCTAssertEqual(s.recordIndex, 3, "newest record selected")
+        XCTAssertEqual(s.replayCount, replays + 1, "its clip starts playing at once")
         s.handle(.cancel)
         XCTAssertEqual(s.route, .memberMenu, "back from Lookback is the menu")
         XCTAssertEqual(s.menuChoice, .lookback)

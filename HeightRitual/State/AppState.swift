@@ -438,9 +438,10 @@ final class AppState {
             case .record:
                 go(to: .makeFilm(.ready))
             case .lookback:
+                // Opens on the newest record, its clip playing at once.
                 recordIndex = max(0, currentRecords.count - 1)
                 go(to: .memoryWall)
-                if settings.autoPlay { startAutoPlay() }
+                if settings.autoPlay { startAutoPlay() } else { replayCount += 1 }
             }
         }
     }

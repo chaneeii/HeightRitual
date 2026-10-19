@@ -143,7 +143,6 @@ struct HeightDial: View, Animatable {
             ctx.fill(Path(ellipseIn: dot), with: .color(Theme.dialNeedle))
         }
         .frame(width: width, height: height)
-        .background(Theme.dialBackground)
         .accessibilityHidden(true)
     }
 }

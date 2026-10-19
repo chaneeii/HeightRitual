@@ -38,8 +38,6 @@ enum Theme {
     /// The bar that fills while filming.
     @MainActor static var progress: Color { accent }
     static let progressTrack = Color(white: 0xCC / 255)
-    /// Behind the height dial.
-    static let dialBackground = Color(white: 0.985)
     static let dialTick = Color(white: 0.45)
     @MainActor static var dialNeedle: Color { accent }
     /// Secondary buttons (Retake, Return to home).

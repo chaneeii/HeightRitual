@@ -22,27 +22,6 @@ struct UnitsPage: View {
     }
 }
 
-/// Settings > Appearance: light, dark or the phone's setting. The wall image stays black.
-struct AppearancePicker: View {
-    @Environment(AppState.self) private var state
-
-    var body: some View {
-        @Bindable var settings = state.settings
-        Picker(selection: $settings.appearance) {
-            Text("System").tag(Appearance.system)
-            Text("Light").tag(Appearance.light)
-            Text("Dark").tag(Appearance.dark)
-        } label: {
-            Label {
-                Text("Appearance")
-                Text("Light or dark phone screens. The wall stays black.")
-            } icon: {
-                Image(systemName: "circle.lefthalf.filled")
-            }
-        }
-    }
-}
-
 /// S6: connection state, a live list of what the controller sends (to test the box), a light
 /// test and Forget this controller. While this page is open, controls are only listed.
 struct ControllerPage: View {

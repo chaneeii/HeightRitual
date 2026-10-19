@@ -188,6 +188,29 @@
         }
       }
     },
+    "2. Place the phone next to it" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. 휴대폰을 옆에 놓기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Placera telefonen bredvid"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. 把手机放在旁边"
+          }
+        }
+      }
+    },
     "100 cm" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -229,29 +252,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "100 厘米线"
-          }
-        }
-      }
-    },
-    "2. Place the phone next to it" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "2. 휴대폰을 옆에 놓기"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "2. Placera telefonen bredvid"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "2. 把手机放在旁边"
           }
         }
       }
@@ -433,28 +433,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已允许"
-          }
-        }
-      }
-    },
-    "Appearance" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "화면 모드"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Utseende"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "外观"
           }
         }
       }
@@ -689,6 +667,7 @@
       }
     },
     "Centimetres" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -1100,28 +1079,6 @@
         }
       }
     },
-    "Dark" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다크"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mörkt"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "深色"
-          }
-        }
-      }
-    },
     "Date" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1509,6 +1466,7 @@
       }
     },
     "Feet and inches" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -1807,6 +1765,7 @@
       }
     },
     "For every height on the phone and the wall" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -2010,6 +1969,7 @@
       }
     },
     "Language" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -2050,50 +2010,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最近使用的控制"
-          }
-        }
-      }
-    },
-    "Light" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "라이트"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ljust"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "浅色"
-          }
-        }
-      }
-    },
-    "Light or dark phone screens. The wall stays black." : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "휴대폰 화면을 밝게 또는 어둡게. 벽 화면은 항상 검정이에요."
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ljusa eller mörka skärmar på telefonen. Väggen förblir svart."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "手机界面浅色或深色，墙面始终为黑色。"
           }
         }
       }
@@ -2576,7 +2492,6 @@
       }
     },
     "Not allowed" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -2802,29 +2717,6 @@
         }
       }
     },
-    "Open Settings" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "설정 열기"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Öppna Inställningar"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "打开设置"
-          }
-        }
-      }
-    },
     "Open permissions" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2844,6 +2736,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "打开权限设置"
+          }
+        }
+      }
+    },
+    "Open Settings" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설정 열기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öppna Inställningar"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开设置"
           }
         }
       }
@@ -3394,29 +3309,6 @@
         }
       }
     },
-    "Rotation" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "회전"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rotation"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "旋转"
-          }
-        }
-      }
-    },
     "Sample records have no clip; the wall shows a soft outline." : {
       "localizations" : {
         "ko" : {
@@ -3669,7 +3561,6 @@
       }
     },
     "Settings" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -3714,7 +3605,6 @@
       }
     },
     "Setup guide" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -3846,50 +3736,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "以全尺寸显示图片"
-          }
-        }
-      }
-    },
-    "Side, -90°" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "옆, -90°"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sida, -90°"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "侧放 -90°"
-          }
-        }
-      }
-    },
-    "Side, 90°" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "옆, 90°"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sida, 90°"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "侧放 90°"
           }
         }
       }
@@ -4432,6 +4278,7 @@
       }
     },
     "Units" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -4449,28 +4296,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "单位"
-          }
-        }
-      }
-    },
-    "Upright" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "똑바로"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Upprätt"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正放"
           }
         }
       }

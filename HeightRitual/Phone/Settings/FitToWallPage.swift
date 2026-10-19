@@ -10,16 +10,6 @@ struct FitToWallPage: View {
         let wall = state.settings.wall
 
         Form {
-            Section("Rotation") {
-                Picker("Rotation", selection: Binding(get: { state.settings.wall.rotation },
-                                                      set: { state.settings.wall.rotation = $0 })) {
-                    Text("Upright").tag(0)
-                    Text("Side, 90°").tag(90)
-                    Text("Side, -90°").tag(-90)
-                }
-                .pickerStyle(.segmented)
-            }
-
             Section {
                 WallCopy()
                     .frame(maxHeight: 320)

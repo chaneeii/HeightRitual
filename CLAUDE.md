@@ -19,7 +19,7 @@ controller light. P1 live foot check and the camera position auto-detect are not
 - The phone UI follows Apple's HIG: system TabView (Make / Memory, hidden on pushed screens),
   NavigationStacks drawn from `AppState.route` (`State/Navigation.swift`; the system back button
   sends Cancel), Settings and A1 as sheets with Forms.
-- iPhone and iPad, portrait, full screen. Light / dark / system appearance.
+- iPhone and iPad, portrait, full screen. Follows the phone's light or dark appearance.
 - English, Korean, Simplified Chinese, Swedish (`Resources/*.xcstrings`), chosen in Settings.
   Strings built in code go through `L(_:)` so they follow that choice.
 - The controller connects on a device; buttons-only firmware in `Firmware/controller_buttons/`.

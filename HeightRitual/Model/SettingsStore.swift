@@ -46,24 +46,19 @@ func L(_ value: String.LocalizationValue) -> String {
     String(localized: value, bundle: AppLanguage.current.bundle)
 }
 
-/// The phone's light or dark look. The wall image is always black.
-enum Appearance: String, Codable, CaseIterable {
-    case system, light, dark
-}
-
 /// Maps real centimetres on the wall to points on the projected image (SPEC 7, S2).
 struct Calibration: Codable, Equatable {
     /// Distance from the bottom edge of the projected image to the floor line, in points.
     var floorPt: Double = 40
     /// How many projector points one real centimetre takes on the wall.
     var ptPerCM: Double = 5
-    /// 0 when the projector stands normally; 90 or -90 when it lies on its side. -90 by default:
-    /// the group's projector lies on its side that way.
-    var rotation: Int = -90
+    /// The projector always lies on its side, turned -90 degrees (no longer a setting). Settings
+    /// saved before may still hold another value, which decoding ignores.
+    var rotation: Int { -90 }
 
     /// The projected image size after rotation, in the wall's own up and down direction.
     func logicalSize(for screen: CGSize) -> CGSize {
-        rotation == 0 ? screen : CGSize(width: screen.height, height: screen.width)
+        CGSize(width: screen.height, height: screen.width)
     }
 
     /// Only a portrait strip of the picture is used: 9:16, the picture's full height, so the
@@ -105,7 +100,6 @@ final class SettingsStore {
     var autoPlay: Bool { didSet { save(autoPlay, "autoPlay") } }
     /// Memory shows clips as filmed, with their background, instead of the cut-out.
     var showBackground: Bool { didSet { save(showBackground, "showBackground") } }
-    var appearance: Appearance { didSet { save(appearance, "appearance") } }
     var language: AppLanguage {
         didSet {
             AppLanguage.current = language
@@ -129,7 +123,6 @@ final class SettingsStore {
         soundOn = load("soundOn") ?? false
         autoPlay = load("autoPlay") ?? false
         showBackground = load("showBackground") ?? false
-        appearance = load("appearance") ?? .system
         let language: AppLanguage = load("language") ?? .system
         self.language = language
         AppLanguage.current = language

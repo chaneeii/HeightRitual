@@ -329,12 +329,6 @@ private struct WallSettingsMenu: View {
 
     private var rows: [[Tile]] {
         let settings = state.settings
-        let appearance: String
-        switch settings.appearance {
-        case .system: appearance = L("System")
-        case .light: appearance = L("Light")
-        case .dark: appearance = L("Dark")
-        }
         let tiles = [
             Tile(id: .family, title: "Family", detail: "Add, rename or remove the people you measure",
                  systemImage: "person.2", value: "\(state.store.members.count)"),
@@ -347,8 +341,6 @@ private struct WallSettingsMenu: View {
                  value: settings.unit == .cm ? L("Centimetres") : L("Feet and inches")),
             Tile(id: .language, title: "Language", detail: "For the phone and the wall", systemImage: "globe",
                  value: settings.language == .system ? L("System") : settings.language.nativeName),
-            Tile(id: .appearance, title: "Appearance", detail: "Light or dark phone screens. The wall stays black.",
-                 systemImage: "circle.lefthalf.filled", value: appearance),
             Tile(id: .sound, title: "Sound", detail: "Record and play sound with each clip",
                  systemImage: "speaker.wave.2", value: settings.soundOn ? L("On") : L("Off")),
             Tile(id: .controller, title: "Controller", detail: "Connection, and a test of every button",

@@ -311,6 +311,23 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.route, .settings(.list))
     }
 
+    func testFitToWallFromTheGrid() {
+        let h = Harness()
+        let s = h.state
+        let start = s.settings.wall
+        s.openSettings()
+        s.handle(.knob(SettingsTile.fitToWall.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.fitToWall))
+        XCTAssertEqual(s.wallModel.kind, .ruler)
+        XCTAssertEqual(s.fitValue, .floor)
+        s.handle(.knob(1))
+        XCTAssertEqual(s.settings.wall.floorPt, start.floorPt + 5)
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.list), "Done goes back to the grid")
+        XCTAssertEqual(s.settingsHighlight, .fitToWall)
+    }
+
     func testLanguageChosenOnThePhoneGoesBack() {
         let h = Harness()
         let s = h.state

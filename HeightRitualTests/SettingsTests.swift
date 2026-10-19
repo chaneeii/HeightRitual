@@ -5,7 +5,7 @@ import XCTest
 @MainActor
 final class SettingsTests: XCTestCase {
 
-    func testWallRotationDefaultsToOnItsSide() {
+    func testWallRotationIsOnItsSide() {
         XCTAssertEqual(Calibration().rotation, -90, "the group's projector lies on its side")
     }
 
@@ -198,14 +198,6 @@ final class SettingsTests: XCTestCase {
         XCTAssertTrue(s.showsMemberSheet, "A1 from the + tile is a sheet")
         s.dismissMemberSheet()
         XCTAssertEqual(s.route, .makeWho)
-    }
-
-    func testAppearanceIsRemembered() {
-        let suite = "test." + UUID().uuidString
-        let defaults = UserDefaults(suiteName: suite)!
-        SettingsStore(defaults: defaults).appearance = .light
-        XCTAssertEqual(SettingsStore(defaults: defaults).appearance, .light)
-        defaults.removePersistentDomain(forName: suite)
     }
 
     func testSetUpLater() {

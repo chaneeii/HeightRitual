@@ -17,16 +17,17 @@ enum SettingsPage: Equatable {
 }
 
 /// What the controller moves through on the projector's settings grid, in order: Setup guide
-/// (beside the title), then the tiles row by row. Setup guide, Units, Language and Permissions have
-/// projector pages so far.
+/// (beside the title), then the tiles row by row. Setup guide, Fit to wall, Units, Language and
+/// Permissions open from the grid so far.
 enum SettingsTile: Int, CaseIterable {
-    case setupGuide, family, fitToWall, cameraPosition, units, language, appearance, sound,
+    case setupGuide, family, fitToWall, cameraPosition, units, language, sound,
          controller, permissions, sampleFamily, deleteEverything
 
     /// The page Select opens from the projector grid; nil until that page exists on the projector.
     var page: SettingsPage? {
         switch self {
         case .setupGuide: return .setupGuide
+        case .fitToWall: return .fitToWall
         case .units: return .units
         case .language: return .language
         case .permissions: return .permissions

@@ -11,7 +11,7 @@ struct SettingsSheet: View {
             SettingsList()
                 .navigationTitle("Settings")
                 .toolbarBackground(SettingsStyle.background, for: .navigationBar)
-                .toolbarColorScheme(.dark, for: .navigationBar)
+                .toolbarColorScheme(.light, for: .navigationBar)
                 .toolbar {
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Done") { state.dismissSettings() }
@@ -69,12 +69,13 @@ struct SettingsPageView: View {
     }
 }
 
-/// The settings list's dark blue-grey look. The same in light and dark appearance, so the list
-/// is always drawn with dark-appearance text and controls.
+/// The settings list's white and light blue look, also used by the projector's settings tiles.
+/// The same in light and dark appearance, so the list is always drawn with light-appearance
+/// (dark) text and controls.
 enum SettingsStyle {
-    static let background = Color(red: 0.20, green: 0.40, blue: 0.23)
-    static let row = Color(red: 0.60, green: 0.75, blue: 0.60)
-    static let icon = Color(red: 0.10, green: 0.10, blue: 0.10)
+    static let background = Color(red: 0.91, green: 0.95, blue: 1.00)   // light blue
+    static let row = Color(red: 1.00, green: 1.00, blue: 1.00)          // white
+    static let icon = Color(red: 0.20, green: 0.48, blue: 0.85)         // clear blue
 }
 
 private struct SettingsList: View {
@@ -111,7 +112,6 @@ private struct SettingsList: View {
                      value: settings.unit == .cm ? L("Centimetres") : L("Feet and inches"))
                 link(.language, "Language", detail: "For the phone and the wall", systemImage: "globe",
                      value: settings.language == .system ? L("System") : settings.language.nativeName)
-                AppearancePicker()
                 Toggle(isOn: $settings.soundOn) {
                     Label {
                         Text("Sound")
@@ -151,7 +151,7 @@ private struct SettingsList: View {
         .scrollContentBackground(.hidden)
         .background(SettingsStyle.background)
         .tint(SettingsStyle.icon)
-        .environment(\.colorScheme, .dark)
+        .environment(\.colorScheme, .light)
         .confirmationDialog("Load the sample family?", isPresented: $confirmSample, titleVisibility: .visible) {
             Button("Replace with sample family", role: .destructive) { state.loadSampleFamily() }
         } message: {

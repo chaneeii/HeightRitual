@@ -5,7 +5,7 @@ import XCTest
 @MainActor
 final class SettingsTests: XCTestCase {
 
-    func testWallRotationDefaultsToOnItsSide() {
+    func testWallRotationIsOnItsSide() {
         XCTAssertEqual(Calibration().rotation, -90, "the group's projector lies on its side")
     }
 
@@ -127,7 +127,7 @@ final class SettingsTests: XCTestCase {
 
         s.handle(.cancel)
         XCTAssertEqual(s.route, .home)
-        XCTAssertEqual(s.homeCardCount, 1, "only the Add card")
+        XCTAssertEqual(s.homeCardCount, 2, "only the Add card and the Settings card")
 
         s.loadSampleFamily()
         XCTAssertEqual(s.store.members.map(\.name), ["Nora", "Leo"])
@@ -195,14 +195,6 @@ final class SettingsTests: XCTestCase {
         XCTAssertNil(SettingsStore(defaults: defaults).accentIndex, "black by default")
         SettingsStore(defaults: defaults).accentIndex = 4
         XCTAssertEqual(SettingsStore(defaults: defaults).accentIndex, 4)
-        defaults.removePersistentDomain(forName: suite)
-    }
-
-    func testAppearanceIsRemembered() {
-        let suite = "test." + UUID().uuidString
-        let defaults = UserDefaults(suiteName: suite)!
-        SettingsStore(defaults: defaults).appearance = .light
-        XCTAssertEqual(SettingsStore(defaults: defaults).appearance, .light)
         defaults.removePersistentDomain(forName: suite)
     }
 

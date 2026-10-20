@@ -6,17 +6,19 @@ import XCTest
 final class ControlTableTests: XCTestCase {
 
     // Row: H, the Home wheel — knob and Left / Right turn it, Confirm opens the card after the
-    // check has turned green. The Add card comes last.
+    // check has turned green. The Add card comes after the members, then the Settings card.
     func testHomeWheel() {
         let h = Harness()
         let s = h.state
 
         XCTAssertEqual(s.route, .home, "the app opens on Home")
-        XCTAssertEqual(s.homeCardCount, 3, "Nora, Leo and the Add card")
+        XCTAssertEqual(s.homeCardCount, 4, "Nora, Leo, the Add card and the Settings card")
         s.handle(.knob(1))
         XCTAssertEqual(s.highlight, 1)
         s.handle(.knob(5))
-        XCTAssertEqual(s.highlight, 2, "stops at the Add card")
+        XCTAssertEqual(s.highlight, 3, "stops at the Settings card")
+        XCTAssertTrue(s.highlightsSettingsCard)
+        s.handle(.left)
         XCTAssertTrue(s.highlightsAddCard)
         s.handle(.left)
         XCTAssertEqual(s.highlight, 1)
@@ -310,8 +312,6 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.settingsHighlight, .setupGuide)
         s.handle(.right)
         XCTAssertEqual(s.settingsHighlight, .family)
-        s.handle(.confirm)
-        XCTAssertEqual(s.route, .settings(.list), "tiles without a projector page do nothing yet")
         s.handle(.knob(3))
         XCTAssertEqual(s.settingsHighlight, .units)
         s.handle(.left)
@@ -341,6 +341,234 @@ final class ControlTableTests: XCTestCase {
 
         s.handle(.cancel)
         XCTAssertEqual(s.route, .memoryWall, "Back on the grid closes Settings")
+    }
+
+    func testSettingsPermissionsAndSetupGuide() {
+        let h = Harness()
+        let s = h.state
+        s.openSettings()
+        s.handle(.knob(SettingsTile.permissions.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.permissions))
+        XCTAssertEqual(s.wallModel.kind, .settingsPermissions)
+        s.handle(.right)
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.permissions), "nothing to choose on Permissions")
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.list))
+
+        s.handle(.knob(-20))
+        XCTAssertEqual(s.settingsHighlight, .setupGuide)
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.setupGuide))
+        XCTAssertEqual(s.wallModel.kind, .settingsGuide, "the projector shows the setup pictures")
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.list))
+    }
+
+    func testCameraPositionFromTheGrid() {
+        let h = Harness()
+        let s = h.state
+        s.openSettings()
+        s.handle(.knob(SettingsTile.cameraPosition.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.cameraPosition))
+        XCTAssertEqual(s.wallModel.kind, .cameraLines, "the projector shows the 0 and 100 cm lines")
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.list))
+        XCTAssertEqual(s.settingsHighlight, .cameraPosition)
+    }
+
+    func testSettingsCardOnHome() {
+        let h = Harness()
+        let s = h.state
+        XCTAssertEqual(s.route, .home)
+        let members = s.store.members.count
+        s.handle(.knob(members))
+        XCTAssertTrue(s.highlightsAddCard)
+        s.handle(.right)
+        XCTAssertTrue(s.highlightsSettingsCard, "the gear comes after Add")
+        s.handle(.right)
+        XCTAssertTrue(s.highlightsSettingsCard, "and is the last card")
+        h.confirm()
+        XCTAssertEqual(s.route, .settings(.list))
+        XCTAssertEqual(s.wallModel.kind, .settingsMenu)
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .home, "Back on the grid returns to Home")
+    }
+
+    func testSoundFromTheGrid() {
+        let h = Harness()
+        let s = h.state
+        s.settings.soundOn = false
+        s.openSettings()
+        s.handle(.knob(SettingsTile.sound.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.sound))
+        XCTAssertEqual(s.wallModel.kind, .settingsSound)
+        XCTAssertFalse(s.soundHighlight, "starts on the saved choice, Off")
+        s.handle(.left)
+        XCTAssertTrue(s.soundHighlight)
+        s.handle(.cancel)
+        XCTAssertFalse(s.settings.soundOn, "Back leaves sound unchanged")
+        s.handle(.confirm)
+        s.handle(.left)
+        s.handle(.confirm)
+        XCTAssertTrue(s.settings.soundOn)
+        XCTAssertEqual(s.route, .settings(.list), "back to the grid after choosing")
+        s.openSettingsPage(.sound)
+        s.chooseSound(false)
+        XCTAssertFalse(s.settings.soundOn, "the phone's page saves too")
+        XCTAssertEqual(s.route, .settings(.list))
+    }
+
+    func testPointColourFromTheGrid() {
+        let h = Harness()
+        let s = h.state
+        s.settings.accentIndex = nil
+        s.openSettings()
+        s.handle(.knob(SettingsTile.pointColour.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.pointColour))
+        XCTAssertEqual(s.wallModel.kind, .settingsPointColour)
+        XCTAssertNil(s.accentHighlight, "starts on the saved colour, Black")
+        s.handle(.right)
+        s.handle(.knob(1))
+        XCTAssertEqual(s.accentHighlight, 1)
+        s.handle(.cancel)
+        XCTAssertNil(s.settings.accentIndex, "Back leaves the colour unchanged")
+        s.handle(.confirm)
+        s.handle(.right)
+        s.handle(.confirm)
+        XCTAssertEqual(s.settings.accentIndex, 0)
+        XCTAssertEqual(s.route, .settings(.list), "back to the grid after choosing")
+        XCTAssertEqual(s.wallModel.selection, Palette.color(0), "the outline takes the point colour")
+        s.choosePointColour(nil)
+        XCTAssertEqual(s.wallModel.selection, .white, "Black is drawn white on the wall")
+    }
+
+    func testSampleFamilyAsksFirst() {
+        let h = Harness()
+        let s = h.state
+        s.deleteEverything()
+        s.openSettings()
+        s.handle(.knob(SettingsTile.sampleFamily.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.confirmSample))
+        XCTAssertEqual(s.wallModel.kind, .settingsQuestion)
+        XCTAssertFalse(s.confirmChoice, "Cancel is chosen first")
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.list))
+        XCTAssertTrue(s.store.members.isEmpty, "Cancel loads nothing")
+        s.handle(.confirm)
+        s.handle(.right)
+        s.handle(.confirm)
+        XCTAssertEqual(s.store.members.map(\.name), ["Nora", "Leo"])
+        XCTAssertEqual(s.route, .settings(.list))
+    }
+
+    func testDeleteEverythingAsksTwice() {
+        let h = Harness()
+        let s = h.state
+        let members = s.store.members.count
+        s.openSettings()
+        s.handle(.knob(SettingsTile.deleteEverything.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.confirmDelete))
+        s.handle(.right)
+        s.handle(.confirm)
+        XCTAssertEqual(s.deleteStep, 2, "asks a second time")
+        XCTAssertFalse(s.confirmChoice, "Cancel is chosen first again")
+        XCTAssertEqual(s.store.members.count, members)
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.list))
+        XCTAssertEqual(s.store.members.count, members, "Cancel deletes nothing")
+        s.handle(.confirm)
+        s.handle(.right)
+        s.handle(.confirm)
+        s.handle(.knob(1))
+        s.handle(.confirm)
+        XCTAssertTrue(s.store.members.isEmpty)
+        XCTAssertEqual(s.route, .settings(.list))
+    }
+
+    func testControllerPageLeavesWithBackTwice() {
+        let h = Harness()
+        let s = h.state
+        s.openSettings()
+        s.handle(.knob(SettingsTile.controller.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.controller))
+        XCTAssertEqual(s.wallModel.kind, .settingsController)
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.controller), "one Back is only listed")
+        s.handle(.left)
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.controller), "Back twice must be in a row")
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.list))
+    }
+
+    func testFamilyFromTheGrid() {
+        let h = Harness()
+        let s = h.state
+        let nora = h.nora
+        let members = s.store.members.count
+        s.openSettings()
+        s.handle(.knob(SettingsTile.family.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.family))
+        XCTAssertEqual(s.wallModel.kind, .settingsFamily)
+        XCTAssertEqual(s.familyHighlight, 0)
+
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .memberEdit(nora.id))
+        XCTAssertEqual(s.wallModel.kind, .settingsMember)
+        XCTAssertEqual(s.memberStep, .choices)
+        s.handle(.confirm)
+        XCTAssertEqual(s.memberStep, .colour)
+        let colour = (nora.colorIndex + 1) % Palette.memberColors.count
+        s.handle(.knob(colour - nora.colorIndex % Palette.memberColors.count))
+        s.handle(.confirm)
+        XCTAssertEqual(s.store.member(nora.id)?.colorIndex, colour)
+        XCTAssertEqual(s.memberStep, .choices)
+
+        s.handle(.right)
+        s.handle(.confirm)
+        XCTAssertEqual(s.memberStep, .confirmDelete)
+        s.handle(.confirm)
+        XCTAssertEqual(s.memberStep, .choices, "Cancel is chosen first")
+        XCTAssertNotNil(s.store.member(nora.id))
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.family), "Back goes back to Family")
+
+        s.handle(.confirm)
+        s.handle(.right)
+        s.handle(.confirm)
+        s.handle(.right)
+        s.handle(.confirm)
+        XCTAssertNil(s.store.member(nora.id))
+        XCTAssertEqual(s.route, .settings(.family))
+
+        s.handle(.knob(20))
+        XCTAssertEqual(s.familyHighlight, members - 2, "stops at the last member; there is no Add")
+    }
+
+    func testFitToWallFromTheGrid() {
+        let h = Harness()
+        let s = h.state
+        let start = s.settings.wall
+        s.openSettings()
+        s.handle(.knob(SettingsTile.fitToWall.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.fitToWall))
+        XCTAssertEqual(s.wallModel.kind, .ruler)
+        XCTAssertEqual(s.fitValue, .floor)
+        s.handle(.knob(1))
+        XCTAssertEqual(s.settings.wall.floorPt, start.floorPt + 5)
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.list), "Done goes back to the grid")
+        XCTAssertEqual(s.settingsHighlight, .fitToWall)
     }
 
     func testUnitChosenOnThePhoneGoesBack() {

@@ -113,12 +113,12 @@ Each step can be reopened from Settings.
 | R2 | Memory: wall | Segmented control "Auto play / Manual" at the top. Copy of the wall. Manual: Previous, Next, Replay. Auto play: Stop. No Record: filming is only in Make | Marks for all records; the selected record's clip life-size; caption "Nora, Aug 2025, 121.0 cm". Auto play: each record in order |
 | R3 | One record | Clip, date, height, growth since the record before. Change height, Delete | Unchanged |
 | A1 | Add or edit member | Name, colour, Delete member | Unchanged |
-| S | Settings | List: Family, Setup guide, Fit to wall, Camera position, Units, Sound, Controller, Permissions, Sample family, Delete everything | Back icon top left, the same items as rounded tiles in two columns with their current values, Setup guide as a pill beside the title; the controller's choice outlined in orange |
-| S2 | Fit to wall | Rotation at the top, two sliders (floor line, size), fine-step toggle | Centimetre ruler: 0, 100, 150 highlighted, dashed line at 170 |
+| S | Settings | List: Family, Setup guide, Fit to wall, Camera position, Units, Point colour, Sound, Controller, Permissions, Sample family, Delete everything | Back icon top left, the same items as rounded tiles in two columns with their current values, Setup guide as a pill beside the title; the controller's choice outlined in the point colour (Black drawn white on the wall) |
+| S2 | Fit to wall | Two sliders (floor line, size), fine-step toggle | Centimetre ruler: 0, 100, 150 highlighted, dashed line at 170 |
 | S3 | Camera position | Camera preview with two draggable lines: floor and 100 cm. Text: put them on the projected lines | Two bright lines at 0 and 100 cm |
-| S4 | Units | cm or feet and inches; choosing one saves it and goes back to the list | Back icon, "Units", the two units with the saved one ticked and the controller's choice outlined in orange |
-| S5 | Permissions | Camera, Bluetooth, Microphone (only if sound is on): state of each, button to open iOS Settings | Unchanged |
-| S6 | Controller | Connected or searching, last control used (for testing), Forget this controller | Unchanged |
+| S4 | Units | cm or feet and inches; choosing one saves it and goes back to the list | Back icon, "Units", the two units with the saved one ticked and the controller's choice outlined in the point colour (Black drawn white on the wall) |
+| S5 | Permissions | Camera, Bluetooth, Microphone (only if sound is on): state of each, button to open iOS Settings | Back icon, "Permissions", each permission with Allowed / Not asked yet / Not allowed (display only) |
+| S6 | Controller | Connected or searching, last control used (for testing), Forget this controller | Back icon, status, the box with the control just pressed lit for a moment, a tick per control received; "Press Back twice to go back" |
 | W | First-start wizard | S5, S2, S3 in order with Next and Skip | As in each step |
 
 States, not separate screens:
@@ -160,7 +160,7 @@ The controller only reports what was used. The app decides what it means.
 
 | Screen | Knob | Left / Right | Confirm | Back |
 |---|---|---|---|---|
-| Home wheel | Turn the wheel | Previous / next member | Open the member menu | |
+| Home wheel | Turn the wheel (members, then Add, then the Settings gear) | Previous / next card | Open the member menu, the letter wheel or Settings | |
 | Member menu | Record or Lookback | Record / Lookback | Choose | Close the menu |
 | Add member (letter wheel) | Move through the keys | Previous / next key | Press the key (a letter, delete or done) | Back to home |
 | Film: ready | | | Start filming (3-2-1, then 5 s) | Back to the member menu |
@@ -169,7 +169,14 @@ The controller only reports what was used. The app decides what it means.
 | Saved | | | See the growth (Lookback) | Return to home |
 | Lookback | Previous / next record | Previous / next record | Replay the clip | Back to the member menu |
 | Lookback, auto play on | Stop, then move | Stop, then move | Stop | Stop |
-| Settings on the wall | Move through the tiles | Previous / next | Open | Close |
+| Settings on the wall (grid) | Move through Setup guide and the tiles | Previous / next | Open the tile's page | Close Settings |
+| Settings: Units, Point colour, Sound | Choose an option | Previous / next option | Save, back to the grid | Back to the grid |
+| Settings: Permissions, Setup guide, Camera position | | | | Back to the grid |
+| Settings: Family | Move through the members | Previous / next | Open the member (members are added from Home) | Back to the grid |
+| Settings: a member (from Family) | Change colour / Delete member, then a colour or Cancel / Delete | Previous / next | Choose; a colour is saved at once; Delete asks first (Cancel chosen) | Back one step, then to Family |
+| Settings: Load sample family, Delete everything | Cancel / the action | Cancel / the action | Answer (Cancel chosen first); Delete everything asks twice | Back to the grid |
+| Settings: Controller | Listed only | Listed only | Listed only | Listed; Back twice in a row goes back to the grid |
+| Settings: Fit to wall | Change selected value | Floor line / Size | Done | Done |
 | Onboarding with the controller | As each step says | | Next | Previous step |
 
 In ft/in the knob and Left / Right step by 1/4 inch and 1 inch.
@@ -212,19 +219,20 @@ Confirm, Right) that fills in as each packet arrives, plus the raw packets.
 
 Two pictures with the steps written below them: the projector lens 2.5 m from the wall and 0.97 m
 above the floor; the phone right next to it at the same distance and height, rear camera facing the
-wall, the parent behind them with the controller. Tapping a picture shows it full size with Done.
+wall, the parent behind them with the controller. Tapping a picture shows it full size with Done. The projector shows the same two pictures, with
+the back icon and the title.
 Sources: `docs/setup-guide/`.
 
 ### S1 Projector placement (removed)
 
 There is no placement page. The projector is placed by hand; the picture must reach at least 170 cm
-(the ruler on the wall shows "Top of picture" while fitting). The wall rotation defaults to -90 degrees, the group's projector on its
-side, and is changed on S2.
+(the ruler on the wall shows "Top of picture" while fitting). The wall image is always turned -90 degrees: the group's projector lies on its
+side (no rotation setting since 19 Oct).
 
 ### S2 Fit to wall
 
 Calibration holds three values: `floorPt` (points from the bottom edge to the floor line),
-`ptPerCM` and `rotation` (0, 90 or -90 degrees). The drawing is always centred left to right.
+`ptPerCM`; `rotation` is fixed at -90 degrees. The drawing is always centred left to right.
 `y(cm) = imageHeight - floorPt - cm * ptPerCM`.
 
 Procedure: tape marks on the wall at 0 and 100 cm; move the floor line until the projected 0 sits on
@@ -414,7 +422,7 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
   R3 shows the memory wall with that record.
 - Until a projector is connected, the phone's wall copy assumes a 1920 x 1080 picture.
 - R2 always shows the selected record (date, height, growth) under the wall copy; tapping it opens R3.
-- The S2 rotation starts at -90 degrees (projector on its side).
+- The wall image is always turned -90 degrees (projector on its side); there is no rotation setting.
 - The Settings button is hidden during the wizard; the wizard is left only by Next, Skip or Finish.
 - Bluetooth permission is asked when "Allow" is pressed on S5, not at launch.
 - S2 has, per value, a slider and - / + buttons (one knob step each); tapping a value selects it for the knob.
@@ -426,8 +434,8 @@ Assumed in milestone 1 (simplest behaviour; confirm or change):
   so the mode switch always matches what the app does.
 - Changed 6 Oct (team): the phone UI follows Apple's Human Interface Guidelines: a system tab bar
   for Make / Memory (hidden while filming), NavigationStacks with the system back button (it sends
-  Cancel / Back), Settings as a sheet with grouped lists, A1 as a sheet from M1. Light, dark or
-  system appearance is a setting; the wall image is always black. The wall copy has a full-screen
+  Cancel / Back), Settings as a sheet with grouped lists, A1 as a sheet from M1. The phone follows
+  the phone's light or dark appearance (no setting since 19 Oct); the wall image is always black. The wall copy has a full-screen
   button. The grid title is "Choose a family member".
 - Changed 6 Oct (team):
   - First start shows three welcome pages (what it is, Make, Memory) before setup; "Set up later"

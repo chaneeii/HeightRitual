@@ -10,16 +10,6 @@ struct FitToWallPage: View {
         let wall = state.settings.wall
 
         Form {
-            Section("Rotation") {
-                Picker("Rotation", selection: Binding(get: { state.settings.wall.rotation },
-                                                      set: { state.settings.wall.rotation = $0 })) {
-                    Text("Upright").tag(0)
-                    Text("Side, 90°").tag(90)
-                    Text("Side, -90°").tag(-90)
-                }
-                .pickerStyle(.segmented)
-            }
-
             Section {
                 WallCopy()
                     .frame(maxHeight: 320)
@@ -78,7 +68,14 @@ struct FitToWallPage: View {
                 if editing { state.selectFitValue(value) }
             }
         }
-        .padding(.vertical, 4)
+        .padding(8)
+        .overlay {
+            // The value the knob moves; Left and Right on the controller choose it.
+            if state.fitValue == value {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .strokeBorder(SettingsStyle.selection(state.settings.accentIndex, onWall: false), lineWidth: 3)
+            }
+        }
         .accessibilityElement(children: .contain)
         .accessibilityAddTraits(state.fitValue == value ? .isSelected : [])
     }

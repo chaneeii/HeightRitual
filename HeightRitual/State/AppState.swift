@@ -110,6 +110,22 @@ final class AppState {
     private(set) var settingsHighlight: SettingsTile = .setupGuide
     /// The option the controller has chosen on the projector's Units page.
     private(set) var unitHighlight: HeightUnit = .cm
+    /// The point colour the controller has chosen on the projector's page: nil is Black.
+    private(set) var accentHighlight: Int?
+    /// The member the controller has chosen on the projector's Family page.
+    private(set) var familyHighlight = 0
+    /// On the projector's Sound page: true is On.
+    private(set) var soundHighlight = false
+    /// A member opened from the projector's Family page.
+    private(set) var memberStep: MemberStep = .choices
+    /// On that member's page: 0 Change colour, 1 Delete member.
+    private(set) var memberChoice = 0
+    private(set) var memberColourHighlight = 0
+    /// On a question (sample family, delete everything, delete member): true is the action, false
+    /// Cancel, which is chosen first.
+    private(set) var confirmChoice = false
+    /// Delete everything asks twice: 1, then 2.
+    private(set) var deleteStep = 1
 
     var externalDisplayConnected = false
     /// Projector screen size in points. Until a projector is connected, a 1080p picture is assumed.
@@ -173,11 +189,15 @@ final class AppState {
         currentRecords.indices.contains(recordIndex) ? currentRecords[recordIndex] : nil
     }
 
-    /// Cards on the Home wheel: every member, then the Add card.
-    var homeCardCount: Int { store.members.count + 1 }
+    /// Cards on the Home wheel: every member, then the Add card, then the Settings card (a gear),
+    /// so Settings can be opened with the controller.
+    var homeCardCount: Int { store.members.count + 2 }
 
     /// The highlighted Home card is the Add card.
-    var highlightsAddCard: Bool { highlight >= store.members.count }
+    var highlightsAddCard: Bool { highlight == store.members.count }
+
+    /// The highlighted Home card is the Settings card, after Add.
+    var highlightsSettingsCard: Bool { highlight >= store.members.count + 1 }
 
     /// The member on the highlighted Home card.
     var highlightedMember: Member? {
@@ -189,10 +209,15 @@ final class AppState {
     // MARK: Input
 
     func handle(_ event: ControlEvent) {
+        let previous = lastControl
         lastControl = event
         inputCount += 1
         // 컨트롤러 테스트 페이지: 신호는 기록만 하고 화면은 그대로 둔다
-        if route == .settings(.controller) { return }
+        // On the projector the test page is left with Back twice in a row.
+        if route == .settings(.controller) {
+            if event == .cancel, previous == .cancel { go(to: .settings(.list)) }
+            return
+        }
         if case .mode(let next) = event {
             switchMode(to: next)
             return
@@ -214,6 +239,8 @@ final class AppState {
             if isAutoPlaying { handleAutoPlay(event) } else { handleManual(event) }
         case .record:
             if event == .cancel { go(to: .memoryWall) }
+        case .memberEdit(let id?) where memberEditInSettings:
+            handleMember(event, id)
         case .memberEdit:
             if event == .cancel { closeMemberEdit() }
         case .settings(.fitToWall), .wizard(.fitToWall):
@@ -222,6 +249,14 @@ final class AppState {
             handleSettingsGrid(event)
         case .settings(.units):
             handleUnits(event)
+        case .settings(.pointColour):
+            handlePointColour(event)
+        case .settings(.family):
+            handleFamily(event)
+        case .settings(.sound):
+            handleSound(event)
+        case .settings(.confirmSample), .settings(.confirmDelete):
+            handleQuestion(event)
         case .settings(let page):
             if event == .cancel { page == .list ? leaveSettings() : go(to: .settings(.list)) }
         case .wizard:
@@ -415,6 +450,10 @@ final class AppState {
     }
 
     private func openHighlighted() {
+        if highlightsSettingsCard {
+            confirmThen { [weak self] in self?.openSettings() }
+            return
+        }
         if highlightsAddCard {
             confirmThen { [weak self] in self?.openAddMember() }
             return
@@ -780,6 +819,8 @@ final class AppState {
 
     func openMemberEdit(_ id: UUID?) {
         if case .memberEdit = route {} else { memberEditReturn = route }
+        memberStep = .choices
+        memberChoice = 0
         go(to: .memberEdit(id))
     }
 
@@ -824,6 +865,13 @@ final class AppState {
     func openSettingsPage(_ page: SettingsPage) {
         if page == .fitToWall { fitValue = .floor }
         if page == .units { unitHighlight = settings.unit }
+        if page == .pointColour { accentHighlight = settings.accentIndex }
+        if page == .sound { soundHighlight = settings.soundOn }
+        if page == .family, route == .settings(.list) { familyHighlight = 0 }
+        if page == .confirmSample || page == .confirmDelete {
+            confirmChoice = false
+            deleteStep = 1
+        }
         go(to: .settings(page))
     }
 
@@ -834,8 +882,7 @@ final class AppState {
         case .knob(let steps): moveSettingsHighlight(by: steps)
         case .left: moveSettingsHighlight(by: -1)
         case .right: moveSettingsHighlight(by: 1)
-        case .confirm:
-            if let page = settingsHighlight.page { openSettingsPage(page) }
+        case .confirm: openSettingsPage(settingsHighlight.page)
         case .cancel: leaveSettings()
         default: break
         }
@@ -857,6 +904,149 @@ final class AppState {
         case .cancel: go(to: .settings(.list))
         default: break
         }
+    }
+
+    // MARK: Settings questions on the projector and the phone
+
+    /// Load sample family or Delete everything: Left / the knob back is Cancel, Right / forward the
+    /// action; Select answers; Back cancels.
+    private func handleQuestion(_ event: ControlEvent) {
+        switch event {
+        case .knob(let steps): confirmChoice = steps > 0
+        case .left: confirmChoice = false
+        case .right: confirmChoice = true
+        case .confirm: answerQuestion(confirmChoice)
+        case .cancel: go(to: .settings(.list))
+        default: break
+        }
+    }
+
+    /// The answer, from Select on the projector or a button on the phone. Delete everything asks a
+    /// second time before it deletes.
+    func answerQuestion(_ yes: Bool) {
+        guard yes else { go(to: .settings(.list)); return }
+        switch route {
+        case .settings(.confirmSample):
+            loadSampleFamily()
+            go(to: .settings(.list))
+            showNotice("Sample family loaded")
+        case .settings(.confirmDelete) where deleteStep == 1:
+            deleteStep = 2
+            confirmChoice = false
+        case .settings(.confirmDelete):
+            deleteEverything()
+            go(to: .settings(.list))
+            showNotice("Everything deleted")
+        default:
+            break
+        }
+    }
+
+    // MARK: Family on the projector
+
+    /// The members; Select opens a member's page. Adding a member is done from Home.
+    private func handleFamily(_ event: ControlEvent) {
+        let count = store.members.count
+        func move(_ steps: Int) { familyHighlight = min(max(familyHighlight + steps, 0), max(count - 1, 0)) }
+        switch event {
+        case .knob(let steps): move(steps)
+        case .left: move(-1)
+        case .right: move(1)
+        case .confirm:
+            if familyHighlight < count { openMemberEdit(store.members[familyHighlight].id) }
+        case .cancel: go(to: .settings(.list))
+        default: break
+        }
+    }
+
+    /// A member from the projector's Family page: Change colour or Delete member. Renaming needs
+    /// typing, so it stays on the phone.
+    private func handleMember(_ event: ControlEvent, _ id: UUID) {
+        guard let member = store.member(id) else { closeMemberEdit(); return }
+        let colours = Palette.memberColors.count
+        switch (memberStep, event) {
+        case (.choices, .knob(let steps)): memberChoice = steps > 0 ? 1 : 0
+        case (.choices, .left): memberChoice = 0
+        case (.choices, .right): memberChoice = 1
+        case (.choices, .confirm):
+            if memberChoice == 0 {
+                memberColourHighlight = member.colorIndex % colours
+                memberStep = .colour
+            } else {
+                confirmChoice = false
+                memberStep = .confirmDelete
+            }
+        case (.choices, .cancel): closeMemberEdit()
+
+        case (.colour, .knob(let steps)):
+            memberColourHighlight = min(max(memberColourHighlight + steps, 0), colours - 1)
+        case (.colour, .left): memberColourHighlight = max(memberColourHighlight - 1, 0)
+        case (.colour, .right): memberColourHighlight = min(memberColourHighlight + 1, colours - 1)
+        case (.colour, .confirm):
+            var changed = member
+            changed.colorIndex = memberColourHighlight
+            store.updateMember(changed)
+            memberStep = .choices
+        case (.colour, .cancel): memberStep = .choices
+
+        case (.confirmDelete, .knob(let steps)): confirmChoice = steps > 0
+        case (.confirmDelete, .left): confirmChoice = false
+        case (.confirmDelete, .right): confirmChoice = true
+        case (.confirmDelete, .confirm):
+            if confirmChoice {
+                memberStep = .choices
+                deleteMember(id)
+            } else {
+                memberStep = .choices
+            }
+        case (.confirmDelete, .cancel): memberStep = .choices
+        default: break
+        }
+    }
+
+    /// The projector's Sound page: On first, then Off. The knob, Left and Right choose; Select saves
+    /// and goes back.
+    private func handleSound(_ event: ControlEvent) {
+        switch event {
+        case .knob(let steps): soundHighlight = steps < 0
+        case .left: soundHighlight = true
+        case .right: soundHighlight = false
+        case .confirm: chooseSound(soundHighlight)
+        case .cancel: go(to: .settings(.list))
+        default: break
+        }
+    }
+
+    /// Saves sound on or off and goes back to the settings list, from the phone or the controller.
+    func chooseSound(_ on: Bool) {
+        settings.soundOn = on
+        soundHighlight = on
+        if route == .settings(.sound) { go(to: .settings(.list)) }
+    }
+
+    /// Black, then each palette colour, in the order the pages list them.
+    static let pointColours: [Int?] = [nil] + Palette.memberColors.indices.map { $0 }
+
+    /// The projector's Point colour page: the knob, Left and Right move through Black and the
+    /// colours; Select saves and goes back.
+    private func handlePointColour(_ event: ControlEvent) {
+        let all = Self.pointColours
+        let index = all.firstIndex(of: accentHighlight) ?? 0
+        switch event {
+        case .knob(let steps): accentHighlight = all[min(max(index + steps, 0), all.count - 1)]
+        case .left: accentHighlight = all[max(index - 1, 0)]
+        case .right: accentHighlight = all[min(index + 1, all.count - 1)]
+        case .confirm: choosePointColour(accentHighlight)
+        case .cancel: go(to: .settings(.list))
+        default: break
+        }
+    }
+
+    /// Saves the point colour and goes back to the settings list, from the phone or the controller.
+    func choosePointColour(_ index: Int?) {
+        settings.accentIndex = index
+        accentHighlight = index
+        if route == .settings(.pointColour) { go(to: .settings(.list)) }
     }
 
     /// Saves the unit and goes back to the settings list, from the phone or the controller.

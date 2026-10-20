@@ -2,7 +2,8 @@ import SwiftUI
 
 /// H: the wheel of member cards, on the phone or the wall (Figma 197:2107, 214:527, 223:1332,
 /// 223:1387). The card in the middle is the highlighted one; its neighbours lean on the ring.
-/// Knob and Left / Right turn the wheel; Confirm opens the card. The Add card comes last.
+/// Knob and Left / Right turn the wheel; Confirm opens the card. The Add card comes after the
+/// members, then the Settings card (a gear).
 struct HomeContent: View {
     let surface: Surface
     @Environment(AppState.self) private var state
@@ -21,6 +22,7 @@ struct HomeContent: View {
                 let member = members.indices.contains(index) ? members[index] : nil
                 WheelCard(surface: surface, member: member, offset: index - highlight,
                           addLabel: empty && surface == .phone ? Text("Add member") : Text("Add"),
+                          isSettings: index == members.count + 1,
                           squeeze: state.confirmCount, pressable: state.route == .home)
                     .onTapGesture {
                         guard surface == .phone else { return }
@@ -97,7 +99,7 @@ struct HomeContent: View {
 
     @ViewBuilder
     private func bottomHint(empty: Bool) -> some View {
-        if empty && !state.confirmFlash {
+        if empty && !state.confirmFlash && state.highlightsAddCard {
             Text("Press \(inlineIcon(.confirm, size: 30).foregroundColor(Theme.success)) to add")
                 .font(Theme.subtitle(30))
                 .foregroundStyle(Theme.hint)
@@ -134,6 +136,8 @@ private struct WheelCard: View {
     let member: Member?
     let offset: Int
     let addLabel: Text
+    /// The Settings card after Add: a gear instead of the add icon.
+    let isSettings: Bool
     let squeeze: Int
     /// Only on Home itself: under the member menu, Confirm belongs to the menu's cards.
     let pressable: Bool
@@ -152,7 +156,8 @@ private struct WheelCard: View {
         let reach = far ? 1.8 : 1.0
         let position = CGPoint(x: mid.x + side * step.x * reach, y: mid.y + (center ? 0 : step.y * (far ? 1.5 : 1)))
 
-        CardFace(surface: surface, member: member, size: size, isCenter: center, addLabel: addLabel)
+        CardFace(surface: surface, member: member, size: size, isCenter: center,
+                 addLabel: isSettings ? Text("Settings") : addLabel, isSettings: isSettings)
             .confirmSqueeze(squeeze, active: center && pressable)
             .scaleEffect(center ? 1 : sideScale)
             .rotationEffect(.degrees(side * (far ? 55 : 30)))
@@ -170,6 +175,8 @@ struct CardFace: View {
     let size: CGSize
     let isCenter: Bool
     var addLabel: Text = Text("Add")
+    /// Without a member: the Settings card (a gear) instead of the Add card.
+    var isSettings = false
 
     var body: some View {
         let scale = size.height / surface.v(258, 342)
@@ -200,7 +207,7 @@ struct CardFace: View {
                         .fill(Theme.paper)
                         .frame(width: 70 * scale, height: 70 * scale)
                         .overlay {
-                            Image(systemName: "person.fill.badge.plus")
+                            Image(systemName: isSettings ? "gearshape.fill" : "person.fill.badge.plus")
                                 .font(.system(size: 26 * scale, weight: .medium))
                                 .foregroundStyle(Theme.iconInk)
                         }

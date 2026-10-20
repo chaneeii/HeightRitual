@@ -22,27 +22,6 @@ struct UnitsPage: View {
     }
 }
 
-/// Settings > Appearance: light, dark or the phone's setting. The wall image stays black.
-struct AppearancePicker: View {
-    @Environment(AppState.self) private var state
-
-    var body: some View {
-        @Bindable var settings = state.settings
-        Picker(selection: $settings.appearance) {
-            Text("System").tag(Appearance.system)
-            Text("Light").tag(Appearance.light)
-            Text("Dark").tag(Appearance.dark)
-        } label: {
-            Label {
-                Text("Appearance")
-                Text("Light or dark phone screens. The wall stays black.")
-            } icon: {
-                Image(systemName: "circle.lefthalf.filled")
-            }
-        }
-    }
-}
-
 /// S6: connection state, a live list of what the controller sends (to test the box), a light
 /// test and Forget this controller. While this page is open, controls are only listed.
 struct ControllerPage: View {
@@ -58,7 +37,7 @@ struct ControllerPage: View {
             }
 
             Section {
-                ControllerDiagram(active: Set(testedControls.compactMap(\.control)), interactive: false)
+                PressedControllerDiagram()
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
                 ForEach(ControlCheck.allCases, id: \.self) { check in
@@ -94,7 +73,7 @@ struct ControllerPage: View {
             } header: {
                 Text("Received")
             } footer: {
-                Text("Use any control on the box. While this page is open, controls are only listed here.")
+                Text("Use any control on the box. While this page is open, controls are only listed here; Back twice on the box goes back.")
             }
 
             Section {
@@ -124,12 +103,7 @@ struct ControllerPage: View {
     }
 
     /// What the box has sent since the list was cleared, from the raw packets (SPEC 6).
-    private var testedControls: Set<ControlCheck> {
-        Set(state.controlLog.compactMap { entry in
-            guard entry.note == nil, entry.bytes.count >= 2 else { return nil }
-            return ControlCheck(id: entry.bytes[0], value: Int8(bitPattern: entry.bytes[1]))
-        })
-    }
+    private var testedControls: Set<ControlCheck> { state.testedControls }
 
     private func lightButton(_ title: LocalizedStringKey, _ recording: LightState.Recording) -> some View {
         Button(title) { state.testLight(recording) }
@@ -223,49 +197,66 @@ private struct EnlargedPictureView: View {
     }
 }
 
-/// Settings > Point colour: the colour of selection borders, the main button, the dial and the
-/// saved check (`Theme.accent`). Black is the default.
-struct PointColourPicker: View {
+/// Settings > Sound: on or off. Choosing one saves it and goes back to the list, the same as
+/// Select on the projector's Sound page.
+struct SoundPage: View {
     @Environment(AppState.self) private var state
 
     var body: some View {
-        let current = state.settings.accentIndex
-        VStack(alignment: .leading, spacing: 12) {
-            Label {
-                Text("Point colour")
-                Text("Borders, buttons and the dial, on the phone and the wall")
-            } icon: {
-                Image(systemName: "paintpalette")
-            }
-            HStack(spacing: 0) {
-                swatch(nil, color: Theme.ink, selected: current == nil, label: "Black")
-                ForEach(Palette.memberColors.indices, id: \.self) { index in
-                    swatch(index, color: Palette.color(index), selected: current == index, label: "Colour \(index + 1)")
+        Form {
+            Section {
+                Picker("Sound", selection: Binding(get: { state.settings.soundOn },
+                                                   set: { state.chooseSound($0) })) {
+                    Text("On").tag(true)
+                    Text("Off").tag(false)
                 }
+                .pickerStyle(.inline)
+                .labelsHidden()
+            } footer: {
+                Text("Record and play sound with each clip")
             }
         }
-        .padding(.vertical, 4)
     }
+}
 
-    private func swatch(_ index: Int?, color: Color, selected: Bool, label: String) -> some View {
-        Button {
-            state.settings.accentIndex = index
-        } label: {
-            Circle()
-                .fill(color)
-                .frame(width: 30, height: 30)
-                .overlay(Circle().stroke(Color.primary, lineWidth: selected ? 3 : 0).padding(-4))
-                .frame(maxWidth: .infinity, minHeight: 44)
-                .contentShape(Rectangle())
+/// Settings > Point colour: Black or one of the palette colours, for borders, buttons and the dial on
+/// the phone and the wall. Choosing one saves it and goes back to the list, the same as Select on
+/// the projector's Point colour page.
+struct PointColourPage: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        Form {
+            Section {
+                ForEach(AppState.pointColours, id: \.self) { index in
+                    Button {
+                        state.choosePointColour(index)
+                    } label: {
+                        HStack(spacing: 12) {
+                            Circle()
+                                .fill(index.map(Palette.color) ?? Theme.ink)
+                                .frame(width: 26, height: 26)
+                            Text(verbatim: index.map { "Colour \($0 + 1)" } ?? "Black")
+                            Spacer()
+                            if state.settings.accentIndex == index {
+                                Image(systemName: "checkmark").fontWeight(.semibold)
+                            }
+                        }
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(state.settings.accentIndex == index ? .isSelected : [])
+                }
+            } footer: {
+                Text("Borders, buttons and the dial, on the phone and the wall")
+            }
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(Text(verbatim: label))
-        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
 
 /// The six things to try on the box: four buttons and the knob in both directions.
-private enum ControlCheck: CaseIterable {
+enum ControlCheck: CaseIterable {
     case back, knobClockwise, knobCounterclockwise, left, confirm, right
 
     init?(id: UInt8, value: Int8) {
@@ -298,6 +289,98 @@ private enum ControlCheck: CaseIterable {
         case .left: return .left
         case .confirm: return .confirm
         case .right: return .right
+        }
+    }
+}
+
+extension AppState {
+    /// The controls the box has sent since the list was last cleared.
+    var testedControls: Set<ControlCheck> {
+        Set(controlLog.compactMap { entry in
+            guard entry.note == nil, entry.bytes.count >= 2 else { return nil }
+            return ControlCheck(id: entry.bytes[0], value: Int8(bitPattern: entry.bytes[1]))
+        })
+    }
+}
+
+/// What Load sample family and Delete everything ask, on the phone and the projector.
+struct SettingsQuestion {
+    let title: String
+    let message: String
+    let action: String
+
+    @MainActor static func current(_ state: AppState) -> SettingsQuestion? {
+        switch state.route {
+        case .settings(.confirmSample):
+            return SettingsQuestion(
+                title: "Load the sample family?",
+                message: "Every member, record and clip on this phone is replaced by Nora and Leo.",
+                action: "Replace with sample family")
+        case .settings(.confirmDelete) where state.deleteStep == 1:
+            return SettingsQuestion(
+                title: "Delete everything?",
+                message: "Removes every member, record and clip. Setup values are kept.",
+                action: "Delete everything")
+        case .settings(.confirmDelete):
+            return SettingsQuestion(
+                title: "Are you sure?",
+                message: "This cannot be undone. Every member, record and clip is deleted.",
+                action: "Delete everything")
+        default:
+            return nil
+        }
+    }
+}
+
+/// Settings > Load sample family or Delete everything on the phone: the question, the action and
+/// Cancel. The projector asks the same; the answer is the same from either.
+struct SettingsQuestionPage: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        if let question = SettingsQuestion.current(state) {
+            Form {
+                Section {
+                    Text(verbatim: question.title).font(.headline)
+                    Text(verbatim: question.message).foregroundStyle(.secondary)
+                }
+                Section {
+                    Button(role: .destructive) { state.answerQuestion(true) } label: {
+                        Text(verbatim: question.action)
+                    }
+                    Button("Cancel") { state.answerQuestion(false) }
+                }
+            }
+        }
+    }
+}
+
+/// The controller box on the Controller test pages (phone and projector): the control just pressed
+/// lights up for a moment. The list below it keeps which controls have been received.
+struct PressedControllerDiagram: View {
+    @Environment(AppState.self) private var state
+    @State private var lit: ControllerDiagram.Control?
+
+    var body: some View {
+        ControllerDiagram(active: lit.map { [$0] } ?? [], interactive: false)
+            .onChange(of: state.inputCount) {
+                let pressed = state.lastControl.flatMap(Self.control)
+                lit = pressed
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(600))
+                    if lit == pressed { lit = nil }
+                }
+            }
+    }
+
+    private static func control(_ event: ControlEvent) -> ControllerDiagram.Control? {
+        switch event {
+        case .cancel: return .back
+        case .knob: return .knob
+        case .left: return .left
+        case .right: return .right
+        case .confirm: return .confirm
+        default: return nil
         }
     }
 }

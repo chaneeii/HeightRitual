@@ -10,7 +10,13 @@ enum Theme {
     /// button, the dial's needle, the filming bar, the saved check, the cursor. Read through the
     /// settings so every screen redraws when it changes.
     @MainActor static var accent: Color {
-        AppState.shared.settings.accentIndex.map(Palette.color) ?? ink
+        pointColour(AppState.shared.settings.accentIndex)
+    }
+
+    /// The one place the point colour is worked out, for every border and pointer in the app.
+    /// `onDark`: on a black background (the settings pages on the wall) Black is drawn white.
+    static func pointColour(_ accentIndex: Int?, onDark: Bool = false) -> Color {
+        accentIndex.map(Palette.color) ?? (onDark ? .white : ink)
     }
     static let paper = Color.white
     /// The ring of the Home wheel.
@@ -29,8 +35,8 @@ enum Theme {
     static let hint = Color(white: 0x6B / 255)
     /// The text cursor in the name field.
     @MainActor static var caret: Color { accent }
-    /// The selection on the member menu (Record or Lookback): a blue of its own.
-    static let menuHighlight = Palette.color(2)
+    /// The selection on the member menu (Record or Lookback): the point colour, like every border.
+    @MainActor static var menuHighlight: Color { accent }
     /// The outline to stand in and the foot marks, on the camera picture and the wall.
     static let guide = Color(white: 0.88)
     /// Record (the one coloured control: it films).

@@ -3,6 +3,36 @@ import CoreBluetooth
 import SwiftUI
 import UIKit
 
+/// Whether a permission has been asked for and how it was answered. Read by the phone's
+/// Permissions page and the projector's (which only shows it).
+enum PermissionAccess {
+    case notAsked, allowed, refused
+
+    static var camera: PermissionAccess {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .notDetermined: return .notAsked
+        case .authorized: return .allowed
+        default: return .refused
+        }
+    }
+
+    static var bluetooth: PermissionAccess {
+        switch CBManager.authorization {
+        case .notDetermined: return .notAsked
+        case .allowedAlways: return .allowed
+        default: return .refused
+        }
+    }
+
+    static var microphone: PermissionAccess {
+        switch AVAudioApplication.shared.recordPermission {
+        case .undetermined: return .notAsked
+        case .granted: return .allowed
+        default: return .refused
+        }
+    }
+}
+
 /// S5: camera, Bluetooth and (with sound on) microphone. Asks when not asked yet; otherwise
 /// opens iOS Settings, the only place a refused permission can be changed.
 struct PermissionsPage: View {
@@ -10,7 +40,7 @@ struct PermissionsPage: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var refresh = 0
 
-    enum Access { case notAsked, allowed, refused }
+    typealias Access = PermissionAccess
 
     var body: some View {
         Form {
@@ -41,29 +71,9 @@ struct PermissionsPage: View {
         }
     }
 
-    private var camera: Access {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .notDetermined: return .notAsked
-        case .authorized: return .allowed
-        default: return .refused
-        }
-    }
-
-    private var bluetooth: Access {
-        switch CBManager.authorization {
-        case .notDetermined: return .notAsked
-        case .allowedAlways: return .allowed
-        default: return .refused
-        }
-    }
-
-    private var microphone: Access {
-        switch AVAudioApplication.shared.recordPermission {
-        case .undetermined: return .notAsked
-        case .granted: return .allowed
-        default: return .refused
-        }
-    }
+    private var camera: Access { .camera }
+    private var bluetooth: Access { .bluetooth }
+    private var microphone: Access { .microphone }
 
     private func row(_ title: LocalizedStringKey, why: LocalizedStringKey, access: Access, ask: @escaping () -> Void) -> some View {
         LabeledContent {

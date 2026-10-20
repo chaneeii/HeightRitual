@@ -22,8 +22,19 @@ struct WallModel: Equatable {
         /// S list: the settings as tiles in two columns, Setup guide as a pill beside the title. Only shown; the
         /// settings are changed on the phone.
         case settingsMenu
-        /// S4 Units: the two units, the controller's choice outlined. Only Units has a page so far.
+        /// S4 Units: the two units, the controller's choice outlined.
         case settingsUnits
+        /// Point colour: Black and the palette colours, the controller's choice outlined.
+        case settingsPointColour
+        /// Family: the members; a member's page; the controller test page;
+        /// the question before Load sample family or Delete everything.
+        case settingsFamily, settingsMember, settingsController, settingsQuestion
+        /// Sound: On and Off, the controller's choice outlined.
+        case settingsSound
+        /// S5 Permissions: each permission and whether it is allowed. Only shown.
+        case settingsPermissions
+        /// Setup guide: the two pictures the phone shows.
+        case settingsGuide
     }
 
     struct Mark: Equatable {
@@ -63,6 +74,8 @@ struct WallModel: Equatable {
     /// Height of the standing outline on the foot guide.
     var guideMM: Int?
     var fitValue: FitValue?
+    /// The controller's choice on the settings pages: the point colour, Black drawn white.
+    var selection: Color = .white
     var unit: HeightUnit = .cm
 }
 
@@ -71,6 +84,7 @@ extension AppState {
         var model = WallModel()
         model.calibration = settings.wall
         model.unit = settings.unit
+        model.selection = SettingsStyle.selection(settings.accentIndex, onWall: true)
         let unit = settings.unit
 
         func marks(of memberID: UUID?, selecting index: Int?) -> [WallModel.Mark] {
@@ -102,6 +116,9 @@ extension AppState {
         }
 
         switch route {
+        case .memberEdit(_?) where memberEditInSettings:
+            model.kind = .settingsMember
+
         case .memberEdit, .wizard(.welcome), .wizard(.permissions):
             model.kind = .idle
 
@@ -117,6 +134,27 @@ extension AppState {
 
         case .settings(.units):
             model.kind = .settingsUnits
+
+        case .settings(.pointColour):
+            model.kind = .settingsPointColour
+
+        case .settings(.family):
+            model.kind = .settingsFamily
+
+        case .settings(.sound):
+            model.kind = .settingsSound
+
+        case .settings(.controller):
+            model.kind = .settingsController
+
+        case .settings(.confirmSample), .settings(.confirmDelete):
+            model.kind = .settingsQuestion
+
+        case .settings(.permissions):
+            model.kind = .settingsPermissions
+
+        case .settings(.setupGuide):
+            model.kind = .settingsGuide
 
         case .settings:
             model.kind = .idle

@@ -11,7 +11,7 @@ struct SettingsSheet: View {
             SettingsList()
                 .navigationTitle("Settings")
                 .toolbarBackground(SettingsStyle.background, for: .navigationBar)
-                .toolbarColorScheme(.dark, for: .navigationBar)
+                .toolbarColorScheme(.light, for: .navigationBar)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         DebugWallButton(color: .white)
@@ -56,6 +56,10 @@ struct SettingsPageView: View {
         case .fitToWall: return "Fit to wall"
         case .cameraPosition: return "Camera position"
         case .units: return "Units"
+        case .pointColour: return "Point colour"
+        case .sound: return "Sound"
+        case .confirmSample: return "Sample family"
+        case .confirmDelete: return "Delete everything"
         case .controller: return "Controller"
         case .permissions: return "Permissions"
         }
@@ -69,24 +73,31 @@ struct SettingsPageView: View {
         case .fitToWall: FitToWallPage()
         case .cameraPosition: CameraPositionPage()
         case .units: UnitsPage()
+        case .pointColour: PointColourPage()
+        case .sound: SoundPage()
+        case .confirmSample, .confirmDelete: SettingsQuestionPage()
         case .controller: ControllerPage()
         case .permissions: PermissionsPage()
         }
     }
 }
 
-/// The settings list's dark blue-grey look. The same in light and dark appearance, so the list
-/// is always drawn with dark-appearance text and controls.
+/// The settings list's white and light blue look, also used by the projector's settings tiles.
+/// The same in light and dark appearance, so the list is always drawn with light-appearance
+/// (dark) text and controls.
 enum SettingsStyle {
-    static let background = Color(red: 0.20, green: 0.40, blue: 0.23)
-    static let row = Color(red: 0.60, green: 0.75, blue: 0.60)
-    static let icon = Color(red: 0.10, green: 0.10, blue: 0.10)
+    static let background = Color(red: 0.91, green: 0.95, blue: 1.00)   // light blue
+    static let row = Color(red: 1.00, green: 1.00, blue: 1.00)          // white
+    static let icon = Color(red: 0.20, green: 0.48, blue: 0.85)         // clear blue
+    /// The controller's choice outline: the point colour (`Theme.pointColour`). Black (the default)
+    /// is drawn white on the projector, where the settings pages are black.
+    static func selection(_ accentIndex: Int?, onWall: Bool) -> Color {
+        Theme.pointColour(accentIndex, onDark: onWall)
+    }
 }
 
 private struct SettingsList: View {
     @Environment(AppState.self) private var state
-    @State private var confirmSample = false
-    @State private var confirmDelete = false
 
     var body: some View {
         @Bindable var settings = state.settings
@@ -115,16 +126,11 @@ private struct SettingsList: View {
                 link(.units, "Units", detail: "For every height on the phone and the wall",
                      systemImage: "textformat.123",
                      value: settings.unit == .cm ? L("Centimetres") : L("Feet and inches"))
-                AppearancePicker()
-                PointColourPicker()
-                Toggle(isOn: $settings.soundOn) {
-                    Label {
-                        Text("Sound")
-                        Text("Record and play sound with each clip")
-                    } icon: {
-                        Image(systemName: "speaker.wave.2")
-                    }
-                }
+                link(.pointColour, "Point colour", detail: "Borders, buttons and the dial, on the phone and the wall",
+                     systemImage: "paintpalette",
+                     value: settings.accentIndex.map { "Colour \($0 + 1)" } ?? "Black")
+                link(.sound, "Sound", detail: "Record and play sound with each clip",
+                     systemImage: "speaker.wave.2", value: settings.soundOn ? "On" : "Off")
                 link(.controller, "Controller", detail: "Connection, and a test of every button",
                      systemImage: "gamecontroller", value: controllerText)
                 link(.permissions, "Permissions", detail: "Camera, Bluetooth and microphone",
@@ -142,8 +148,9 @@ private struct SettingsList: View {
                         Image(systemName: "gamecontroller")
                     }
                 }
+                // Both ask first on a page of their own, so the projector asks the same question.
                 Button {
-                    confirmSample = true
+                    state.openSettingsPage(.confirmSample)
                 } label: {
                     Label {
                         Text("Load sample family")
@@ -153,7 +160,7 @@ private struct SettingsList: View {
                     }
                 }
                 Button(role: .destructive) {
-                    confirmDelete = true
+                    state.openSettingsPage(.confirmDelete)
                 } label: {
                     Label("Delete everything", systemImage: "trash")
                         .foregroundStyle(.red)
@@ -166,17 +173,7 @@ private struct SettingsList: View {
         .scrollContentBackground(.hidden)
         .background(SettingsStyle.background)
         .tint(SettingsStyle.icon)
-        .environment(\.colorScheme, .dark)
-        .confirmationDialog("Load the sample family?", isPresented: $confirmSample, titleVisibility: .visible) {
-            Button("Replace with sample family", role: .destructive) { state.loadSampleFamily() }
-        } message: {
-            Text("Every member, record and clip on this phone is replaced by Nora and Leo.")
-        }
-        .confirmationDialog("Delete everything?", isPresented: $confirmDelete, titleVisibility: .visible) {
-            Button("Delete everything", role: .destructive) { state.deleteEverything() }
-        } message: {
-            Text("Removes every member, record and clip. Setup values are kept. This cannot be undone.")
-        }
+        .environment(\.colorScheme, .light)
     }
 
     /// A row with its title, one line on what it is for, and the current value.

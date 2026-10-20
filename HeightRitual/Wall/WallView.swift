@@ -24,6 +24,14 @@ struct WallView: View {
                     switch model.kind {
                     case .settingsMenu: WallSettingsMenu()
                     case .settingsUnits: WallUnitsPage()
+                    case .settingsPointColour: WallPointColourPage()
+                    case .settingsFamily: WallFamilyPage()
+                    case .settingsSound: WallSoundPage()
+                    case .settingsMember: WallMemberPage()
+                    case .settingsController: WallControllerPage()
+                    case .settingsQuestion: WallQuestionPage()
+                    case .settingsPermissions: WallPermissionsPage()
+                    case .settingsGuide: WallSetupGuidePage()
                     default: EmptyView()
                     }
                 }
@@ -94,7 +102,9 @@ struct WallCanvas: View {
             case .dark: drawNumber(ctx, g)
             case .cameraLines: drawCameraLines(ctx, g)
             case .screen: ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Theme.paper))
-            case .settingsMenu, .settingsUnits: break    // views above the canvas: WallSettingsMenu, WallUnitsPage
+            case .settingsMenu, .settingsUnits, .settingsPointColour, .settingsPermissions, .settingsGuide,
+                 .settingsFamily, .settingsMember, .settingsController, .settingsQuestion, .settingsSound:
+                break    // views above the canvas: WallSettingsMenu and the settings pages below it
             }
         }
     }
@@ -254,11 +264,32 @@ struct WallCanvas: View {
             ctx.stroke(line(left, right, g.y(cm: 170)), with: .color(.white.opacity(0.8)),
                        style: StrokeStyle(lineWidth: 2, dash: [8, 6]))
         }
-        let label = model.fitValue.map { L("Adjusting: \($0.title)") } ?? ""
-        let status = Text("Top of picture: \(Int(g.topCM)) cm   \(label)")
+        let status = Text("Top of picture: \(Int(g.topCM)) cm")
             .font(.system(size: font(g, 0.8), design: .serif)).italic()
             .foregroundColor(pencil)
         ctx.draw(status, at: CGPoint(x: 16, y: 24), anchor: .leading)
+        // Floor line | Size: Left and Right choose (filled orange), the knob moves the chosen one.
+        if let chosen = model.fitValue {
+            let size = font(g, 2.0)
+            var x: CGFloat = 16
+            for value in FitValue.allCases {
+                let selected = value == chosen
+                let text = ctx.resolve(Text(verbatim: value.title)
+                    .font(.system(size: size, weight: .semibold))
+                    .foregroundColor(selected ? .black : pencil))
+                let measured = text.measure(in: CGSize(width: g.size.width, height: size * 3))
+                let pill = CGRect(x: x, y: 24 + size, width: measured.width + size * 1.4,
+                                  height: measured.height + size * 0.8)
+                let shape = Path(roundedRect: pill, cornerRadius: pill.height / 2)
+                if selected {
+                    ctx.fill(shape, with: .color(model.selection))
+                } else {
+                    ctx.stroke(shape, with: .color(pencil.opacity(0.6)), lineWidth: 2)
+                }
+                ctx.draw(text, at: CGPoint(x: pill.midX, y: pill.midY), anchor: .center)
+                x = pill.maxX + size * 0.6
+            }
+        }
         ctx.stroke(Path(CGRect(origin: .zero, size: g.size).insetBy(dx: 1, dy: 1)),
                    with: .color(.white.opacity(0.5)), lineWidth: 2)
     }
@@ -347,12 +378,6 @@ private struct WallSettingsMenu: View {
 
     private var rows: [[Tile]] {
         let settings = state.settings
-        let appearance: String
-        switch settings.appearance {
-        case .system: appearance = L("System")
-        case .light: appearance = L("Light")
-        case .dark: appearance = L("Dark")
-        }
         let tiles = [
             Tile(id: .family, title: "Family", detail: "Add, rename or remove the people you measure",
                  systemImage: "person.2", value: "\(state.store.members.count)"),
@@ -363,8 +388,9 @@ private struct WallSettingsMenu: View {
             Tile(id: .units, title: "Units", detail: "For every height on the phone and the wall",
                  systemImage: "textformat.123",
                  value: settings.unit == .cm ? L("Centimetres") : L("Feet and inches")),
-            Tile(id: .appearance, title: "Appearance", detail: "Light or dark phone screens. The wall stays black.",
-                 systemImage: "circle.lefthalf.filled", value: appearance),
+            Tile(id: .pointColour, title: "Point colour", detail: "Borders, buttons and the dial, on the phone and the wall",
+                 systemImage: "paintpalette",
+                 value: settings.accentIndex.map { "Colour \($0 + 1)" } ?? "Black"),
             Tile(id: .sound, title: "Sound", detail: "Record and play sound with each clip",
                  systemImage: "speaker.wave.2", value: settings.soundOn ? L("On") : L("Off")),
             Tile(id: .controller, title: "Controller", detail: "Connection, and a test of every button",
@@ -427,7 +453,8 @@ private struct WallSettingsMenu: View {
         .background(SettingsStyle.row, in: Capsule())
         .overlay {
             if state.settingsHighlight == .setupGuide {
-                Capsule().strokeBorder(WallBackIcon.orange, lineWidth: unit * 1.2)
+                Capsule().stroke(SettingsStyle.selection(state.settings.accentIndex, onWall: true), lineWidth: unit * 1.2)
+                    .padding(-unit * 0.9)
             }
         }
     }
@@ -466,8 +493,10 @@ private struct WallSettingsMenu: View {
         .background(SettingsStyle.row, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
         .overlay {
             if state.settingsHighlight == tile.id {
-                RoundedRectangle(cornerRadius: unit * 4, style: .continuous)
-                    .strokeBorder(WallBackIcon.orange, lineWidth: unit * 1.2)
+                // Drawn around the tile, so a white outline (Black chosen) shows on the black wall.
+                RoundedRectangle(cornerRadius: unit * 4.6, style: .continuous)
+                    .stroke(SettingsStyle.selection(state.settings.accentIndex, onWall: true), lineWidth: unit * 1.2)
+                    .padding(-unit * 0.9)
             }
         }
     }
@@ -489,46 +518,59 @@ private struct WallBackIcon: View {
     }
 }
 
-/// S4 Units on the projector: the two units, the saved one ticked, the controller's choice outlined.
-/// The knob, Left and Right choose; Select saves and goes back to the grid; Back goes back.
-private struct WallUnitsPage: View {
+/// One option on a projector settings page.
+private struct WallChoice: Identifiable {
+    let id: Int
+    let title: Text
+    var detail: String?
+    /// A colour dot before the title (Point colour, members).
+    var swatch: Color?
+    /// A symbol before the title when there is no colour dot (Add family member).
+    var systemImage: String?
+    /// Red, for an action that deletes.
+    var destructive = false
+}
+
+/// A projector settings page with options: back icon and title, the options as rows, the saved one
+/// ticked and the controller's choice outlined in orange.
+private struct WallChoicePage: View {
     @Environment(AppState.self) private var state
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
+    let choices: [WallChoice]
+    let saved: Int
+    let highlighted: Int
     private static let text = Color(red: 0.08, green: 0.10, blue: 0.08)
 
     var body: some View {
-        GeometryReader { geo in
-            let unit = geo.size.width / 100
-            VStack(alignment: .leading, spacing: unit * 4) {
-                HStack(alignment: .center, spacing: unit * 3) {
-                    WallBackIcon(unit: unit)
-                    Text("Units")
-                        .font(.system(size: unit * 6, weight: .bold))
-                        .foregroundStyle(.white)
-                }
-                Text("For every height on the phone and the wall")
-                    .font(.system(size: unit * 3.4))
-                    .foregroundStyle(.white.opacity(0.75))
-                option(.cm, title: "Centimetres", unit: unit)
-                option(.ftin, title: "Feet and inches", unit: unit)
-                Spacer(minLength: 0)
+        WallSettingsPage(title: title, subtitle: subtitle) { unit in
+            ForEach(choices) { choice in
+                row(choice, unit: unit)
             }
-            .padding(unit * 4)
-            .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
         }
-        .background(Color.black)
     }
 
-    private func option(_ value: HeightUnit, title: LocalizedStringKey, unit: CGFloat) -> some View {
+    private func row(_ choice: WallChoice, unit: CGFloat) -> some View {
         HStack(spacing: unit * 3) {
+            if let swatch = choice.swatch {
+                Circle().fill(swatch).frame(width: unit * 6, height: unit * 6)
+            } else if let systemImage = choice.systemImage {
+                Image(systemName: systemImage)
+                    .font(.system(size: unit * 4.6, weight: .semibold))
+                    .frame(width: unit * 6, height: unit * 6)
+            }
             VStack(alignment: .leading, spacing: unit * 1) {
-                Text(title)
+                choice.title
                     .font(.system(size: unit * 5, weight: .semibold))
-                Text(verbatim: HeightFormatter.text(1210, unit: value))
-                    .font(.system(size: unit * 3.6))
-                    .opacity(0.7)
+                    .foregroundStyle(choice.destructive ? Color.red : Self.text)
+                if let detail = choice.detail {
+                    Text(verbatim: detail)
+                        .font(.system(size: unit * 3.6))
+                        .opacity(0.7)
+                }
             }
             Spacer(minLength: 0)
-            if state.settings.unit == value {
+            if choice.id == saved {
                 Image(systemName: "checkmark")
                     .font(.system(size: unit * 5, weight: .bold))
             }
@@ -538,9 +580,280 @@ private struct WallUnitsPage: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(SettingsStyle.row, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
         .overlay {
-            if state.unitHighlight == value {
-                RoundedRectangle(cornerRadius: unit * 4, style: .continuous)
-                    .strokeBorder(WallBackIcon.orange, lineWidth: unit * 1.2)
+            if choice.id == highlighted {
+                // Drawn around the tile, so a white outline (Black chosen) shows on the black wall.
+                RoundedRectangle(cornerRadius: unit * 4.6, style: .continuous)
+                    .stroke(SettingsStyle.selection(state.settings.accentIndex, onWall: true), lineWidth: unit * 1.2)
+                    .padding(-unit * 0.9)
+            }
+        }
+    }
+}
+
+/// The frame of every projector settings page: back icon, title and subtitle, then the content.
+private struct WallSettingsPage<Content: View>: View {
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
+    @ViewBuilder let content: (CGFloat) -> Content
+
+    var body: some View {
+        GeometryReader { geo in
+            let unit = geo.size.width / 100
+            VStack(alignment: .leading, spacing: unit * 4) {
+                HStack(alignment: .center, spacing: unit * 3) {
+                    WallBackIcon(unit: unit)
+                    Text(title)
+                        .font(.system(size: unit * 6, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+                Text(subtitle)
+                    .font(.system(size: unit * 3.4))
+                    .foregroundStyle(.white.opacity(0.75))
+                content(unit)
+                Spacer(minLength: 0)
+            }
+            .padding(unit * 4)
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
+        }
+        .background(Color.black)
+    }
+}
+
+/// S4 Units on the projector. The knob, Left and Right choose; Select saves and goes back to the
+/// grid; Back goes back.
+private struct WallUnitsPage: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        let units = HeightUnit.allCases
+        WallChoicePage(
+            title: "Units", subtitle: "For every height on the phone and the wall",
+            choices: units.enumerated().map { index, unit in
+                WallChoice(id: index, title: Text(unit == .cm ? "Centimetres" : "Feet and inches"),
+                           detail: HeightFormatter.text(1210, unit: unit))
+            },
+            saved: units.firstIndex(of: state.settings.unit) ?? 0,
+            highlighted: units.firstIndex(of: state.unitHighlight) ?? 0)
+    }
+}
+
+/// Point colour on the projector, the same way as Units, with a colour dot per option.
+private struct WallPointColourPage: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        let options = AppState.pointColours
+        WallChoicePage(
+            title: "Point colour", subtitle: "Borders, buttons and the dial, on the phone and the wall",
+            choices: options.enumerated().map { index, colour in
+                WallChoice(id: index, title: Text(verbatim: colour.map { "Colour \($0 + 1)" } ?? "Black"),
+                           swatch: colour.map(Palette.color) ?? Theme.ink)
+            },
+            saved: options.firstIndex(of: state.settings.accentIndex) ?? 0,
+            highlighted: options.firstIndex(of: state.accentHighlight) ?? 0)
+    }
+}
+
+/// Settings > Family on the projector: the members. Select opens a member's page; Back goes back
+/// to the grid. Members are added from Home.
+private struct WallFamilyPage: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        let members = state.store.members
+        WallChoicePage(
+            title: "Family", subtitle: "Add, rename or remove the people you measure",
+            choices: members.enumerated().map { index, member in
+                let count = state.store.records(for: member.id).count
+                return WallChoice(id: index, title: Text(verbatim: member.name),
+                                  detail: count == 1 ? "1 record" : "\(count) records",
+                                  swatch: Palette.color(member.colorIndex))
+            },
+            saved: -1,
+            highlighted: min(state.familyHighlight, max(members.count - 1, 0)))
+    }
+}
+
+/// Settings > Sound on the projector, the same way as Units.
+private struct WallSoundPage: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        WallChoicePage(
+            title: "Sound", subtitle: "Record and play sound with each clip",
+            choices: [
+                WallChoice(id: 0, title: Text("On"), systemImage: "speaker.wave.2"),
+                WallChoice(id: 1, title: Text("Off"), systemImage: "speaker.slash"),
+            ],
+            saved: state.settings.soundOn ? 0 : 1,
+            highlighted: state.soundHighlight ? 0 : 1)
+    }
+}
+
+/// A member opened from the projector's Family page: Change colour or Delete member, then the
+/// colours or the delete question. Renaming needs typing and stays on the phone.
+private struct WallMemberPage: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        if case .memberEdit(let id?) = state.route, let member = state.store.member(id) {
+            switch state.memberStep {
+            case .choices:
+                let count = state.store.records(for: member.id).count
+                WallChoicePage(
+                    title: LocalizedStringKey(member.name),
+                    subtitle: LocalizedStringKey("\(count == 1 ? "1 record" : "\(count) records"). Rename on the phone."),
+                    choices: [
+                        WallChoice(id: 0, title: Text("Change colour"), swatch: Palette.color(member.colorIndex)),
+                        WallChoice(id: 1, title: Text("Delete member"), systemImage: "trash", destructive: true),
+                    ],
+                    saved: -1, highlighted: state.memberChoice)
+            case .colour:
+                WallChoicePage(
+                    title: "Colour", subtitle: LocalizedStringKey("For \(member.name)'s card and marks"),
+                    choices: Palette.memberColors.indices.map { index in
+                        WallChoice(id: index, title: Text(verbatim: "Colour \(index + 1)"),
+                                   swatch: Palette.color(index))
+                    },
+                    saved: member.colorIndex % Palette.memberColors.count,
+                    highlighted: state.memberColourHighlight)
+            case .confirmDelete:
+                WallChoicePage(
+                    title: LocalizedStringKey("Delete \(member.name)?"),
+                    subtitle: "Their records and clips are deleted too. This cannot be undone.",
+                    choices: [
+                        WallChoice(id: 0, title: Text("Cancel")),
+                        WallChoice(id: 1, title: Text("Delete member"), systemImage: "trash", destructive: true),
+                    ],
+                    saved: -1, highlighted: state.confirmChoice ? 1 : 0)
+            }
+        }
+    }
+}
+
+/// Load sample family or Delete everything on the projector: the same question as the phone,
+/// Cancel chosen first. Delete everything asks twice.
+private struct WallQuestionPage: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        if let question = SettingsQuestion.current(state) {
+            WallChoicePage(
+                title: LocalizedStringKey(question.title), subtitle: LocalizedStringKey(question.message),
+                choices: [
+                    WallChoice(id: 0, title: Text("Cancel")),
+                    WallChoice(id: 1, title: Text(verbatim: question.action),
+                               systemImage: state.route == .settings(.confirmDelete) ? "trash" : "person.3",
+                               destructive: state.route == .settings(.confirmDelete)),
+                ],
+                saved: -1, highlighted: state.confirmChoice ? 1 : 0)
+        }
+    }
+}
+
+/// Settings > Controller on the projector: whether it is connected, the box with each control
+/// that has been received in colour, and a tick per control. Controls are only listed here, so
+/// the page is left with Back twice in a row.
+private struct WallControllerPage: View {
+    @Environment(AppState.self) private var state
+    private static let text = Color(red: 0.08, green: 0.10, blue: 0.08)
+
+    var body: some View {
+        let tested = state.testedControls
+        let status = state.controllerStatus == .connected ? L("Connected") : state.controllerStatus.label
+        WallSettingsPage(title: "Controller", subtitle: LocalizedStringKey(status)) { unit in
+            let scale = unit * 70 / 275
+            PressedControllerDiagram()
+                .scaleEffect(scale)
+                .frame(width: 275 * scale, height: 195 * scale)
+                .frame(maxWidth: .infinity)
+            VStack(alignment: .leading, spacing: unit * 1.8) {
+                ForEach(ControlCheck.allCases, id: \.self) { check in
+                    HStack(spacing: unit * 2.5) {
+                        Image(systemName: tested.contains(check) ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(tested.contains(check) ? Theme.success : Self.text.opacity(0.4))
+                        Text(verbatim: check.title)
+                    }
+                    .font(.system(size: unit * 4, weight: .semibold))
+                }
+            }
+            .foregroundStyle(Self.text)
+            .padding(unit * 4)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(SettingsStyle.row, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
+            Text("Press each control to test it. Press Back twice to go back.")
+                .font(.system(size: unit * 3.4))
+                .foregroundStyle(.white.opacity(0.75))
+        }
+    }
+}
+
+/// S5 Permissions on the projector: each permission and whether it is allowed. Nothing to choose;
+/// permissions are changed on the phone, where iOS asks. Back goes back to the grid.
+private struct WallPermissionsPage: View {
+    @Environment(AppState.self) private var state
+    private static let text = Color(red: 0.08, green: 0.10, blue: 0.08)
+
+    var body: some View {
+        // iOS does not report changes, so look again every second.
+        TimelineView(.periodic(from: .now, by: 1)) { _ in
+            WallSettingsPage(title: "Permissions", subtitle: "Camera, Bluetooth and microphone") { unit in
+                row("Camera", why: "Films the clip.", access: .camera, unit: unit)
+                row("Bluetooth", why: "Connects the controller.", access: .bluetooth, unit: unit)
+                if state.settings.soundOn {
+                    row("Microphone", why: "Records sound with the clip.", access: .microphone, unit: unit)
+                }
+                Text("Change permissions on the phone.")
+                    .font(.system(size: unit * 3.4))
+                    .foregroundStyle(.white.opacity(0.75))
+            }
+        }
+    }
+
+    private func row(_ title: LocalizedStringKey, why: LocalizedStringKey, access: PermissionAccess,
+                     unit: CGFloat) -> some View {
+        HStack(spacing: unit * 3) {
+            VStack(alignment: .leading, spacing: unit * 1) {
+                Text(title)
+                    .font(.system(size: unit * 5, weight: .semibold))
+                Text(why)
+                    .font(.system(size: unit * 3.6))
+                    .opacity(0.7)
+            }
+            Spacer(minLength: 0)
+            Label {
+                switch access {
+                case .allowed: Text("Allowed")
+                case .notAsked: Text("Not asked yet")
+                case .refused: Text("Not allowed")
+                }
+            } icon: {
+                switch access {
+                case .allowed: Image(systemName: "checkmark.circle.fill")
+                case .notAsked: Image(systemName: "questionmark.circle")
+                case .refused: Image(systemName: "xmark.circle.fill")
+                }
+            }
+            .font(.system(size: unit * 3.8, weight: .semibold))
+            .foregroundStyle(access == .refused ? Color.red : Self.text)
+        }
+        .foregroundStyle(Self.text)
+        .padding(unit * 4)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(SettingsStyle.row, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
+    }
+}
+
+/// Setup guide on the projector: the same two pictures as the phone's Setup guide page. Only
+/// shown; Back goes back to the grid.
+private struct WallSetupGuidePage: View {
+    var body: some View {
+        WallSettingsPage(title: "Setup guide", subtitle: "Where to put the projector and the phone") { unit in
+            ForEach(["SetupGuideProjector", "SetupGuideCamera"], id: \.self) { name in
+                Image(name)
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: unit * 3, style: .continuous))
             }
         }
     }

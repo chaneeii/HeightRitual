@@ -5,20 +5,11 @@ struct HeightRitualApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var state = AppState.shared
 
-    private var colorScheme: ColorScheme? {
-        switch state.settings.appearance {
-        case .system: return nil
-        case .light: return .light
-        case .dark: return .dark
-        }
-    }
-
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environment(state)
                 .modifier(ProjectorAccessory(state: state))
-                .preferredColorScheme(colorScheme)
                 .environment(\.locale, .english)
                 .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
         }

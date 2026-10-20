@@ -138,7 +138,7 @@ Every screen, captured: [`docs/images/screens/`](docs/images/screens). The full 
 controller table per screen: [`docs/SPEC.md`](docs/SPEC.md).
 
 Design rules: one decision per screen, one obvious next action, system controls, targets of at
-least 44 pt, no hidden gestures. Light and dark appearance. English only.
+least 44 pt, no hidden gestures. Follows the phone's light or dark appearance. English only.
 
 ## Controller
 

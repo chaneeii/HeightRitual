@@ -3,14 +3,15 @@
 //   [ Back ]                 ( Knob )
 //   < Left      ( Confirm )     Right >
 //
-// Board:   ESP32 Dev Module
-// Library: NimBLE-Arduino 2.x by h2zero
+// Board:     ESP32 Dev Module
+// Libraries: NimBLE-Arduino 2.x (h2zero), ESP32Encoder (madhephaestus) - both from Library Manager
 // Serial Monitor: 115200 baud
 //
-// Packets [id, value]: knob [1, +1] / [1, -1], Confirm [13, 1], Left [14, 1], Right [15, 1],
+// Packets [id, value]: knob [1, +n] / [1, -n], Confirm [13, 1], Left [14, 1], Right [15, 1],
 // Back [23, 1]. The app decides what each control does on each screen.
 
 #include <NimBLEDevice.h>
+#include <ESP32Encoder.h>
 
 #define DEVICE_NAME  "MemoryMeter"
 #define SERVICE_UUID "6f1d0001-8a3c-4b6e-9a51-2c7e0b1d4a01"
@@ -24,6 +25,8 @@ const int PIN_CONFIRM = 27;
 const int PIN_CLK     = 32;   // knob CLK
 const int PIN_DT      = 26;   // knob DT
 
+// Encoder counts per click. 1 for the box's knob. One click moves two steps: 2.
+#define COUNTS_PER_CLICK 1
 // The knob turns the wrong way round: set to 1.
 #define REVERSE_KNOB 0
 
@@ -76,50 +79,18 @@ void readButtons() {
   }
 }
 
-// ---- Knob ----
-// The box's knob rests with CLK and DT at the same level and both change on every click.
-// Counter-clockwise DT moves first; clockwise CLK moves first or both move at the same moment.
-// So: DT first is counter-clockwise, anything else clockwise. An interrupt on each pin notes
-// which moved first; the click counts once both pins rest at a new level for 3 ms.
-
-volatile bool moving = false;
-volatile bool dtFirst = false;
-volatile unsigned long lastChange = 0;
-volatile int restLevel = HIGH;
-
-void IRAM_ATTR onKnobPin() {
-  int clk = digitalRead(PIN_CLK);
-  int dt = digitalRead(PIN_DT);
-  if (!moving && (clk != restLevel || dt != restLevel)) {
-    moving = true;
-    dtFirst = (dt != restLevel) && (clk == restLevel);
-  }
-  lastChange = micros();
-}
+// ---- Knob: the ESP32's hardware pulse counter (PCNT) through ESP32Encoder ----
+// The hardware counts every edge with its own glitch filter, so nothing is missed or read late.
+ESP32Encoder encoder;
+long sentClicks = 0;
 
 void readKnob() {
-  int clk = digitalRead(PIN_CLK);
-  int dt = digitalRead(PIN_DT);
-
-  noInterrupts();
-  bool isMoving = moving;
-  bool counterClockwise = dtFirst;
-  unsigned long quietFor = micros() - lastChange;
-  int rest = restLevel;
-  interrupts();
-
-  if (!isMoving || quietFor < 3000 || clk != dt) return;   // still turning or bouncing
-
-  noInterrupts();
-  moving = false;
-  restLevel = clk;
-  interrupts();
-
-  if (clk == rest) return;   // came back to where it was: no click
-
-  int step = counterClockwise ? -1 : 1;
-  if (REVERSE_KNOB) step = -step;
-  send(1, step, step > 0 ? "Knob +" : "Knob -");
+  long clicks = encoder.getCount() / COUNTS_PER_CLICK;
+  if (REVERSE_KNOB) clicks = -clicks;
+  if (clicks == sentClicks) return;
+  long delta = constrain(clicks - sentClicks, -127, 127);
+  sentClicks += delta;
+  send(1, (int8_t)delta, delta > 0 ? "Knob +" : "Knob -");
 }
 
 // ---- Setup and loop ----
@@ -133,11 +104,10 @@ void setup() {
     b.changedAt = 0;
   }
 
-  pinMode(PIN_CLK, INPUT_PULLUP);
-  pinMode(PIN_DT, INPUT_PULLUP);
-  restLevel = digitalRead(PIN_CLK);
-  attachInterrupt(digitalPinToInterrupt(PIN_CLK), onKnobPin, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(PIN_DT), onKnobPin, CHANGE);
+  ESP32Encoder::useInternalWeakPullResistors = puType::up;
+  encoder.attachHalfQuad(PIN_DT, PIN_CLK);
+  encoder.setFilter(1023);   // the strongest hardware debounce, recommended for KY-040 knobs
+  encoder.clearCount();
 
   NimBLEDevice::init(DEVICE_NAME);
   server = NimBLEDevice::createServer();
@@ -157,5 +127,5 @@ void setup() {
 void loop() {
   readButtons();
   readKnob();
-  delay(1);
+  delay(10);
 }

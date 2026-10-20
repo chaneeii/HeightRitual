@@ -150,9 +150,9 @@ The box, seen from above (19 Oct; replaces the 5 Oct sketch). Powered by a USB p
 | Left, Right | Momentary push buttons | Press |
 | Confirm | Round momentary push button; also starts and stops filming | Press |
 
-No mode switch, Record button, auto play switch or recording light any more. The app shows the
-mode, starts filming on Confirm and auto play is a setting. The light characteristic stays in the
-protocol and drives the LED on the ESP32 board, which is not visible in the closed box.
+No mode switch, Record button, auto play switch or light any more. The app shows the mode,
+starts filming on Confirm and auto play is a setting. The v4 firmware has no light
+characteristic; the app still looks for it and skips it when it is missing.
 
 The controller only reports what was used. The app decides what it means.
 

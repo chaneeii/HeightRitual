@@ -21,9 +21,7 @@
 //   14 Left           1
 //   15 Right          1
 //   23 Back           1
-// Light characteristic (write), 1 or 2 bytes [recording, mode]; only the first byte is used:
-//   0 off, 1 slow blink, 2 on, 3 three quick flashes then off
-//   The box has no light of its own, so this drives the LED on the board (not visible when closed).
+// No light: the box has no LED, so there is no light characteristic (the app skips it).
 
 // Encoder steps per click you feel. Most EC11 / KY-040 knobs: 4.
 // If one click moves the height by 0.2 cm, set 2. If it takes two clicks to move once, set 4 -> 2.
@@ -38,7 +36,6 @@
 #define DEVICE_NAME  "MemoryMeter"
 #define SERVICE_UUID "6f1d0001-8a3c-4b6e-9a51-2c7e0b1d4a01"
 #define INPUT_UUID   "6f1d0002-8a3c-4b6e-9a51-2c7e0b1d4a01"
-#define LED_UUID     "6f1d0003-8a3c-4b6e-9a51-2c7e0b1d4a01"
 
 // ---- Pins. Every button: one leg to the pin, the other leg to GND (internal pull-up). ----
 #if CONFIG_IDF_TARGET_ESP32S3
@@ -48,7 +45,6 @@ const int PIN_CONFIRM = 17;
 const int PIN_RIGHT   = 18;
 const int PIN_ENC_A   = 4;    // encoder CLK
 const int PIN_ENC_B   = 5;    // encoder DT
-const int PIN_LED     = 48;   // RGB LED on most S3 DevKitC boards; any free pin works
 #else
 // The box as soldered (20 Oct): Back 25, Left 33, Right 14, Confirm 27, knob CLK 32 / DT 26.
 // Avoid 34 to 39: input only, no internal pull-ups.
@@ -58,7 +54,6 @@ const int PIN_CONFIRM = 27;
 const int PIN_RIGHT   = 14;
 const int PIN_ENC_A   = 32;   // encoder CLK
 const int PIN_ENC_B   = 26;   // encoder DT
-const int PIN_LED     = 2;    // blue LED on the board
 #endif
 
 enum : uint8_t { ID_KNOB = 1, ID_CONFIRM = 13, ID_LEFT = 14, ID_RIGHT = 15, ID_BACK = 23 };
@@ -122,8 +117,6 @@ long detents() {
 // ---- Bluetooth ----
 NimBLEServer* server = nullptr;
 NimBLECharacteristic* inputChar = nullptr;
-volatile uint8_t ledMode = 0;
-volatile unsigned long ledSince = 0;
 
 bool isConnected() { return server && server->getConnectedCount() > 0; }
 
@@ -137,38 +130,17 @@ void send(uint8_t id, int8_t value, const char* name) {
   inputChar->notify();
 }
 
-void setLed(uint8_t pattern) { ledMode = pattern; ledSince = millis(); }
-
-void updateLed() {
-  unsigned long t = millis() - ledSince;
-  bool on = false;
-  if (!isConnected()) on = (millis() % 2000) < 60;            // short blip every 2 s: waiting for the phone
-  else if (ledMode == 1) on = (millis() / 500) % 2 == 0;      // slow blink
-  else if (ledMode == 2) on = true;                           // steady
-  else if (ledMode == 3) { if (t >= 900) ledMode = 0; else on = (t / 150) % 2 == 0; }
-  digitalWrite(PIN_LED, on ? HIGH : LOW);
-}
-
 class ServerCallbacks : public NimBLEServerCallbacks {
   void onConnect(NimBLEServer* s, NimBLEConnInfo& info) override {
-    setLed(3);
 #if SERIAL_DEBUG
     Serial.println("[BLE] phone connected");
 #endif
   }
   void onDisconnect(NimBLEServer* s, NimBLEConnInfo& info, int reason) override {
-    setLed(0);
 #if SERIAL_DEBUG
     Serial.println("[BLE] phone disconnected, advertising again");
 #endif
     NimBLEDevice::startAdvertising();
-  }
-};
-
-class LedCallbacks : public NimBLECharacteristicCallbacks {
-  void onWrite(NimBLECharacteristic* c, NimBLEConnInfo& info) override {
-    NimBLEAttValue value = c->getValue();
-    if (value.size() > 0) setLed(value.data()[0]);
   }
 };
 
@@ -179,9 +151,6 @@ void setup() {
   Serial.printf("Memory Meter controller v4. Back %d, Left %d, Confirm %d, Right %d, knob %d/%d\n",
                 PIN_BACK, PIN_LEFT, PIN_CONFIRM, PIN_RIGHT, PIN_ENC_A, PIN_ENC_B);
 #endif
-  pinMode(PIN_LED, OUTPUT);
-  digitalWrite(PIN_LED, LOW);
-
   for (Button& b : buttons) {
     pinMode(b.pin, INPUT_PULLUP);
     b.stable = b.lastRead = digitalRead(b.pin);
@@ -200,9 +169,6 @@ void setup() {
 
   NimBLEService* service = server->createService(SERVICE_UUID);
   inputChar = service->createCharacteristic(INPUT_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
-  NimBLECharacteristic* ledChar =
-      service->createCharacteristic(LED_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_NR);
-  ledChar->setCallbacks(new LedCallbacks());
   service->start();
 
   NimBLEAdvertising* adv = NimBLEDevice::getAdvertising();
@@ -229,6 +195,5 @@ void loop() {
     lastKnobSend = millis();
   }
 
-  updateLed();
   delay(2);
 }

@@ -77,19 +77,6 @@ struct ControllerPage: View {
             }
 
             Section {
-                HStack(spacing: 8) {
-                    lightButton("Blink", .countdown)
-                    lightButton("On", .steady)
-                    lightButton("Flash", .saved)
-                    lightButton("Off", .off)
-                }
-            } header: {
-                Text("Recording light")
-            } footer: {
-                Text("The light on the controller follows these while it is connected.")
-            }
-
-            Section {
                 Button("Forget this controller", role: .destructive) { confirmForget = true }
             } footer: {
                 Text("The controller connects by itself when it is switched on. Every control also works with the buttons on this phone.")
@@ -105,12 +92,6 @@ struct ControllerPage: View {
     /// What the box has sent since the list was cleared, from the raw packets (SPEC 6).
     private var testedControls: Set<ControlCheck> { state.testedControls }
 
-    private func lightButton(_ title: LocalizedStringKey, _ recording: LightState.Recording) -> some View {
-        Button(title) { state.testLight(recording) }
-            .buttonStyle(.bordered)
-            .frame(maxWidth: .infinity)
-            .disabled(state.controllerStatus != .connected)
-    }
 }
 
 /// Settings > Setup guide: where the projector and the phone stand, as two pictures with the

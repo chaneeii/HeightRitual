@@ -23,9 +23,12 @@
 //   23 Back           1
 // No light: the box has no LED, so there is no light characteristic (the app skips it).
 
-// Encoder steps per click you feel. 1 for the box's knob (it needed a long turn at 4).
-// If one click now jumps several steps (0.2 to 0.4 cm on the height check), set 2, then 4.
-#define COUNTS_PER_DETENT 1
+// How the knob is read. A step is only sent once a click has fully happened, so contact bounce
+// can no longer send a step the other way.
+//   1 = half-step: one step per click on knobs that rest in two positions (the box's knob)
+//   0 = full-step: one step per click on knobs that rest in one position
+// One click moves two steps: set 0. Two clicks to move once: set 1.
+#define HALF_STEP 1
 // Turn the knob clockwise: the height should go up. If it goes down, set 1.
 #define REVERSE_KNOB 0
 // Print presses, turns and sent packets to the Serial Monitor (115200 baud): 1 = on, 0 = off
@@ -92,15 +95,43 @@ bool pressed(Button& b) {
   return false;
 }
 
-// ---- Knob: quadrature decoding in an interrupt, no library ----
-// Each valid change of the two pins moves the count by one; invalid ones (bounce) are ignored.
+// ---- Knob: a state machine in an interrupt, no library ----
+// After Ben Buxton's rotary encoder state machine: invalid or bouncing transitions lead back to
+// the start without a step, so only complete clicks count.
+const uint8_t DIR_CW = 0x10, DIR_CCW = 0x20;
+#if HALF_STEP
+const uint8_t R_START = 0x0, R_CCW_BEGIN = 0x1, R_CW_BEGIN = 0x2, R_START_M = 0x3, R_CW_BEGIN_M = 0x4,
+              R_CCW_BEGIN_M = 0x5;
+const uint8_t ENC_TABLE[6][4] = {
+  {R_START_M,           R_CW_BEGIN,    R_CCW_BEGIN,  R_START},
+  {R_START_M | DIR_CCW, R_START,       R_CCW_BEGIN,  R_START},
+  {R_START_M | DIR_CW,  R_CW_BEGIN,    R_START,      R_START},
+  {R_START_M,           R_CCW_BEGIN_M, R_CW_BEGIN_M, R_START},
+  {R_START_M,           R_START_M,     R_CW_BEGIN_M, R_START | DIR_CW},
+  {R_START_M,           R_CCW_BEGIN_M, R_START_M,    R_START | DIR_CCW},
+};
+#else
+const uint8_t R_START = 0x0, R_CW_FINAL = 0x1, R_CW_BEGIN = 0x2, R_CW_NEXT = 0x3, R_CCW_BEGIN = 0x4,
+              R_CCW_FINAL = 0x5, R_CCW_NEXT = 0x6;
+const uint8_t ENC_TABLE[7][4] = {
+  {R_START,    R_CW_BEGIN,  R_CCW_BEGIN, R_START},
+  {R_CW_NEXT,  R_START,     R_CW_FINAL,  R_START | DIR_CW},
+  {R_CW_NEXT,  R_CW_BEGIN,  R_START,     R_START},
+  {R_CW_NEXT,  R_CW_BEGIN,  R_CW_FINAL,  R_START},
+  {R_CCW_NEXT, R_START,     R_CCW_BEGIN, R_START},
+  {R_CCW_NEXT, R_CCW_FINAL, R_START,     R_START | DIR_CCW},
+  {R_CCW_NEXT, R_CCW_FINAL, R_CCW_BEGIN, R_START},
+};
+#endif
+
 volatile long encCount = 0;
-volatile uint8_t encState = 0;
-const int8_t ENC_TABLE[16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
+volatile uint8_t encState = R_START;
 
 void IRAM_ATTR onEncoder() {
-  encState = ((encState << 2) | (digitalRead(PIN_ENC_A) << 1) | digitalRead(PIN_ENC_B)) & 0x0F;
-  encCount += ENC_TABLE[encState];
+  uint8_t pins = (digitalRead(PIN_ENC_A) << 1) | digitalRead(PIN_ENC_B);   // same direction as before
+  encState = ENC_TABLE[encState & 0x0F][pins];
+  if (encState & DIR_CW) encCount++;
+  else if (encState & DIR_CCW) encCount--;
 }
 
 long lastDetent = 0;
@@ -110,8 +141,7 @@ long detents() {
   noInterrupts();
   long count = encCount;
   interrupts();
-  long d = count / COUNTS_PER_DETENT;
-  return REVERSE_KNOB ? -d : d;
+  return REVERSE_KNOB ? -count : count;
 }
 
 // ---- Bluetooth ----
@@ -159,7 +189,6 @@ void setup() {
 
   pinMode(PIN_ENC_A, INPUT_PULLUP);
   pinMode(PIN_ENC_B, INPUT_PULLUP);
-  encState = (digitalRead(PIN_ENC_A) << 1) | digitalRead(PIN_ENC_B);
   attachInterrupt(digitalPinToInterrupt(PIN_ENC_A), onEncoder, CHANGE);
   attachInterrupt(digitalPinToInterrupt(PIN_ENC_B), onEncoder, CHANGE);
 

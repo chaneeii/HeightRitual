@@ -78,7 +78,7 @@ struct MemberMenuOverlay: View {
                         .foregroundStyle(Theme.iconInk)
                 }
             Text(action == .record ? "Record" : "Lookback")
-                .font(Theme.label(surface.v(20, 34)))
+                .font(Theme.choiceLabel(surface.v(20, 34)))
                 .foregroundStyle(Theme.ink)
         }
         .frame(width: size.width, height: size.height)

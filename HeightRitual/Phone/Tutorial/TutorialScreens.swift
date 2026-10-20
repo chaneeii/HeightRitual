@@ -278,7 +278,7 @@ struct TutorialContent: View {
         return VStack(spacing: 14) {
             Circle().fill(Theme.paper).frame(width: 74, height: 74)
                 .overlay(Image(systemName: symbol).font(.system(size: 27, weight: .medium)).foregroundStyle(Theme.iconInk))
-            label.font(Theme.label(18)).foregroundStyle(Theme.ink)
+            label.font(Theme.choiceLabel(18)).foregroundStyle(Theme.ink)
         }
         .frame(width: 122, height: 170)
         .background(Theme.choice, in: RoundedRectangle(cornerRadius: 18))

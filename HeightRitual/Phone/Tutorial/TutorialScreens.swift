@@ -247,21 +247,21 @@ struct TutorialContent: View {
 
     /// What the app does: an icon and a line of text each, nothing behind them.
     private var welcomeList: some View {
-        VStack(alignment: .leading, spacing: 22) {
+        VStack(alignment: .leading, spacing: 44) {
             row("video", "Film a few seconds")
             row("ruler", "Check the height")
             row("clock.arrow.circlepath", "Look back, life-size")
             row("lock", "Stays on this phone")
         }
-        .frame(width: 330, height: 260)
+        .frame(width: 360, height: 330)
     }
 
     private func row(_ symbol: String, _ text: LocalizedStringKey) -> some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 20) {
             Image(systemName: symbol)
-                .font(.system(size: 22, weight: .medium))
-                .frame(width: 32)
-            Text(text).font(.system(size: 19, weight: .medium))
+                .font(.system(size: 32, weight: .medium))
+                .frame(width: 46)
+            Text(text).font(.system(size: 26, weight: .semibold))
         }
         .foregroundStyle(Theme.ink)
     }

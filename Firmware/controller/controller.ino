@@ -23,9 +23,9 @@
 //   23 Back           1
 // No light: the box has no LED, so there is no light characteristic (the app skips it).
 
-// Encoder steps per click you feel. Most EC11 / KY-040 knobs: 4.
-// If one click moves the height by 0.2 cm, set 2. If it takes two clicks to move once, set 4 -> 2.
-#define COUNTS_PER_DETENT 4
+// Encoder steps per click you feel. 1 for the box's knob (it needed a long turn at 4).
+// If one click now jumps several steps (0.2 to 0.4 cm on the height check), set 2, then 4.
+#define COUNTS_PER_DETENT 1
 // Turn the knob clockwise: the height should go up. If it goes down, set 1.
 #define REVERSE_KNOB 0
 // Print presses, turns and sent packets to the Serial Monitor (115200 baud): 1 = on, 0 = off

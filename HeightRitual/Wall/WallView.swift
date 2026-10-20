@@ -410,7 +410,7 @@ private struct WallSettingsMenu: View {
                 Text("Settings")
                     .font(.system(size: unit * 7, weight: .bold))
                     .foregroundStyle(Self.text)
-                    .padding(.bottom, unit * 1)
+                    .padding(.bottom, unit * 3)
                 setupGuide(unit: unit)
                 Grid(horizontalSpacing: unit * 2, verticalSpacing: unit * 2) {
                     ForEach(rows.indices, id: \.self) { row in
@@ -447,7 +447,8 @@ private struct WallSettingsMenu: View {
             }
             Spacer(minLength: 0)
         }
-        .padding(unit * 3)
+        .padding(.horizontal, unit * 3)
+        .padding(.vertical, unit * 4.5)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(selected ? Theme.wallPanelSelected : Theme.wallPanel,
                     in: RoundedRectangle(cornerRadius: unit * 3.5, style: .continuous))

@@ -56,6 +56,7 @@ struct SettingsPageView: View {
         case .fitToWall: return "Fit to wall"
         case .cameraPosition: return "Camera position"
         case .units: return "Units"
+        case .pointColour: return "Point colour"
         case .controller: return "Controller"
         case .permissions: return "Permissions"
         }
@@ -69,6 +70,7 @@ struct SettingsPageView: View {
         case .fitToWall: FitToWallPage()
         case .cameraPosition: CameraPositionPage()
         case .units: UnitsPage()
+        case .pointColour: PointColourPage()
         case .controller: ControllerPage()
         case .permissions: PermissionsPage()
         }
@@ -82,8 +84,11 @@ enum SettingsStyle {
     static let background = Color(red: 0.91, green: 0.95, blue: 1.00)   // light blue
     static let row = Color(red: 1.00, green: 1.00, blue: 1.00)          // white
     static let icon = Color(red: 0.20, green: 0.48, blue: 0.85)         // clear blue
-    /// The controller's choice, the same orange as on the projector.
-    static let highlight = Color(red: 0.93, green: 0.42, blue: 0.18)
+    /// The controller's choice outline: the point colour. Black (the default) is drawn white on the
+    /// projector, where the picture is black.
+    static func selection(_ accentIndex: Int?, onWall: Bool) -> Color {
+        accentIndex.map(Palette.color) ?? (onWall ? .white : .black)
+    }
 }
 
 private struct SettingsList: View {
@@ -118,7 +123,9 @@ private struct SettingsList: View {
                 link(.units, "Units", detail: "For every height on the phone and the wall",
                      systemImage: "textformat.123",
                      value: settings.unit == .cm ? L("Centimetres") : L("Feet and inches"))
-                PointColourPicker()
+                link(.pointColour, "Point colour", detail: "Borders, buttons and the dial, on the phone and the wall",
+                     systemImage: "paintpalette",
+                     value: settings.accentIndex.map { "Colour \($0 + 1)" } ?? "Black")
                 Toggle(isOn: $settings.soundOn) {
                     Label {
                         Text("Sound")

@@ -24,6 +24,7 @@ struct WallView: View {
                     switch model.kind {
                     case .settingsMenu: WallSettingsMenu()
                     case .settingsUnits: WallUnitsPage()
+                    case .settingsPointColour: WallPointColourPage()
                     case .settingsPermissions: WallPermissionsPage()
                     case .settingsGuide: WallSetupGuidePage()
                     default: EmptyView()
@@ -96,7 +97,7 @@ struct WallCanvas: View {
             case .dark: drawNumber(ctx, g)
             case .cameraLines: drawCameraLines(ctx, g)
             case .screen: ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Theme.paper))
-            case .settingsMenu, .settingsUnits, .settingsPermissions, .settingsGuide:
+            case .settingsMenu, .settingsUnits, .settingsPointColour, .settingsPermissions, .settingsGuide:
                 break    // views above the canvas: WallSettingsMenu and the settings pages below it
             }
         }
@@ -269,13 +270,13 @@ struct WallCanvas: View {
                 let selected = value == chosen
                 let text = ctx.resolve(Text(verbatim: value.title)
                     .font(.system(size: size, weight: .semibold))
-                    .foregroundColor(selected ? .white : pencil))
+                    .foregroundColor(selected ? .black : pencil))
                 let measured = text.measure(in: CGSize(width: g.size.width, height: size * 3))
                 let pill = CGRect(x: x, y: 24 + size, width: measured.width + size * 1.4,
                                   height: measured.height + size * 0.8)
                 let shape = Path(roundedRect: pill, cornerRadius: pill.height / 2)
                 if selected {
-                    ctx.fill(shape, with: .color(WallBackIcon.orange))
+                    ctx.fill(shape, with: .color(model.selection))
                 } else {
                     ctx.stroke(shape, with: .color(pencil.opacity(0.6)), lineWidth: 2)
                 }
@@ -446,7 +447,8 @@ private struct WallSettingsMenu: View {
         .background(SettingsStyle.row, in: Capsule())
         .overlay {
             if state.settingsHighlight == .setupGuide {
-                Capsule().strokeBorder(WallBackIcon.orange, lineWidth: unit * 1.2)
+                Capsule().stroke(SettingsStyle.selection(state.settings.accentIndex, onWall: true), lineWidth: unit * 1.2)
+                    .padding(-unit * 0.9)
             }
         }
     }
@@ -485,8 +487,10 @@ private struct WallSettingsMenu: View {
         .background(SettingsStyle.row, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
         .overlay {
             if state.settingsHighlight == tile.id {
-                RoundedRectangle(cornerRadius: unit * 4, style: .continuous)
-                    .strokeBorder(WallBackIcon.orange, lineWidth: unit * 1.2)
+                // Drawn around the tile, so a white outline (Black chosen) shows on the black wall.
+                RoundedRectangle(cornerRadius: unit * 4.6, style: .continuous)
+                    .stroke(SettingsStyle.selection(state.settings.accentIndex, onWall: true), lineWidth: unit * 1.2)
+                    .padding(-unit * 0.9)
             }
         }
     }
@@ -513,11 +517,14 @@ private struct WallChoice: Identifiable {
     let id: Int
     let title: Text
     var detail: String?
+    /// A colour dot before the title (Point colour).
+    var swatch: Color?
 }
 
 /// A projector settings page with options: back icon and title, the options as rows, the saved one
 /// ticked and the controller's choice outlined in orange.
 private struct WallChoicePage: View {
+    @Environment(AppState.self) private var state
     let title: LocalizedStringKey
     let subtitle: LocalizedStringKey
     let choices: [WallChoice]
@@ -535,6 +542,9 @@ private struct WallChoicePage: View {
 
     private func row(_ choice: WallChoice, unit: CGFloat) -> some View {
         HStack(spacing: unit * 3) {
+            if let swatch = choice.swatch {
+                Circle().fill(swatch).frame(width: unit * 6, height: unit * 6)
+            }
             VStack(alignment: .leading, spacing: unit * 1) {
                 choice.title
                     .font(.system(size: unit * 5, weight: .semibold))
@@ -556,8 +566,10 @@ private struct WallChoicePage: View {
         .background(SettingsStyle.row, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
         .overlay {
             if choice.id == highlighted {
-                RoundedRectangle(cornerRadius: unit * 4, style: .continuous)
-                    .strokeBorder(WallBackIcon.orange, lineWidth: unit * 1.2)
+                // Drawn around the tile, so a white outline (Black chosen) shows on the black wall.
+                RoundedRectangle(cornerRadius: unit * 4.6, style: .continuous)
+                    .stroke(SettingsStyle.selection(state.settings.accentIndex, onWall: true), lineWidth: unit * 1.2)
+                    .padding(-unit * 0.9)
             }
         }
     }
@@ -607,6 +619,23 @@ private struct WallUnitsPage: View {
             },
             saved: units.firstIndex(of: state.settings.unit) ?? 0,
             highlighted: units.firstIndex(of: state.unitHighlight) ?? 0)
+    }
+}
+
+/// Point colour on the projector, the same way as Units, with a colour dot per option.
+private struct WallPointColourPage: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        let options = AppState.pointColours
+        WallChoicePage(
+            title: "Point colour", subtitle: "Borders, buttons and the dial, on the phone and the wall",
+            choices: options.enumerated().map { index, colour in
+                WallChoice(id: index, title: Text(verbatim: colour.map { "Colour \($0 + 1)" } ?? "Black"),
+                           swatch: colour.map(Palette.color) ?? Theme.ink)
+            },
+            saved: options.firstIndex(of: state.settings.accentIndex) ?? 0,
+            highlighted: options.firstIndex(of: state.accentHighlight) ?? 0)
     }
 }
 

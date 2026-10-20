@@ -113,10 +113,10 @@ Each step can be reopened from Settings.
 | R2 | Memory: wall | Segmented control "Auto play / Manual" at the top. Copy of the wall. Manual: Previous, Next, Replay. Auto play: Stop. No Record: filming is only in Make | Marks for all records; the selected record's clip life-size; caption "Nora, Aug 2025, 121.0 cm". Auto play: each record in order |
 | R3 | One record | Clip, date, height, growth since the record before. Change height, Delete | Unchanged |
 | A1 | Add or edit member | Name, colour, Delete member | Unchanged |
-| S | Settings | List: Family, Setup guide, Fit to wall, Camera position, Units, Point colour, Sound, Controller, Permissions, Sample family, Delete everything | Back icon top left, the same items as rounded tiles in two columns with their current values, Setup guide as a pill beside the title; the controller's choice outlined in orange |
+| S | Settings | List: Family, Setup guide, Fit to wall, Camera position, Units, Point colour, Sound, Controller, Permissions, Sample family, Delete everything | Back icon top left, the same items as rounded tiles in two columns with their current values, Setup guide as a pill beside the title; the controller's choice outlined in the point colour (Black drawn white on the wall) |
 | S2 | Fit to wall | Two sliders (floor line, size), fine-step toggle | Centimetre ruler: 0, 100, 150 highlighted, dashed line at 170 |
 | S3 | Camera position | Camera preview with two draggable lines: floor and 100 cm. Text: put them on the projected lines | Two bright lines at 0 and 100 cm |
-| S4 | Units | cm or feet and inches; choosing one saves it and goes back to the list | Back icon, "Units", the two units with the saved one ticked and the controller's choice outlined in orange |
+| S4 | Units | cm or feet and inches; choosing one saves it and goes back to the list | Back icon, "Units", the two units with the saved one ticked and the controller's choice outlined in the point colour (Black drawn white on the wall) |
 | S5 | Permissions | Camera, Bluetooth, Microphone (only if sound is on): state of each, button to open iOS Settings | Back icon, "Permissions", each permission with Allowed / Not asked yet / Not allowed (display only) |
 | S6 | Controller | Connected or searching, last control used (for testing), Forget this controller | Unchanged |
 | W | First-start wizard | S5, S2, S3 in order with Next and Skip | As in each step |
@@ -169,8 +169,8 @@ The controller only reports what was used. The app decides what it means.
 | Saved | | | See the growth (Lookback) | Return to home |
 | Lookback | Previous / next record | Previous / next record | Replay the clip | Back to the member menu |
 | Lookback, auto play on | Stop, then move | Stop, then move | Stop | Stop |
-| Settings on the wall (grid) | Move through Setup guide and the tiles | Previous / next | Open (Setup guide, Fit to wall, Camera position, Units, Permissions so far) | Close Settings |
-| Settings: Units | Choose a unit | Centimetres / feet and inches | Save, back to the grid | Back to the grid |
+| Settings on the wall (grid) | Move through Setup guide and the tiles | Previous / next | Open (Setup guide, Fit to wall, Camera position, Units, Point colour, Permissions so far); on Sound, switch it on or off | Close Settings |
+| Settings: Units, Point colour | Choose an option | Previous / next option | Save, back to the grid | Back to the grid |
 | Settings: Permissions, Setup guide, Camera position | | | | Back to the grid |
 | Settings: Fit to wall | Change selected value | Floor line / Size | Done | Done |
 | Onboarding with the controller | As each step says | | Next | Previous step |

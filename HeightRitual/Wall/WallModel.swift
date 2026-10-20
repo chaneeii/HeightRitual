@@ -24,6 +24,8 @@ struct WallModel: Equatable {
         case settingsMenu
         /// S4 Units: the two units, the controller's choice outlined.
         case settingsUnits
+        /// Point colour: Black and the palette colours, the controller's choice outlined.
+        case settingsPointColour
         /// S5 Permissions: each permission and whether it is allowed. Only shown.
         case settingsPermissions
         /// Setup guide: the two pictures the phone shows.
@@ -67,6 +69,8 @@ struct WallModel: Equatable {
     /// Height of the standing outline on the foot guide.
     var guideMM: Int?
     var fitValue: FitValue?
+    /// The controller's choice on the settings pages: the point colour, Black drawn white.
+    var selection: Color = .white
     var unit: HeightUnit = .cm
 }
 
@@ -75,6 +79,7 @@ extension AppState {
         var model = WallModel()
         model.calibration = settings.wall
         model.unit = settings.unit
+        model.selection = SettingsStyle.selection(settings.accentIndex, onWall: true)
         let unit = settings.unit
 
         func marks(of memberID: UUID?, selecting index: Int?) -> [WallModel.Mark] {
@@ -121,6 +126,9 @@ extension AppState {
 
         case .settings(.units):
             model.kind = .settingsUnits
+
+        case .settings(.pointColour):
+            model.kind = .settingsPointColour
 
         case .settings(.permissions):
             model.kind = .settingsPermissions

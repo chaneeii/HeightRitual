@@ -12,12 +12,12 @@ enum HeightState: Equatable {
 }
 
 enum SettingsPage: Equatable {
-    case list, family, setupGuide, fitToWall, cameraPosition, units, controller, permissions
+    case list, family, setupGuide, fitToWall, cameraPosition, units, pointColour, controller, permissions
 }
 
 /// What the controller moves through on the projector's settings grid, in order: Setup guide
 /// (beside the title), then the tiles row by row. Setup guide, Fit to wall, Camera position,
-/// Units and Permissions open from the grid so far.
+/// Units, Point colour and Permissions open from the grid; Sound switches on the grid itself.
 enum SettingsTile: Int, CaseIterable {
     case setupGuide, family, fitToWall, cameraPosition, units, pointColour, sound,
          controller, permissions, sampleFamily, deleteEverything
@@ -29,6 +29,7 @@ enum SettingsTile: Int, CaseIterable {
         case .fitToWall: return .fitToWall
         case .cameraPosition: return .cameraPosition
         case .units: return .units
+        case .pointColour: return .pointColour
         case .permissions: return .permissions
         default: return nil
         }

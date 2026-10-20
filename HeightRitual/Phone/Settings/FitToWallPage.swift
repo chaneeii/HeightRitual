@@ -73,7 +73,7 @@ struct FitToWallPage: View {
             // The value the knob moves; Left and Right on the controller choose it.
             if state.fitValue == value {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(SettingsStyle.highlight, lineWidth: 3)
+                    .strokeBorder(SettingsStyle.selection(state.settings.accentIndex, onWall: false), lineWidth: 3)
             }
         }
         .accessibilityElement(children: .contain)

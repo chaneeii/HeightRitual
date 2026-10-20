@@ -379,6 +379,44 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.settingsHighlight, .cameraPosition)
     }
 
+    func testSoundSwitchesOnTheGrid() {
+        let h = Harness()
+        let s = h.state
+        s.settings.soundOn = false
+        s.openSettings()
+        s.handle(.knob(SettingsTile.sound.rawValue))
+        s.handle(.confirm)
+        XCTAssertTrue(s.settings.soundOn)
+        XCTAssertEqual(s.route, .settings(.list), "Sound switches on the tile; no page")
+        s.handle(.confirm)
+        XCTAssertFalse(s.settings.soundOn)
+    }
+
+    func testPointColourFromTheGrid() {
+        let h = Harness()
+        let s = h.state
+        s.settings.accentIndex = nil
+        s.openSettings()
+        s.handle(.knob(SettingsTile.pointColour.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.pointColour))
+        XCTAssertEqual(s.wallModel.kind, .settingsPointColour)
+        XCTAssertNil(s.accentHighlight, "starts on the saved colour, Black")
+        s.handle(.right)
+        s.handle(.knob(1))
+        XCTAssertEqual(s.accentHighlight, 1)
+        s.handle(.cancel)
+        XCTAssertNil(s.settings.accentIndex, "Back leaves the colour unchanged")
+        s.handle(.confirm)
+        s.handle(.right)
+        s.handle(.confirm)
+        XCTAssertEqual(s.settings.accentIndex, 0)
+        XCTAssertEqual(s.route, .settings(.list), "back to the grid after choosing")
+        XCTAssertEqual(s.wallModel.selection, Palette.color(0), "the outline takes the point colour")
+        s.choosePointColour(nil)
+        XCTAssertEqual(s.wallModel.selection, .white, "Black is drawn white on the wall")
+    }
+
     func testFitToWallFromTheGrid() {
         let h = Harness()
         let s = h.state

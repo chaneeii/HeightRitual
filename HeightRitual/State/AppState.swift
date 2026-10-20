@@ -110,6 +110,8 @@ final class AppState {
     private(set) var settingsHighlight: SettingsTile = .setupGuide
     /// The option the controller has chosen on the projector's Units page.
     private(set) var unitHighlight: HeightUnit = .cm
+    /// The point colour the controller has chosen on the projector's page: nil is Black.
+    private(set) var accentHighlight: Int?
 
     var externalDisplayConnected = false
     /// Projector screen size in points. Until a projector is connected, a 1080p picture is assumed.
@@ -222,6 +224,8 @@ final class AppState {
             handleSettingsGrid(event)
         case .settings(.units):
             handleUnits(event)
+        case .settings(.pointColour):
+            handlePointColour(event)
         case .settings(let page):
             if event == .cancel { page == .list ? leaveSettings() : go(to: .settings(.list)) }
         case .wizard:
@@ -824,6 +828,7 @@ final class AppState {
     func openSettingsPage(_ page: SettingsPage) {
         if page == .fitToWall { fitValue = .floor }
         if page == .units { unitHighlight = settings.unit }
+        if page == .pointColour { accentHighlight = settings.accentIndex }
         go(to: .settings(page))
     }
 
@@ -835,7 +840,11 @@ final class AppState {
         case .left: moveSettingsHighlight(by: -1)
         case .right: moveSettingsHighlight(by: 1)
         case .confirm:
-            if let page = settingsHighlight.page { openSettingsPage(page) }
+            if settingsHighlight == .sound {
+                settings.soundOn.toggle()
+            } else if let page = settingsHighlight.page {
+                openSettingsPage(page)
+            }
         case .cancel: leaveSettings()
         default: break
         }
@@ -857,6 +866,31 @@ final class AppState {
         case .cancel: go(to: .settings(.list))
         default: break
         }
+    }
+
+    /// Black, then each palette colour, in the order the pages list them.
+    static let pointColours: [Int?] = [nil] + Palette.memberColors.indices.map { $0 }
+
+    /// The projector's Point colour page: the knob, Left and Right move through Black and the
+    /// colours; Select saves and goes back.
+    private func handlePointColour(_ event: ControlEvent) {
+        let all = Self.pointColours
+        let index = all.firstIndex(of: accentHighlight) ?? 0
+        switch event {
+        case .knob(let steps): accentHighlight = all[min(max(index + steps, 0), all.count - 1)]
+        case .left: accentHighlight = all[max(index - 1, 0)]
+        case .right: accentHighlight = all[min(index + 1, all.count - 1)]
+        case .confirm: choosePointColour(accentHighlight)
+        case .cancel: go(to: .settings(.list))
+        default: break
+        }
+    }
+
+    /// Saves the point colour and goes back to the settings list, from the phone or the controller.
+    func choosePointColour(_ index: Int?) {
+        settings.accentIndex = index
+        accentHighlight = index
+        if route == .settings(.pointColour) { go(to: .settings(.list)) }
     }
 
     /// Saves the unit and goes back to the settings list, from the phone or the controller.

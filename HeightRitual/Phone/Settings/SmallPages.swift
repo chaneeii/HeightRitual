@@ -202,44 +202,39 @@ private struct EnlargedPictureView: View {
     }
 }
 
-/// Settings > Point colour: the colour of selection borders, the main button, the dial and the
-/// saved check (`Theme.accent`). Black is the default.
-struct PointColourPicker: View {
+/// Settings > Point colour: Black or one of the palette colours, for borders, buttons and the dial on
+/// the phone and the wall. Choosing one saves it and goes back to the list, the same as Select on
+/// the projector's Point colour page.
+struct PointColourPage: View {
     @Environment(AppState.self) private var state
 
     var body: some View {
-        let current = state.settings.accentIndex
-        VStack(alignment: .leading, spacing: 12) {
-            Label {
-                Text("Point colour")
-                Text("Borders, buttons and the dial, on the phone and the wall")
-            } icon: {
-                Image(systemName: "paintpalette")
-            }
-            HStack(spacing: 0) {
-                swatch(nil, color: Theme.ink, selected: current == nil, label: "Black")
-                ForEach(Palette.memberColors.indices, id: \.self) { index in
-                    swatch(index, color: Palette.color(index), selected: current == index, label: "Colour \(index + 1)")
+        Form {
+            Section {
+                ForEach(AppState.pointColours, id: \.self) { index in
+                    Button {
+                        state.choosePointColour(index)
+                    } label: {
+                        HStack(spacing: 12) {
+                            Circle()
+                                .fill(index.map(Palette.color) ?? Theme.ink)
+                                .frame(width: 26, height: 26)
+                            Text(verbatim: index.map { "Colour \($0 + 1)" } ?? "Black")
+                            Spacer()
+                            if state.settings.accentIndex == index {
+                                Image(systemName: "checkmark").fontWeight(.semibold)
+                            }
+                        }
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(state.settings.accentIndex == index ? .isSelected : [])
                 }
+            } footer: {
+                Text("Borders, buttons and the dial, on the phone and the wall")
             }
         }
-        .padding(.vertical, 4)
-    }
-
-    private func swatch(_ index: Int?, color: Color, selected: Bool, label: String) -> some View {
-        Button {
-            state.settings.accentIndex = index
-        } label: {
-            Circle()
-                .fill(color)
-                .frame(width: 30, height: 30)
-                .overlay(Circle().stroke(Color.primary, lineWidth: selected ? 3 : 0).padding(-4))
-                .frame(maxWidth: .infinity, minHeight: 44)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(Text(verbatim: label))
-        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
 

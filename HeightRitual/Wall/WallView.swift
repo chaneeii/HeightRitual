@@ -406,15 +406,12 @@ private struct WallSettingsMenu: View {
         GeometryReader { geo in
             let unit = geo.size.width / 100
             VStack(alignment: .leading, spacing: unit * 2) {
-                HStack(alignment: .center) {
-                    WallBackPill(unit: unit)
-                    Spacer(minLength: unit * 2)
-                    setupGuide(unit: unit)
-                }
+                WallBackPill(unit: unit)
                 Text("Settings")
                     .font(.system(size: unit * 7, weight: .bold))
                     .foregroundStyle(Self.text)
                     .padding(.bottom, unit * 1)
+                setupGuide(unit: unit)
                 Grid(horizontalSpacing: unit * 2, verticalSpacing: unit * 2) {
                     ForEach(rows.indices, id: \.self) { row in
                         GridRow {
@@ -433,22 +430,31 @@ private struct WallSettingsMenu: View {
         .background(Theme.paper)
     }
 
-    /// Setup guide sits apart from the tiles, as a pill beside the title.
+    /// Setup guide: one wide card above the tiles, the first stop for the controller.
     private func setupGuide(unit: CGFloat) -> some View {
-        Label {
-            Text("Setup guide")
-                .font(.system(size: unit * 3.4, weight: .semibold))
-        } icon: {
+        let selected = state.settingsHighlight == .setupGuide
+        return HStack(spacing: unit * 2.5) {
             Image(systemName: "book")
-                .font(.system(size: unit * 3.4))
+                .font(.system(size: unit * 4, weight: .medium))
+                .foregroundStyle(Self.text.opacity(0.9))
+            VStack(alignment: .leading, spacing: unit * 0.5) {
+                Text("Setup guide")
+                    .font(.system(size: unit * 3.6, weight: .semibold))
+                    .foregroundStyle(Self.text)
+                Text("Where to put the projector and the phone")
+                    .font(.system(size: unit * 2.4))
+                    .foregroundStyle(Self.text.opacity(0.55))
+            }
+            Spacer(minLength: 0)
         }
-        .foregroundStyle(Self.text)
-        .padding(.horizontal, unit * 3)
-        .padding(.vertical, unit * 1.6)
-        .background(Theme.wallPanel, in: Capsule())
+        .padding(unit * 3)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(selected ? Theme.wallPanelSelected : Theme.wallPanel,
+                    in: RoundedRectangle(cornerRadius: unit * 3.5, style: .continuous))
         .overlay {
-            if state.settingsHighlight == .setupGuide {
-                Capsule().stroke(Theme.ink, lineWidth: unit * 0.7)
+            if selected {
+                RoundedRectangle(cornerRadius: unit * 4, style: .continuous)
+                    .stroke(Theme.ink, lineWidth: unit * 0.7)
                     .padding(-unit * 0.6)
             }
         }

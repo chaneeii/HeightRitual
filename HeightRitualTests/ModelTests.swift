@@ -189,6 +189,28 @@ final class ModelTests: XCTestCase {
         XCTAssertEqual(h.state.recordIndex, 0)
     }
 
+    // Turning the knob moves to another record at once, even in the middle of a clip.
+    func testKnobMovesDuringAClip() throws {
+        let h = Harness()
+        let cut = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
+        try Data([1]).write(to: cut)
+        h.state.store.addRecord(memberID: h.nora.id, heightMM: 1250, source: .edited,
+                                clip: ProcessedClip(videoURL: cut, duration: 5))
+        h.openMemoryWall()
+        let newest = h.state.recordIndex
+        h.scheduler.advance(1)                      // one second into the newest clip
+        h.state.handle(.knob(-1))
+        XCTAssertEqual(h.state.recordIndex, newest - 1, "manual: moves straight away")
+
+        h.state.handle(.autoPlayToggle)
+        h.scheduler.advance(0.5)                    // auto play, half a second into a record
+        let playing = h.state.recordIndex
+        h.state.handle(.knob(1))
+        XCTAssertEqual(h.state.recordIndex, min(playing + 1, h.state.currentRecords.count - 1),
+                       "auto play: stops and moves straight away")
+        XCTAssertFalse(h.state.isAutoPlaying)
+    }
+
     // R3 (SPEC 12, R4): correct one record's height, then delete it.
     func testRecordDetail() {
         let h = Harness()

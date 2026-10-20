@@ -93,19 +93,26 @@ bool pressed(Button& b) {
 }
 
 // ---- Knob: CLK falling edge, DT gives the direction ----
+// DT is read the moment CLK first changes: a few milliseconds later it has already moved on when
+// the knob turns one way, which made every step count as the other way.
 long encCount = 0;
 bool clkStable, clkLast;
+bool dtAtEdge;
 unsigned long clkChangedAt = 0;
 
 void readKnob() {
   bool clk = digitalRead(PIN_ENC_A);
   unsigned long now = micros();
-  if (clk != clkLast) { clkLast = clk; clkChangedAt = now; }
+  if (clk != clkLast) {
+    clkLast = clk;
+    clkChangedAt = now;
+    dtAtEdge = digitalRead(PIN_ENC_B);   // the direction, taken at the edge itself
+  }
   if (clk == clkStable || now - clkChangedAt < KNOB_SETTLE_US) return;
   clkStable = clk;
   if (clk == LOW) {
     // DT high when CLK falls: one way; DT low: the other way.
-    if (digitalRead(PIN_ENC_B) != clk) encCount++;
+    if (dtAtEdge != clk) encCount++;
     else encCount--;
   }
 }
@@ -161,6 +168,7 @@ void setup() {
   pinMode(PIN_ENC_A, INPUT_PULLUP);
   pinMode(PIN_ENC_B, INPUT_PULLUP);
   clkStable = clkLast = digitalRead(PIN_ENC_A);
+  dtAtEdge = digitalRead(PIN_ENC_B);
 
   NimBLEDevice::init(DEVICE_NAME);
   server = NimBLEDevice::createServer();
@@ -195,5 +203,5 @@ void loop() {
     lastKnobSend = millis();
   }
 
-  delayMicroseconds(500);
+  delayMicroseconds(200);   // read the knob often, so DT is caught right at the CLK edge
 }

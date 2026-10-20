@@ -26,7 +26,7 @@
 // How the knob is read: each time CLK falls, DT gives the direction (one step per click).
 // CLK has to hold its new level this long before it counts, so contact bounce is ignored.
 #define KNOB_SETTLE_US 2000
-// Print CLK and DT at every change of CLK, to see what the knob sends: 1 = on
+// Print every change of CLK or DT with the time in microseconds, to see what the knob sends: 1 = on
 #define KNOB_RAW_DEBUG 0
 // Turn the knob clockwise: the height should go up. If it goes down, set 1.
 #define REVERSE_KNOB 0
@@ -105,15 +105,21 @@ unsigned long clkChangedAt = 0;
 void readKnob() {
   bool clk = digitalRead(PIN_ENC_A);
   unsigned long now = micros();
+#if SERIAL_DEBUG && KNOB_RAW_DEBUG
+  static int rawClk = -1, rawDt = -1;
+  int dtNow = digitalRead(PIN_ENC_B);
+  if (clk != rawClk || dtNow != rawDt) {
+    Serial.printf("[KNOB] %10lu us  CLK %d  DT %d\n", now, clk, dtNow);
+    rawClk = clk;
+    rawDt = dtNow;
+  }
+#endif
   if (clk != clkLast) {
     // Only the first change after CLK has been quiet is the real edge; the bounces after it come
     // when DT may already have moved on, so they must not overwrite the direction.
     if (now - clkChangedAt >= KNOB_SETTLE_US) dtAtEdge = digitalRead(PIN_ENC_B);
     clkLast = clk;
     clkChangedAt = now;
-#if SERIAL_DEBUG && KNOB_RAW_DEBUG
-    Serial.printf("[KNOB] CLK %d  DT %d\n", clk, digitalRead(PIN_ENC_B));
-#endif
   }
   if (clk == clkStable || now - clkChangedAt < KNOB_SETTLE_US) return;
   clkStable = clk;

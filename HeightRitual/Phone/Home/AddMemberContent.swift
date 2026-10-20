@@ -5,6 +5,8 @@ import SwiftUI
 /// a swipe turns it and a tap presses a key.
 struct AddMemberContent: View {
     let surface: Surface
+    /// Renaming this member on the projector instead of adding a new one.
+    var renaming: String? = nil
     @Environment(AppState.self) private var state
 
     var body: some View {
@@ -28,7 +30,8 @@ struct AddMemberContent: View {
     }
 
     private var title: Text {
-        surface == .phone ? Text("Add a family member") : Text("Add a new member")
+        if let renaming { return Text("Rename \(renaming)") }
+        return surface == .phone ? Text("Add a family member") : Text("Add a new member")
     }
 
     private var subtitle: Text {

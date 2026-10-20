@@ -12,7 +12,7 @@ enum HeightState: Equatable {
 }
 
 enum SettingsPage: Equatable {
-    case list, family, setupGuide, fitToWall, cameraPosition, units, pointColour, sound, controller, permissions
+    case list, family, setupGuide, fitToWall, cameraPosition, units, sound, controller, permissions
     /// Load sample family and Delete everything ask first, on the phone and the projector.
     case confirmSample, confirmDelete
 }
@@ -20,7 +20,7 @@ enum SettingsPage: Equatable {
 /// What the controller moves through on the projector's settings grid, in order: Setup guide
 /// (beside the title), then the tiles row by row. Every tile opens a page.
 enum SettingsTile: Int, CaseIterable {
-    case setupGuide, family, fitToWall, cameraPosition, units, pointColour, sound,
+    case setupGuide, family, fitToWall, cameraPosition, units, sound,
          controller, permissions, sampleFamily, deleteEverything
 
     /// The page Select opens from the projector grid.
@@ -31,7 +31,6 @@ enum SettingsTile: Int, CaseIterable {
         case .fitToWall: return .fitToWall
         case .cameraPosition: return .cameraPosition
         case .units: return .units
-        case .pointColour: return .pointColour
         case .sound: return .sound
         case .controller: return .controller
         case .permissions: return .permissions
@@ -44,7 +43,12 @@ enum SettingsTile: Int, CaseIterable {
 /// A family member opened from the projector's Family page: its choices, then the colour list or
 /// the delete question.
 enum MemberStep: Equatable {
-    case choices, colour, confirmDelete
+    case choices, rename, colour, confirmDelete
+}
+
+/// The rows of a member's page on the projector, in the same order as the phone's member page.
+enum MemberRow: Int, CaseIterable {
+    case card, name, colour, delete
 }
 
 /// First-start wizard: what the app is, then S5, S2, S3 in order.

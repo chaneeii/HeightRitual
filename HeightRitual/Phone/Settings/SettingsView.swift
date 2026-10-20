@@ -14,7 +14,7 @@ struct SettingsSheet: View {
                 .toolbarColorScheme(.light, for: .navigationBar)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
-                        DebugWallButton(color: .white)
+                        DebugWallButton(color: Theme.ink)
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Done") { state.dismissSettings() }
@@ -56,7 +56,6 @@ struct SettingsPageView: View {
         case .fitToWall: return "Fit to wall"
         case .cameraPosition: return "Camera position"
         case .units: return "Units"
-        case .pointColour: return "Point colour"
         case .sound: return "Sound"
         case .confirmSample: return "Sample family"
         case .confirmDelete: return "Delete everything"
@@ -73,7 +72,6 @@ struct SettingsPageView: View {
         case .fitToWall: FitToWallPage()
         case .cameraPosition: CameraPositionPage()
         case .units: UnitsPage()
-        case .pointColour: PointColourPage()
         case .sound: SoundPage()
         case .confirmSample, .confirmDelete: SettingsQuestionPage()
         case .controller: ControllerPage()
@@ -126,9 +124,6 @@ private struct SettingsList: View {
                 link(.units, "Units", detail: "For every height on the phone and the wall",
                      systemImage: "textformat.123",
                      value: settings.unit == .cm ? L("Centimetres") : L("Feet and inches"))
-                link(.pointColour, "Point colour", detail: "Borders, buttons and the dial, on the phone and the wall",
-                     systemImage: "paintpalette",
-                     value: settings.accentIndex.map { "Colour \($0 + 1)" } ?? "Black")
                 link(.sound, "Sound", detail: "Record and play sound with each clip",
                      systemImage: "speaker.wave.2", value: settings.soundOn ? "On" : "Off")
                 link(.controller, "Controller", detail: "Connection, and a test of every button",

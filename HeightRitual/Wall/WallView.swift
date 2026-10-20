@@ -24,7 +24,6 @@ struct WallView: View {
                     switch model.kind {
                     case .settingsMenu: WallSettingsMenu()
                     case .settingsUnits: WallUnitsPage()
-                    case .settingsPointColour: WallPointColourPage()
                     case .settingsFamily: WallFamilyPage()
                     case .settingsSound: WallSoundPage()
                     case .settingsMember: WallMemberPage()
@@ -102,7 +101,7 @@ struct WallCanvas: View {
             case .dark: drawNumber(ctx, g)
             case .cameraLines: drawCameraLines(ctx, g)
             case .screen: ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Theme.paper))
-            case .settingsMenu, .settingsUnits, .settingsPointColour, .settingsPermissions, .settingsGuide,
+            case .settingsMenu, .settingsUnits, .settingsPermissions, .settingsGuide,
                  .settingsFamily, .settingsMember, .settingsController, .settingsQuestion, .settingsSound:
                 break    // views above the canvas: WallSettingsMenu and the settings pages below it
             }
@@ -388,9 +387,6 @@ private struct WallSettingsMenu: View {
             Tile(id: .units, title: "Units", detail: "For every height on the phone and the wall",
                  systemImage: "textformat.123",
                  value: settings.unit == .cm ? L("Centimetres") : L("Feet and inches")),
-            Tile(id: .pointColour, title: "Point colour", detail: "Borders, buttons and the dial, on the phone and the wall",
-                 systemImage: "paintpalette",
-                 value: settings.accentIndex.map { "Colour \($0 + 1)" } ?? "Black"),
             Tile(id: .sound, title: "Sound", detail: "Record and play sound with each clip",
                  systemImage: "speaker.wave.2", value: settings.soundOn ? L("On") : L("Off")),
             Tile(id: .controller, title: "Controller", detail: "Connection, and a test of every button",
@@ -637,23 +633,6 @@ private struct WallUnitsPage: View {
     }
 }
 
-/// Point colour on the projector, the same way as Units, with a colour dot per option.
-private struct WallPointColourPage: View {
-    @Environment(AppState.self) private var state
-
-    var body: some View {
-        let options = AppState.pointColours
-        WallChoicePage(
-            title: "Point colour", subtitle: "Borders, buttons and the dial, on the phone and the wall",
-            choices: options.enumerated().map { index, colour in
-                WallChoice(id: index, title: Text(verbatim: colour.map { "Colour \($0 + 1)" } ?? "Black"),
-                           swatch: colour.map(Palette.color) ?? Theme.ink)
-            },
-            saved: options.firstIndex(of: state.settings.accentIndex) ?? 0,
-            highlighted: options.firstIndex(of: state.accentHighlight) ?? 0)
-    }
-}
-
 /// Settings > Family on the projector: the members. Select opens a member's page; Back goes back
 /// to the grid. Members are added from Home.
 private struct WallFamilyPage: View {
@@ -690,8 +669,9 @@ private struct WallSoundPage: View {
     }
 }
 
-/// A member opened from the projector's Family page: Change colour or Delete member, then the
-/// colours or the delete question. Renaming needs typing and stays on the phone.
+/// A member on the projector, laid out like the phone's member page: Card, Name, Colour, Delete
+/// member. Name opens the letter wheel (the same one as adding a member); Colour the colours;
+/// Delete member asks first.
 private struct WallMemberPage: View {
     @Environment(AppState.self) private var state
 
@@ -702,12 +682,23 @@ private struct WallMemberPage: View {
                 let count = state.store.records(for: member.id).count
                 WallChoicePage(
                     title: LocalizedStringKey(member.name),
-                    subtitle: LocalizedStringKey("\(count == 1 ? "1 record" : "\(count) records"). Rename on the phone."),
+                    subtitle: LocalizedStringKey(count == 1 ? "1 record" : "\(count) records"),
                     choices: [
-                        WallChoice(id: 0, title: Text("Change colour"), swatch: Palette.color(member.colorIndex)),
-                        WallChoice(id: 1, title: Text("Delete member"), systemImage: "trash", destructive: true),
+                        WallChoice(id: MemberRow.card.rawValue, title: Text("Card"),
+                                   detail: member.card == .photo ? "Latest photo" : "Colour",
+                                   systemImage: "rectangle.portrait"),
+                        WallChoice(id: MemberRow.name.rawValue, title: Text("Name"), detail: member.name,
+                                   systemImage: "character.cursor.ibeam"),
+                        WallChoice(id: MemberRow.colour.rawValue, title: Text("Colour"),
+                                   swatch: Palette.color(member.colorIndex)),
+                        WallChoice(id: MemberRow.delete.rawValue, title: Text("Delete member"),
+                                   systemImage: "trash", destructive: true),
                     ],
                     saved: -1, highlighted: state.memberChoice)
+            case .rename:
+                DesignCanvas(surface: .wall) {
+                    AddMemberContent(surface: .wall, renaming: member.name)
+                }
             case .colour:
                 WallChoicePage(
                     title: "Colour", subtitle: LocalizedStringKey("For \(member.name)'s card and marks"),

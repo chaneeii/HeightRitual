@@ -412,31 +412,6 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.route, .settings(.list))
     }
 
-    func testPointColourFromTheGrid() {
-        let h = Harness()
-        let s = h.state
-        s.settings.accentIndex = nil
-        s.openSettings()
-        s.handle(.knob(SettingsTile.pointColour.rawValue))
-        s.handle(.confirm)
-        XCTAssertEqual(s.route, .settings(.pointColour))
-        XCTAssertEqual(s.wallModel.kind, .settingsPointColour)
-        XCTAssertNil(s.accentHighlight, "starts on the saved colour, Black")
-        s.handle(.right)
-        s.handle(.knob(1))
-        XCTAssertEqual(s.accentHighlight, 1)
-        s.handle(.cancel)
-        XCTAssertNil(s.settings.accentIndex, "Back leaves the colour unchanged")
-        s.handle(.confirm)
-        s.handle(.right)
-        s.handle(.confirm)
-        XCTAssertEqual(s.settings.accentIndex, 0)
-        XCTAssertEqual(s.route, .settings(.list), "back to the grid after choosing")
-        XCTAssertEqual(s.wallModel.selection, Palette.color(0), "the outline takes the point colour")
-        s.choosePointColour(nil)
-        XCTAssertEqual(s.wallModel.selection, .white, "Black is drawn white on the wall")
-    }
-
     func testSampleFamilyAsksFirst() {
         let h = Harness()
         let s = h.state
@@ -515,6 +490,32 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.route, .memberEdit(nora.id))
         XCTAssertEqual(s.wallModel.kind, .settingsMember)
         XCTAssertEqual(s.memberStep, .choices)
+        XCTAssertEqual(s.memberChoice, MemberRow.card.rawValue, "the rows follow the phone's member page")
+
+        // Card: Confirm switches between the colour and the newest photo.
+        let card = s.store.member(nora.id)!.card
+        s.handle(.confirm)
+        XCTAssertNotEqual(s.store.member(nora.id)?.card, card)
+
+        // Name: the letter wheel, starting on Save with the name filled in.
+        s.handle(.right)
+        s.handle(.confirm)
+        XCTAssertEqual(s.memberStep, .rename)
+        XCTAssertEqual(s.nameDraft, "NORA")
+        s.handle(.left)                 // Delete
+        s.handle(.confirm)
+        s.handle(.confirm)
+        s.handle(.right)                // Save
+        s.handle(.confirm)
+        XCTAssertEqual(s.store.member(nora.id)?.name, "No")
+        XCTAssertEqual(s.memberStep, .choices)
+        s.handle(.confirm)
+        s.handle(.cancel)
+        XCTAssertEqual(s.memberStep, .choices, "Back leaves the wheel without saving")
+        XCTAssertEqual(s.store.member(nora.id)?.name, "No")
+
+        // Colour
+        s.handle(.right)
         s.handle(.confirm)
         XCTAssertEqual(s.memberStep, .colour)
         let colour = (nora.colorIndex + 1) % Palette.memberColors.count
@@ -523,6 +524,7 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.store.member(nora.id)?.colorIndex, colour)
         XCTAssertEqual(s.memberStep, .choices)
 
+        // Delete member asks first, Cancel chosen.
         s.handle(.right)
         s.handle(.confirm)
         XCTAssertEqual(s.memberStep, .confirmDelete)
@@ -533,7 +535,7 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.route, .settings(.family), "Back goes back to Family")
 
         s.handle(.confirm)
-        s.handle(.right)
+        s.handle(.knob(3))
         s.handle(.confirm)
         s.handle(.right)
         s.handle(.confirm)

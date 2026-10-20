@@ -24,8 +24,6 @@ struct WallModel: Equatable {
         case settingsMenu
         /// S4 Units: the two units, the controller's choice outlined.
         case settingsUnits
-        /// Point colour: Black and the palette colours, the controller's choice outlined.
-        case settingsPointColour
         /// Family: the members; a member's page; the controller test page;
         /// the question before Load sample family or Delete everything.
         case settingsFamily, settingsMember, settingsController, settingsQuestion
@@ -116,7 +114,7 @@ extension AppState {
         }
 
         switch route {
-        case .memberEdit(_?) where memberEditInSettings:
+        case .memberEdit(_?):
             model.kind = .settingsMember
 
         case .memberEdit, .wizard(.welcome), .wizard(.permissions):
@@ -134,9 +132,6 @@ extension AppState {
 
         case .settings(.units):
             model.kind = .settingsUnits
-
-        case .settings(.pointColour):
-            model.kind = .settingsPointColour
 
         case .settings(.family):
             model.kind = .settingsFamily

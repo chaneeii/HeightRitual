@@ -110,8 +110,6 @@ final class AppState {
     private(set) var settingsHighlight: SettingsTile = .setupGuide
     /// The option the controller has chosen on the projector's Units page.
     private(set) var unitHighlight: HeightUnit = .cm
-    /// The point colour the controller has chosen on the projector's page: nil is Black.
-    private(set) var accentHighlight: Int?
     /// The member the controller has chosen on the projector's Family page.
     private(set) var familyHighlight = 0
     /// On the projector's Sound page: true is On.
@@ -241,7 +239,7 @@ final class AppState {
             if isAutoPlaying { handleAutoPlay(event) } else { handleManual(event) }
         case .record:
             if event == .cancel { go(to: .memoryWall) }
-        case .memberEdit(let id?) where memberEditInSettings:
+        case .memberEdit(let id?):
             handleMember(event, id)
         case .memberEdit:
             if event == .cancel { closeMemberEdit() }
@@ -251,8 +249,6 @@ final class AppState {
             handleSettingsGrid(event)
         case .settings(.units):
             handleUnits(event)
-        case .settings(.pointColour):
-            handlePointColour(event)
         case .settings(.family):
             handleFamily(event)
         case .settings(.sound):
@@ -514,7 +510,8 @@ final class AppState {
 
     /// Confirm on the letter wheel: add the letter, remove the last one, or save.
     func pressLetterKey() {
-        guard route == .addMember else { return }
+        let renaming: UUID? = { if case .memberEdit(let id?) = route, memberStep == .rename { return id }; return nil }()
+        guard route == .addMember || renaming != nil else { return }
         confirmCount += 1
         switch LetterKey.at(letterIndex) {
         case .letter(let character):
@@ -522,8 +519,18 @@ final class AppState {
         case .delete:
             if !nameDraft.isEmpty { nameDraft.removeLast() }
         case .save:
-            saveNewMember()
+            if let renaming { saveRename(renaming) } else { saveNewMember() }
         }
+    }
+
+    /// Save on the letter wheel while renaming a member on the projector.
+    private func saveRename(_ id: UUID) {
+        let name = nameDraft.capitalized
+        guard !name.isEmpty, var member = store.member(id) else { return }
+        member.name = name
+        store.updateMember(member)
+        nameDraft = ""
+        memberStep = .choices
     }
 
     /// Tapping a key on the phone: bring it to the middle and press it.
@@ -869,7 +876,6 @@ final class AppState {
     func openSettingsPage(_ page: SettingsPage) {
         if page == .fitToWall { fitValue = .floor }
         if page == .units { unitHighlight = settings.unit }
-        if page == .pointColour { accentHighlight = settings.accentIndex }
         if page == .sound { soundHighlight = settings.soundOn }
         if page == .family, route == .settings(.list) { familyHighlight = 0 }
         if page == .confirmSample || page == .confirmDelete {
@@ -963,24 +969,43 @@ final class AppState {
         }
     }
 
-    /// A member from the projector's Family page: Change colour or Delete member. Renaming needs
-    /// typing, so it stays on the phone.
+    /// A member on the projector, from Settings > Family or the gear on the member menu: the same
+    /// rows as the phone's member page. Card switches between colour and newest photo, Name opens
+    /// the letter wheel, Colour the colour list, Delete member asks first.
     private func handleMember(_ event: ControlEvent, _ id: UUID) {
         guard let member = store.member(id) else { closeMemberEdit(); return }
         let colours = Palette.memberColors.count
+        let rows = MemberRow.allCases.count
         switch (memberStep, event) {
-        case (.choices, .knob(let steps)): memberChoice = steps > 0 ? 1 : 0
-        case (.choices, .left): memberChoice = 0
-        case (.choices, .right): memberChoice = 1
+        case (.choices, .knob(let steps)): memberChoice = min(max(memberChoice + steps, 0), rows - 1)
+        case (.choices, .left): memberChoice = max(memberChoice - 1, 0)
+        case (.choices, .right): memberChoice = min(memberChoice + 1, rows - 1)
         case (.choices, .confirm):
-            if memberChoice == 0 {
+            switch MemberRow(rawValue: memberChoice) ?? .card {
+            case .card:
+                var changed = member
+                changed.cardStyle = member.card == .photo ? .colour : .photo
+                store.updateMember(changed)
+            case .name:
+                nameDraft = member.name.uppercased()
+                letterIndex = LetterKey.all.firstIndex(of: .save) ?? LetterKey.startIndex
+                memberStep = .rename
+            case .colour:
                 memberColourHighlight = member.colorIndex % colours
                 memberStep = .colour
-            } else {
+            case .delete:
                 confirmChoice = false
                 memberStep = .confirmDelete
             }
         case (.choices, .cancel): closeMemberEdit()
+
+        case (.rename, .knob(let steps)): moveLetter(by: steps)
+        case (.rename, .left): moveLetter(by: -1)
+        case (.rename, .right): moveLetter(by: 1)
+        case (.rename, .confirm): pressLetterKey()
+        case (.rename, .cancel):
+            nameDraft = ""
+            memberStep = .choices
 
         case (.colour, .knob(let steps)):
             memberColourHighlight = min(max(memberColourHighlight + steps, 0), colours - 1)
@@ -997,12 +1022,8 @@ final class AppState {
         case (.confirmDelete, .left): confirmChoice = false
         case (.confirmDelete, .right): confirmChoice = true
         case (.confirmDelete, .confirm):
-            if confirmChoice {
-                memberStep = .choices
-                deleteMember(id)
-            } else {
-                memberStep = .choices
-            }
+            memberStep = .choices
+            if confirmChoice { deleteMember(id) }
         case (.confirmDelete, .cancel): memberStep = .choices
         default: break
         }
@@ -1026,31 +1047,6 @@ final class AppState {
         settings.soundOn = on
         soundHighlight = on
         if route == .settings(.sound) { go(to: .settings(.list)) }
-    }
-
-    /// Black, then each palette colour, in the order the pages list them.
-    static let pointColours: [Int?] = [nil] + Palette.memberColors.indices.map { $0 }
-
-    /// The projector's Point colour page: the knob, Left and Right move through Black and the
-    /// colours; Select saves and goes back.
-    private func handlePointColour(_ event: ControlEvent) {
-        let all = Self.pointColours
-        let index = all.firstIndex(of: accentHighlight) ?? 0
-        switch event {
-        case .knob(let steps): accentHighlight = all[min(max(index + steps, 0), all.count - 1)]
-        case .left: accentHighlight = all[max(index - 1, 0)]
-        case .right: accentHighlight = all[min(index + 1, all.count - 1)]
-        case .confirm: choosePointColour(accentHighlight)
-        case .cancel: go(to: .settings(.list))
-        default: break
-        }
-    }
-
-    /// Saves the point colour and goes back to the settings list, from the phone or the controller.
-    func choosePointColour(_ index: Int?) {
-        settings.accentIndex = index
-        accentHighlight = index
-        if route == .settings(.pointColour) { go(to: .settings(.list)) }
     }
 
     /// Saves the unit and goes back to the settings list, from the phone or the controller.

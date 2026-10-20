@@ -189,15 +189,6 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(s.route, .home)
     }
 
-    func testPointColourIsRemembered() {
-        let suite = "test." + UUID().uuidString
-        let defaults = UserDefaults(suiteName: suite)!
-        XCTAssertNil(SettingsStore(defaults: defaults).accentIndex, "black by default")
-        SettingsStore(defaults: defaults).accentIndex = 4
-        XCTAssertEqual(SettingsStore(defaults: defaults).accentIndex, 4)
-        defaults.removePersistentDomain(forName: suite)
-    }
-
     func testSetUpLater() {
         let h = Harness(setupDone: false)
         h.state.skipWizard()

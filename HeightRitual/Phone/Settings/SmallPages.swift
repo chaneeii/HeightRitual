@@ -219,42 +219,6 @@ struct SoundPage: View {
     }
 }
 
-/// Settings > Point colour: Black or one of the palette colours, for borders, buttons and the dial on
-/// the phone and the wall. Choosing one saves it and goes back to the list, the same as Select on
-/// the projector's Point colour page.
-struct PointColourPage: View {
-    @Environment(AppState.self) private var state
-
-    var body: some View {
-        Form {
-            Section {
-                ForEach(AppState.pointColours, id: \.self) { index in
-                    Button {
-                        state.choosePointColour(index)
-                    } label: {
-                        HStack(spacing: 12) {
-                            Circle()
-                                .fill(index.map(Palette.color) ?? Theme.ink)
-                                .frame(width: 26, height: 26)
-                            Text(verbatim: index.map { "Colour \($0 + 1)" } ?? "Black")
-                            Spacer()
-                            if state.settings.accentIndex == index {
-                                Image(systemName: "checkmark").fontWeight(.semibold)
-                            }
-                        }
-                        .frame(minHeight: 44)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(state.settings.accentIndex == index ? .isSelected : [])
-                }
-            } footer: {
-                Text("Borders, buttons and the dial, on the phone and the wall")
-            }
-        }
-    }
-}
-
 /// The six things to try on the box: four buttons and the knob in both directions.
 enum ControlCheck: CaseIterable {
     case back, knobClockwise, knobCounterclockwise, left, confirm, right

@@ -119,6 +119,12 @@ struct MemberEditView: View {
         .onChange(of: existing?.colorIndex) { _, new in
             if let new { colorIndex = new }
         }
+        .onChange(of: existing?.name) { _, new in
+            if let new { name = new }
+        }
+        .onChange(of: existing?.card) { _, new in
+            if let new { cardStyle = new }
+        }
     }
 
     private func save() {

@@ -89,7 +89,8 @@ final class SettingsStore {
             guard let data = defaults.data(forKey: "settings." + key) else { return nil }
             return try? JSONDecoder().decode(T.self, from: data)
         }
-        accentIndex = load("accentIndex")
+        // The Point colour setting was removed (20 Oct): black everywhere.
+        accentIndex = nil
         unit = load("unit") ?? .cm
         soundOn = load("soundOn") ?? true
         autoPlay = load("autoPlay") ?? false

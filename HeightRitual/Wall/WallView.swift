@@ -373,7 +373,7 @@ private struct WallSettingsMenu: View {
         var destructive = false
     }
 
-    private static let text = Theme.paper
+    private static let text = Theme.ink
 
     private var rows: [[Tile]] {
         let settings = state.settings
@@ -430,7 +430,7 @@ private struct WallSettingsMenu: View {
             .padding(unit * 4)
             .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
         }
-        .background(Color.black)
+        .background(Theme.paper)
     }
 
     /// Setup guide sits apart from the tiles, as a pill beside the title.
@@ -448,7 +448,7 @@ private struct WallSettingsMenu: View {
         .background(Theme.wallPanel, in: Capsule())
         .overlay {
             if state.settingsHighlight == .setupGuide {
-                Capsule().stroke(SettingsStyle.selection(state.settings.accentIndex, onWall: true), lineWidth: unit * 0.7)
+                Capsule().stroke(Theme.ink, lineWidth: unit * 0.7)
                     .padding(-unit * 0.6)
             }
         }
@@ -492,7 +492,7 @@ private struct WallSettingsMenu: View {
         .overlay {
             if selected {
                 RoundedRectangle(cornerRadius: unit * 4, style: .continuous)
-                    .stroke(SettingsStyle.selection(nil, onWall: true), lineWidth: unit * 0.7)
+                    .stroke(Theme.ink, lineWidth: unit * 0.7)
                     .padding(-unit * 0.6)
             }
         }
@@ -540,7 +540,7 @@ private struct WallChoicePage: View {
     let choices: [WallChoice]
     let saved: Int
     let highlighted: Int
-    private static let text = Theme.paper
+    private static let text = Theme.ink
 
     var body: some View {
         WallSettingsPage(title: title, subtitle: subtitle) { unit in
@@ -583,7 +583,7 @@ private struct WallChoicePage: View {
             if choice.id == highlighted {
                 // Drawn around the tile, so a white outline (Black chosen) shows on the black wall.
                 RoundedRectangle(cornerRadius: unit * 4.6, style: .continuous)
-                    .stroke(SettingsStyle.selection(state.settings.accentIndex, onWall: true), lineWidth: unit * 0.7)
+                    .stroke(Theme.ink, lineWidth: unit * 0.7)
                     .padding(-unit * 0.6)
             }
         }
@@ -604,10 +604,10 @@ private struct WallSettingsPage<Content: View>: View {
                 VStack(alignment: .leading, spacing: unit * 1) {
                     Text(title)
                         .font(.system(size: unit * 7, weight: .bold))
-                        .foregroundStyle(Theme.paper)
+                        .foregroundStyle(Theme.ink)
                     Text(subtitle)
                         .font(.system(size: unit * 3))
-                        .foregroundStyle(Theme.paper.opacity(0.6))
+                        .foregroundStyle(Theme.ink.opacity(0.6))
                 }
                 .padding(.bottom, unit * 1)
                 content(unit)
@@ -616,7 +616,7 @@ private struct WallSettingsPage<Content: View>: View {
             .padding(unit * 4)
             .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
         }
-        .background(Color.black)
+        .background(Theme.paper)
     }
 }
 
@@ -752,7 +752,7 @@ private struct WallQuestionPage: View {
 /// the page is left with Back twice in a row.
 private struct WallControllerPage: View {
     @Environment(AppState.self) private var state
-    private static let text = Theme.paper
+    private static let text = Theme.ink
 
     var body: some View {
         let tested = state.testedControls
@@ -779,7 +779,7 @@ private struct WallControllerPage: View {
             .background(Theme.wallPanel, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
             Text("Press each control to test it. Press Back twice to go back.")
                 .font(.system(size: unit * 3.4))
-                .foregroundStyle(.white.opacity(0.75))
+                .foregroundStyle(Theme.ink.opacity(0.6))
         }
     }
 }
@@ -788,7 +788,7 @@ private struct WallControllerPage: View {
 /// permissions are changed on the phone, where iOS asks. Back goes back to the grid.
 private struct WallPermissionsPage: View {
     @Environment(AppState.self) private var state
-    private static let text = Theme.paper
+    private static let text = Theme.ink
 
     var body: some View {
         // iOS does not report changes, so look again every second.
@@ -801,7 +801,7 @@ private struct WallPermissionsPage: View {
                 }
                 Text("Change permissions on the phone.")
                     .font(.system(size: unit * 3.4))
-                    .foregroundStyle(.white.opacity(0.75))
+                    .foregroundStyle(Theme.ink.opacity(0.6))
             }
         }
     }

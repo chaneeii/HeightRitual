@@ -60,10 +60,11 @@ enum Theme {
     static let destructive = Color(red: 0.90, green: 0.18, blue: 0.16)
     /// Save on the letter wheel, and a confirmed check.
     static let success = ControlIcon.confirmGreen
-    /// Settings on the projector: dark panels on the black wall, white text.
-    static let wallPanel = Color(white: 0.13)
-    static let wallPanelSelected = Color(white: 0.22)
-    static let wallPill = Color(white: 0.2)
+    /// Settings on the projector: light gray panels on the white wall, black text; the choice is
+    /// outlined in black, Back is a black pill (as on Home).
+    static let wallPanel = Color(white: 0.95)
+    static let wallPanelSelected = Color(white: 0.91)
+    static let wallPill = ink
 
     // MARK: Type (SF Compact Display and SF Pro in Figma; system faces until the fonts are chosen)
 

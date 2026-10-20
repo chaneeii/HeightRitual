@@ -128,16 +128,15 @@ struct WallCanvas: View {
             drawOutline(ctx, g, heightCM: Double(figure.heightMM) / 10, centerX: figureX, filled: true)
         }
 
-        // 2. A pencil mark for every record; the selected one in the member's colour.
+        // 2. A pencil mark for every record; the selected one in white.
         for mark in model.marks {
             let y = g.y(mm: mark.heightMM)
             ctx.stroke(line(lineLeft, lineRight, y),
-                       with: .color(mark.selected ? model.accent : pencil.opacity(0.45)),
+                       with: .color(mark.selected ? Theme.paper : pencil.opacity(0.45)),
                        lineWidth: mark.selected ? 3 : 1.5)
             let text = Text(mark.label)
-                .font(.system(size: mark.selected ? size * 1.25 : size, design: .serif))
-                .italic()
-                .foregroundColor(mark.selected ? model.accent : pencil.opacity(0.6))
+                .font(.system(size: mark.selected ? size * 1.25 : size, weight: mark.selected ? .semibold : .regular))
+                .foregroundColor(mark.selected ? Theme.paper : pencil.opacity(0.6))
             ctx.draw(text, at: CGPoint(x: labelX, y: y), anchor: .leading)
         }
 
@@ -146,8 +145,8 @@ struct WallCanvas: View {
         if model.showsText, let caption = model.caption, let figure = model.figure {
             let y = max(g.y(mm: figure.heightMM) - size * 0.9, size * 1.5)
             let text = Text(caption)
-                .font(.system(size: size * 1.1, design: .serif)).italic()
-                .foregroundColor(model.accent)
+                .font(.system(size: size * 1.1, weight: .medium))
+                .foregroundColor(Theme.paper)
             ctx.draw(text, at: CGPoint(x: lineLeft, y: y), anchor: .leading)
         }
 

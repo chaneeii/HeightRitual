@@ -101,22 +101,33 @@ struct TutorialContent: View {
     var body: some View {
         let w = Surface.phone.canvas.width
         ZStack(alignment: .topLeading) {
-            ScreenHeading(surface: .phone, title: title, subtitle: subtitle, top: onWall ? 80 : 108)
+            // Top-aligned under the bar, so a two-line title never reaches it.
+            VStack(spacing: 4) {
+                title.font(Theme.title(26))
+                subtitle.font(Theme.subtitle(20))
+            }
+            .multilineTextAlignment(.center)
+            .foregroundStyle(Theme.ink)
+            .frame(width: w - 32)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.top, onWall ? 70 : 122)
+            .frame(width: w, height: Surface.phone.canvas.height, alignment: .top)
 
             illustration
                 .frame(width: w, height: 330)
-                .position(x: w / 2, y: 380)
+                .scaleEffect(0.88)
+                .position(x: w / 2, y: 415)
 
             if step != .ready {
                 ControllerDiagram(active: active, learned: state.tutorialLearned, interactive: !onWall)
-                    .position(x: w / 2, y: 660)
+                    .position(x: w / 2, y: 698)
                 // The instruction sits under the box, next to the controls it names.
                 hint
                     .font(Theme.subtitle(19))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Theme.ink)
                     .frame(width: w - 32)
-                    .position(x: w / 2, y: 792)
+                    .position(x: w / 2, y: 826)
             } else {
                 Button { state.handle(.confirm) } label: {
                     Text("Press \(inlineIcon(.confirm, size: 18)) to begin")

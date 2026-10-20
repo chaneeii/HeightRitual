@@ -66,10 +66,13 @@ enum Theme {
     static let wallPanelSelected = Color(white: 0.91)
     static let wallPill = ink
 
-    // MARK: Type (SF Compact Display and SF Pro in Figma; system faces until the fonts are chosen)
+    // MARK: Type
 
-    static func title(_ size: CGFloat) -> Font { .system(size: size, weight: .bold) }
-    static func subtitle(_ size: CGFloat) -> Font { .system(size: size, weight: .light) }
+    /// Screen titles: Black Han Sans (bundled, SIL Open Font License, Resources/Fonts).
+    static func title(_ size: CGFloat) -> Font { .custom("BlackHanSans-Regular", fixedSize: size) }
+    /// The line under a title: regular and a little smaller than the old light face. SF Compact
+    /// Text may not be bundled (Apple's font licence), so the system text face stands in for it.
+    static func subtitle(_ size: CGFloat) -> Font { .system(size: size * 0.86, weight: .regular) }
     static func cardName(_ size: CGFloat) -> Font { .system(size: size, weight: .bold) }
     static func label(_ size: CGFloat) -> Font { .system(size: size, weight: .semibold) }
     /// A warmer line under a choice ("Record today's height", "Watch Nora grow"): serif italic.

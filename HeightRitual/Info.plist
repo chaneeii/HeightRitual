@@ -4,30 +4,22 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>Memory Meter</string>
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>en</string>
 	</array>
-	<key>CFBundleDisplayName</key>
-	<string>Memory Meter</string>
-	<key>NSCameraUsageDescription</key>
-	<string>The camera films the short clip that is projected life-size on the wall.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Bluetooth connects the knob and button controller.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>The camera films the short clip that is projected life-size on the wall.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>The microphone records sound with the clip when sound is switched on.</string>
-	<key>UILaunchScreen</key>
-	<dict/>
-	<key>UISupportedInterfaceOrientations</key>
+	<key>UIAppFonts</key>
 	<array>
-		<string>UIInterfaceOrientationPortrait</string>
+		<string>BlackHanSans-Regular.ttf</string>
 	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-	</array>
-	<key>UIRequiresFullScreen</key>
-	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -45,5 +37,17 @@
 			</array>
 		</dict>
 	</dict>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UIRequiresFullScreen</key>
+	<true/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
 </dict>
 </plist>

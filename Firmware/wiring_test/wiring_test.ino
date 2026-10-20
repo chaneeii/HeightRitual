@@ -4,10 +4,10 @@
 // button reads DOWN. Classic ESP32 DevKit pins (same as Firmware/controller).
 
 const int   N = 4;
-const int   PINS[N]  = {25, 26, 27, 14};
+const int   PINS[N]  = {25, 33, 27, 14};
 const char* NAMES[N] = {"Back", "Left", "Confirm", "Right"};
 const int   PIN_ENC_A = 32;   // encoder CLK
-const int   PIN_ENC_B = 33;   // encoder DT
+const int   PIN_ENC_B = 26;   // encoder DT
 const int   PIN_LED   = 2;
 unsigned long lastPrint = 0;
 

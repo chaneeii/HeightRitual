@@ -50,14 +50,14 @@ const int PIN_ENC_A   = 4;    // encoder CLK
 const int PIN_ENC_B   = 5;    // encoder DT
 const int PIN_LED     = 48;   // RGB LED on most S3 DevKitC boards; any free pin works
 #else
-// Same pins as the breadboard (5 Oct): Back 25, Left 26, Confirm 27, Right 14.
-// The old Record button on 18 is gone; Confirm films now.
+// The box as soldered (20 Oct): Back 25, Left 33, Right 14, Confirm 27, knob CLK 32 / DT 26.
+// Avoid 34 to 39: input only, no internal pull-ups.
 const int PIN_BACK    = 25;
-const int PIN_LEFT    = 26;
+const int PIN_LEFT    = 33;
 const int PIN_CONFIRM = 27;
 const int PIN_RIGHT   = 14;
-const int PIN_ENC_A   = 32;   // encoder CLK. 32 and 33 have internal pull-ups; 34 to 39 do not
-const int PIN_ENC_B   = 33;   // encoder DT
+const int PIN_ENC_A   = 32;   // encoder CLK
+const int PIN_ENC_B   = 26;   // encoder DT
 const int PIN_LED     = 2;    // blue LED on the board
 #endif
 

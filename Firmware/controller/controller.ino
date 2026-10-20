@@ -25,10 +25,12 @@
 
 // How the knob is read. A step is only sent once a click has fully happened, so contact bounce
 // can no longer send a step the other way.
-//   1 = half-step: one step per click on knobs that rest in two positions (the box's knob)
-//   0 = full-step: one step per click on knobs that rest in one position
+//   0 = full-step: one step per click on knobs that rest in one position (the box's knob)
+//   1 = half-step: one step per click on knobs that rest in two positions
 // One click moves two steps: set 0. Two clicks to move once: set 1.
-#define HALF_STEP 1
+#define HALF_STEP 0
+// A step against the direction of the last one, sooner than this after it, is contact noise.
+#define REVERSE_GUARD_MS 60
 // Turn the knob clockwise: the height should go up. If it goes down, set 1.
 #define REVERSE_KNOB 0
 // Print presses, turns and sent packets to the Serial Monitor (115200 baud): 1 = on, 0 = off
@@ -126,12 +128,20 @@ const uint8_t ENC_TABLE[7][4] = {
 
 volatile long encCount = 0;
 volatile uint8_t encState = R_START;
+volatile int8_t lastDir = 0;
+volatile unsigned long lastStepAt = 0;
 
 void IRAM_ATTR onEncoder() {
   uint8_t pins = (digitalRead(PIN_ENC_A) << 1) | digitalRead(PIN_ENC_B);   // same direction as before
   encState = ENC_TABLE[encState & 0x0F][pins];
-  if (encState & DIR_CW) encCount++;
-  else if (encState & DIR_CCW) encCount--;
+  int8_t dir = (encState & DIR_CW) ? 1 : (encState & DIR_CCW) ? -1 : 0;
+  if (dir == 0) return;
+  unsigned long now = millis();
+  // While turning one way, a single step back right after a step forward is noise.
+  if (dir != lastDir && lastDir != 0 && now - lastStepAt < REVERSE_GUARD_MS) return;
+  encCount += dir;
+  lastDir = dir;
+  lastStepAt = now;
 }
 
 long lastDetent = 0;

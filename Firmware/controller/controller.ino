@@ -95,37 +95,41 @@ bool pressed(Button& b) {
 }
 
 // ---- Knob: CLK falling edge, DT gives the direction ----
-// DT is read the moment CLK first changes: a few milliseconds later it has already moved on when
-// the knob turns one way, which made every step count as the other way.
+// The box's knob moves DT only about 0.25 ms after CLK, too quick for loop(): an interrupt on
+// CLK reads DT within microseconds of the edge. Only the first edge after a quiet CLK counts;
+// the bounces after it must not overwrite the direction.
 long encCount = 0;
-bool clkStable, clkLast;
-bool dtAtEdge;
-unsigned long clkChangedAt = 0;
+bool clkStable;
+volatile bool dtAtEdge;
+volatile unsigned long clkEdgeAt = 0;
+
+void IRAM_ATTR onClk() {
+  unsigned long t = micros();
+  if (t - clkEdgeAt >= KNOB_SETTLE_US) dtAtEdge = digitalRead(PIN_ENC_B);
+  clkEdgeAt = t;
+}
 
 void readKnob() {
   bool clk = digitalRead(PIN_ENC_A);
-  unsigned long now = micros();
 #if SERIAL_DEBUG && KNOB_RAW_DEBUG
   static int rawClk = -1, rawDt = -1;
   int dtNow = digitalRead(PIN_ENC_B);
   if (clk != rawClk || dtNow != rawDt) {
-    Serial.printf("[KNOB] %10lu us  CLK %d  DT %d\n", now, clk, dtNow);
+    Serial.printf("[KNOB] %10lu us  CLK %d  DT %d\n", micros(), clk, dtNow);
     rawClk = clk;
     rawDt = dtNow;
   }
 #endif
-  if (clk != clkLast) {
-    // Only the first change after CLK has been quiet is the real edge; the bounces after it come
-    // when DT may already have moved on, so they must not overwrite the direction.
-    if (now - clkChangedAt >= KNOB_SETTLE_US) dtAtEdge = digitalRead(PIN_ENC_B);
-    clkLast = clk;
-    clkChangedAt = now;
-  }
-  if (clk == clkStable || now - clkChangedAt < KNOB_SETTLE_US) return;
+  noInterrupts();
+  unsigned long edgeAt = clkEdgeAt;
+  bool dt = dtAtEdge;
+  interrupts();
+  // CLK has to rest at its new level for KNOB_SETTLE_US before the step counts.
+  if (clk == clkStable || micros() - edgeAt < KNOB_SETTLE_US) return;
   clkStable = clk;
   if (clk == LOW) {
-    // DT high when CLK falls: one way; DT low: the other way.
-    if (dtAtEdge != clk) encCount++;
+    // DT still high when CLK falls: one way; DT already low: the other way.
+    if (dt != clk) encCount++;
     else encCount--;
   }
 }
@@ -180,8 +184,9 @@ void setup() {
 
   pinMode(PIN_ENC_A, INPUT_PULLUP);
   pinMode(PIN_ENC_B, INPUT_PULLUP);
-  clkStable = clkLast = digitalRead(PIN_ENC_A);
+  clkStable = digitalRead(PIN_ENC_A);
   dtAtEdge = digitalRead(PIN_ENC_B);
+  attachInterrupt(digitalPinToInterrupt(PIN_ENC_A), onClk, CHANGE);
 
   NimBLEDevice::init(DEVICE_NAME);
   server = NimBLEDevice::createServer();
@@ -216,5 +221,5 @@ void loop() {
     lastKnobSend = millis();
   }
 
-  delayMicroseconds(200);   // read the knob often, so DT is caught right at the CLK edge
+  delay(1);
 }

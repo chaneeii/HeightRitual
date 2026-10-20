@@ -79,8 +79,6 @@ struct ControllerDiagram: View {
         let on = isOn(.knob)
         return ControlIcon(glyph: .knob, size: 78)
             .foregroundStyle(on ? Theme.ink : Theme.controllerOff)
-            .rotationEffect(.degrees(Double(state.inputCount % 8) * (pressed(.knob) ? 22 : 0)))
-            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: state.inputCount)
             .overlay {
                 HStack(spacing: 0) {
                     Color.clear.contentShape(Rectangle()).onTapGesture { if interactive { state.handle(.knob(-1)) } }

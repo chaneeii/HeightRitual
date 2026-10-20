@@ -75,8 +75,8 @@ enum Theme {
     static func subtitle(_ size: CGFloat) -> Font { .system(size: size * 0.86, weight: .regular) }
     static func cardName(_ size: CGFloat) -> Font { .system(size: size, weight: .bold) }
     static func label(_ size: CGFloat) -> Font { .system(size: size, weight: .semibold) }
-    /// A warmer line under a choice ("Record today's height", "Watch Nora grow"): serif italic.
-    static func note(_ size: CGFloat) -> Font { .system(size: size, weight: .regular, design: .serif).italic() }
+    /// The line under a choice ("Record today's height", "Watch Nora grow"): the thin face.
+    static func note(_ size: CGFloat) -> Font { .system(size: size, weight: .light) }
     static func key(_ size: CGFloat) -> Font { .system(size: size, weight: .medium) }
     static func field(_ size: CGFloat) -> Font { .system(size: size, weight: .bold) }
 }

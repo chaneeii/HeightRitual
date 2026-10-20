@@ -223,9 +223,10 @@ struct ScreenHeading: View {
     var top: CGFloat = 121
 
     var body: some View {
-        VStack(spacing: surface.v(4, 8)) {
+        VStack(spacing: surface.v(10, 14)) {
             title
-                .font(Theme.title(surface.v(28, 42.4)))
+                .font(Theme.title(surface.v(24, 36)))
+                .lineSpacing(surface.v(4, 6))
             subtitle
                 .font(Theme.subtitle(surface.v(22, 33.3)))
         }

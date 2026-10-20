@@ -102,8 +102,8 @@ struct TutorialContent: View {
         let w = Surface.phone.canvas.width
         ZStack(alignment: .topLeading) {
             // Top-aligned under the bar, so a two-line title never reaches it.
-            VStack(spacing: 4) {
-                title.font(Theme.title(26))
+            VStack(spacing: 10) {
+                title.font(Theme.title(23)).lineSpacing(4)
                 subtitle.font(Theme.subtitle(20))
             }
             .multilineTextAlignment(.center)

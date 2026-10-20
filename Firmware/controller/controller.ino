@@ -23,14 +23,9 @@
 //   23 Back           1
 // No light: the box has no LED, so there is no light characteristic (the app skips it).
 
-// How the knob is read. A step is only sent once a click has fully happened, so contact bounce
-// can no longer send a step the other way.
-//   0 = full-step: one step per click on knobs that rest in one position (the box's knob)
-//   1 = half-step: one step per click on knobs that rest in two positions
-// One click moves two steps: set 0. Two clicks to move once: set 1.
-#define HALF_STEP 0
-// A step against the direction of the last one, sooner than this after it, is contact noise.
-#define REVERSE_GUARD_MS 60
+// How the knob is read: each time CLK falls, DT gives the direction (one step per click).
+// CLK has to hold its new level this long before it counts, so contact bounce is ignored.
+#define KNOB_SETTLE_US 2000
 // Turn the knob clockwise: the height should go up. If it goes down, set 1.
 #define REVERSE_KNOB 0
 // Print presses, turns and sent packets to the Serial Monitor (115200 baud): 1 = on, 0 = off
@@ -97,62 +92,28 @@ bool pressed(Button& b) {
   return false;
 }
 
-// ---- Knob: a state machine in an interrupt, no library ----
-// After Ben Buxton's rotary encoder state machine: invalid or bouncing transitions lead back to
-// the start without a step, so only complete clicks count.
-const uint8_t DIR_CW = 0x10, DIR_CCW = 0x20;
-#if HALF_STEP
-const uint8_t R_START = 0x0, R_CCW_BEGIN = 0x1, R_CW_BEGIN = 0x2, R_START_M = 0x3, R_CW_BEGIN_M = 0x4,
-              R_CCW_BEGIN_M = 0x5;
-const uint8_t ENC_TABLE[6][4] = {
-  {R_START_M,           R_CW_BEGIN,    R_CCW_BEGIN,  R_START},
-  {R_START_M | DIR_CCW, R_START,       R_CCW_BEGIN,  R_START},
-  {R_START_M | DIR_CW,  R_CW_BEGIN,    R_START,      R_START},
-  {R_START_M,           R_CCW_BEGIN_M, R_CW_BEGIN_M, R_START},
-  {R_START_M,           R_START_M,     R_CW_BEGIN_M, R_START | DIR_CW},
-  {R_START_M,           R_CCW_BEGIN_M, R_START_M,    R_START | DIR_CCW},
-};
-#else
-const uint8_t R_START = 0x0, R_CW_FINAL = 0x1, R_CW_BEGIN = 0x2, R_CW_NEXT = 0x3, R_CCW_BEGIN = 0x4,
-              R_CCW_FINAL = 0x5, R_CCW_NEXT = 0x6;
-const uint8_t ENC_TABLE[7][4] = {
-  {R_START,    R_CW_BEGIN,  R_CCW_BEGIN, R_START},
-  {R_CW_NEXT,  R_START,     R_CW_FINAL,  R_START | DIR_CW},
-  {R_CW_NEXT,  R_CW_BEGIN,  R_START,     R_START},
-  {R_CW_NEXT,  R_CW_BEGIN,  R_CW_FINAL,  R_START},
-  {R_CCW_NEXT, R_START,     R_CCW_BEGIN, R_START},
-  {R_CCW_NEXT, R_CCW_FINAL, R_START,     R_START | DIR_CCW},
-  {R_CCW_NEXT, R_CCW_FINAL, R_CCW_BEGIN, R_START},
-};
-#endif
+// ---- Knob: CLK falling edge, DT gives the direction ----
+long encCount = 0;
+bool clkStable, clkLast;
+unsigned long clkChangedAt = 0;
 
-volatile long encCount = 0;
-volatile uint8_t encState = R_START;
-volatile int8_t lastDir = 0;
-volatile unsigned long lastStepAt = 0;
-
-void IRAM_ATTR onEncoder() {
-  uint8_t pins = (digitalRead(PIN_ENC_A) << 1) | digitalRead(PIN_ENC_B);   // same direction as before
-  encState = ENC_TABLE[encState & 0x0F][pins];
-  int8_t dir = (encState & DIR_CW) ? 1 : (encState & DIR_CCW) ? -1 : 0;
-  if (dir == 0) return;
-  unsigned long now = millis();
-  // While turning one way, a single step back right after a step forward is noise.
-  if (dir != lastDir && lastDir != 0 && now - lastStepAt < REVERSE_GUARD_MS) return;
-  encCount += dir;
-  lastDir = dir;
-  lastStepAt = now;
+void readKnob() {
+  bool clk = digitalRead(PIN_ENC_A);
+  unsigned long now = micros();
+  if (clk != clkLast) { clkLast = clk; clkChangedAt = now; }
+  if (clk == clkStable || now - clkChangedAt < KNOB_SETTLE_US) return;
+  clkStable = clk;
+  if (clk == LOW) {
+    // DT high when CLK falls: one way; DT low: the other way.
+    if (digitalRead(PIN_ENC_B) != clk) encCount++;
+    else encCount--;
+  }
 }
 
 long lastDetent = 0;
 unsigned long lastKnobSend = 0;
 
-long detents() {
-  noInterrupts();
-  long count = encCount;
-  interrupts();
-  return REVERSE_KNOB ? -count : count;
-}
+long detents() { return REVERSE_KNOB ? -encCount : encCount; }
 
 // ---- Bluetooth ----
 NimBLEServer* server = nullptr;
@@ -199,8 +160,7 @@ void setup() {
 
   pinMode(PIN_ENC_A, INPUT_PULLUP);
   pinMode(PIN_ENC_B, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(PIN_ENC_A), onEncoder, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(PIN_ENC_B), onEncoder, CHANGE);
+  clkStable = clkLast = digitalRead(PIN_ENC_A);
 
   NimBLEDevice::init(DEVICE_NAME);
   server = NimBLEDevice::createServer();
@@ -224,6 +184,7 @@ void loop() {
   for (Button& b : buttons) {
     if (pressed(b)) send(b.id, 1, b.name);
   }
+  readKnob();
 
   // Knob: send the clicks turned since the last packet, as one signed number.
   long now = detents();
@@ -234,5 +195,5 @@ void loop() {
     lastKnobSend = millis();
   }
 
-  delay(2);
+  delayMicroseconds(500);
 }

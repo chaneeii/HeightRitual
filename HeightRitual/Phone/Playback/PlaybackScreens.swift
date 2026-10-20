@@ -168,8 +168,7 @@ struct WallPlaybackOverlay: View {
         // The person stands life-size in the middle, so nothing covers the face: the segments sit
         // at the very top, the record at the bottom by the feet. Back is on the box.
         DesignCanvas(surface: .wall, background: .clear) {
-            StoryIndicator(count: records.count, index: index, width: 548, height: 4, gap: 10)
-                .position(x: 304, y: 30)
+
 
             // Keeps the text readable over the clip's legs.
             LinearGradient(colors: [Color.black.opacity(0), Color.black.opacity(0.75)],
@@ -200,7 +199,11 @@ struct WallPlaybackOverlay: View {
             }
             .animation(.snappy, value: index)
             .frame(width: 608, height: 240, alignment: .bottom)
-            .position(x: 304, y: 1080 - 30 - 120)
+            .position(x: 304, y: 1080 - 52 - 120)
+
+            // The segments sit under the height, at the bottom edge (the face stays clear above).
+            StoryIndicator(count: records.count, index: index, width: 548, height: 4, gap: 10)
+                .position(x: 304, y: 1080 - 24)
 
             if state.showsLookbackHint && records.count > 1 {
                 HStack(spacing: 8) {

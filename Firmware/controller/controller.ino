@@ -1,37 +1,14 @@
-// Memory Meter controller v4 -> iPhone app over Bluetooth Low Energy
-// The box (19 Oct 2026), seen from above:
+// Memory Meter controller -> iPhone app over Bluetooth Low Energy
 //
 //   [ Back ]                 ( Knob )
-//
 //   < Left      ( Confirm )     Right >
 //
-// Five controls: Back, a rotary encoder knob, Left, the round Confirm, Right.
-// Confirm also starts and stops filming. Powered by a USB power bank.
+// Board:   ESP32 Dev Module
+// Library: NimBLE-Arduino 2.x by h2zero
+// Serial Monitor: 115200 baud
 //
-// Board:     classic ESP32 DevKit (ESP32-WROOM-32) or ESP32-S3-DevKitC (pins are chosen automatically)
-// Library:   NimBLE-Arduino 2.x by h2zero (Library Manager). The knob needs no library.
-// Serial Monitor at 115200 baud shows every press and turn.
-//
-// The controller only reports what was used. The app decides what it means on each screen
-// (docs/SPEC.md section 6).
-//
-// Input characteristic (notify), 2 bytes [controlId, value]:
-//   1  knob turn      value = signed detents since the last packet (+ clockwise)
-//   13 Confirm        1
-//   14 Left           1
-//   15 Right          1
-//   23 Back           1
-// No light: the box has no LED, so there is no light characteristic (the app skips it).
-
-// How the knob is read: whichever of CLK and DT moves first gives the direction (one step per
-// click). Both pins have to rest this long before a click counts, so contact bounce is ignored.
-#define KNOB_SETTLE_US 2000
-// Print every change of CLK or DT with the time in microseconds, to see what the knob sends: 1 = on
-#define KNOB_RAW_DEBUG 0
-// Turn the knob clockwise: the height should go up. If it goes down, set 1.
-#define REVERSE_KNOB 0
-// Print presses, turns and sent packets to the Serial Monitor (115200 baud): 1 = on, 0 = off
-#define SERIAL_DEBUG 1
+// Packets [id, value]: knob [1, +1] / [1, -1], Confirm [13, 1], Left [14, 1], Right [15, 1],
+// Back [23, 1]. The app decides what each control does on each screen.
 
 #include <NimBLEDevice.h>
 
@@ -39,195 +16,146 @@
 #define SERVICE_UUID "6f1d0001-8a3c-4b6e-9a51-2c7e0b1d4a01"
 #define INPUT_UUID   "6f1d0002-8a3c-4b6e-9a51-2c7e0b1d4a01"
 
-// ---- Pins. Every button: one leg to the pin, the other leg to GND (internal pull-up). ----
-#if CONFIG_IDF_TARGET_ESP32S3
-const int PIN_BACK    = 6;
-const int PIN_LEFT    = 16;
-const int PIN_CONFIRM = 17;
-const int PIN_RIGHT   = 18;
-const int PIN_ENC_A   = 4;    // encoder CLK
-const int PIN_ENC_B   = 5;    // encoder DT
-#else
-// The box as soldered (20 Oct): Back 25, Left 33, Right 14, Confirm 27, knob CLK 32 / DT 26.
-// Avoid 34 to 39: input only, no internal pull-ups.
+// Pins as soldered on the box.
 const int PIN_BACK    = 25;
 const int PIN_LEFT    = 33;
-const int PIN_CONFIRM = 27;
 const int PIN_RIGHT   = 14;
-const int PIN_ENC_A   = 32;   // encoder CLK
-const int PIN_ENC_B   = 26;   // encoder DT
-#endif
+const int PIN_CONFIRM = 27;
+const int PIN_CLK     = 32;   // knob CLK
+const int PIN_DT      = 26;   // knob DT
 
-enum : uint8_t { ID_KNOB = 1, ID_CONFIRM = 13, ID_LEFT = 14, ID_RIGHT = 15, ID_BACK = 23 };
-
-const unsigned long DEBOUNCE_MS = 25;
-const unsigned long KNOB_SEND_MS = 20;   // turns are summed and sent at most every 20 ms
-
-// ---- Buttons, debounced ----
-struct Button {
-  int pin;
-  uint8_t id;
-  const char* name;
-  bool stable;          // debounced level, HIGH = released
-  bool lastRead;
-  unsigned long changedAt;
-};
-
-Button buttons[] = {
-  {PIN_BACK,    ID_BACK,    "Back"},
-  {PIN_LEFT,    ID_LEFT,    "Left"},
-  {PIN_CONFIRM, ID_CONFIRM, "Confirm"},
-  {PIN_RIGHT,   ID_RIGHT,   "Right"},
-};
-
-// Returns true once per press (the debounced level went to LOW).
-bool pressed(Button& b) {
-  bool reading = digitalRead(b.pin);
-  if (reading != b.lastRead) {
-    b.lastRead = reading;
-    b.changedAt = millis();
-  }
-  if (reading != b.stable && millis() - b.changedAt > DEBOUNCE_MS) {
-    b.stable = reading;
-    return reading == LOW;
-  }
-  return false;
-}
-
-// ---- Knob: which pin moves first ----
-// On the box's knob CLK and DT both change on every click, often within a fraction of a
-// millisecond; the one that moves first gives the direction (CLK first: clockwise). Both pins
-// have an interrupt. The first edge after a quiet knob is remembered, and once both pins have
-// rested for KNOB_SETTLE_US at the same level the click counts. Bounces never change the order.
-long encCount = 0;
-volatile uint8_t firstPin = 0;          // 1: CLK moved first, 2: DT moved first
-volatile unsigned long lastEdgeAt = 0;
-int restLevel = -1;                     // the level both pins rested at after the last click
-
-void IRAM_ATTR onClk() {
-  unsigned long t = micros();
-  if (t - lastEdgeAt >= KNOB_SETTLE_US) firstPin = 1;
-  lastEdgeAt = t;
-}
-
-void IRAM_ATTR onDt() {
-  unsigned long t = micros();
-  if (t - lastEdgeAt >= KNOB_SETTLE_US) firstPin = 2;
-  lastEdgeAt = t;
-}
-
-void readKnob() {
-  bool clk = digitalRead(PIN_ENC_A);
-  bool dt = digitalRead(PIN_ENC_B);
-#if SERIAL_DEBUG && KNOB_RAW_DEBUG
-  static int rawClk = -1, rawDt = -1;
-  if (clk != rawClk || dt != rawDt) {
-    Serial.printf("[KNOB] %10lu us  CLK %d  DT %d\n", micros(), clk, dt);
-    rawClk = clk;
-    rawDt = dt;
-  }
-#endif
-  noInterrupts();
-  uint8_t first = firstPin;
-  unsigned long edgeAt = lastEdgeAt;
-  interrupts();
-  if (first == 0 || micros() - edgeAt < KNOB_SETTLE_US) return;   // still moving or bouncing
-  if (clk != dt) return;                                          // between two rests: wait
-  noInterrupts();
-  firstPin = 0;
-  interrupts();
-  if (clk == restLevel) return;                                   // back where it was: no click
-  restLevel = clk;
-  if (first == 1) encCount++;
-  else encCount--;
-}
-
-long lastDetent = 0;
-unsigned long lastKnobSend = 0;
-
-long detents() { return REVERSE_KNOB ? -encCount : encCount; }
+// The knob turns the wrong way round: set to 1.
+#define REVERSE_KNOB 0
 
 // ---- Bluetooth ----
 NimBLEServer* server = nullptr;
 NimBLECharacteristic* inputChar = nullptr;
 
-bool isConnected() { return server && server->getConnectedCount() > 0; }
+bool connected() { return server && server->getConnectedCount() > 0; }
 
 void send(uint8_t id, int8_t value, const char* name) {
-#if SERIAL_DEBUG
-  Serial.printf("[%s] %-8s [%d, %d]\n", isConnected() ? "SEND" : "----", name, id, value);
-#endif
-  if (!isConnected() || !inputChar) return;
+  Serial.printf("[%s] %s [%d, %d]\n", connected() ? "SEND" : "----", name, id, value);
+  if (!connected()) return;
   uint8_t packet[2] = {id, (uint8_t)value};
   inputChar->setValue(packet, 2);
   inputChar->notify();
 }
 
 class ServerCallbacks : public NimBLEServerCallbacks {
-  void onConnect(NimBLEServer* s, NimBLEConnInfo& info) override {
-#if SERIAL_DEBUG
-    Serial.println("[BLE] phone connected");
-#endif
-  }
-  void onDisconnect(NimBLEServer* s, NimBLEConnInfo& info, int reason) override {
-#if SERIAL_DEBUG
-    Serial.println("[BLE] phone disconnected, advertising again");
-#endif
+  void onConnect(NimBLEServer*, NimBLEConnInfo&) override { Serial.println("[BLE] phone connected"); }
+  void onDisconnect(NimBLEServer*, NimBLEConnInfo&, int) override {
+    Serial.println("[BLE] phone disconnected");
     NimBLEDevice::startAdvertising();
   }
 };
 
+// ---- Buttons: one packet per press, 25 ms debounce ----
+struct Button {
+  int pin;
+  uint8_t id;
+  const char* name;
+  bool down;
+  unsigned long changedAt;
+};
+
+Button buttons[] = {
+  {PIN_BACK,    23, "Back"},
+  {PIN_LEFT,    14, "Left"},
+  {PIN_RIGHT,   15, "Right"},
+  {PIN_CONFIRM, 13, "Confirm"},
+};
+
+void readButtons() {
+  for (Button& b : buttons) {
+    bool down = digitalRead(b.pin) == LOW;
+    if (down != b.down && millis() - b.changedAt > 25) {
+      b.down = down;
+      b.changedAt = millis();
+      if (down) send(b.id, 1, b.name);
+    }
+  }
+}
+
+// ---- Knob ----
+// The box's knob rests with CLK and DT at the same level and both change on every click.
+// Counter-clockwise DT moves first; clockwise CLK moves first or both move at the same moment.
+// So: DT first is counter-clockwise, anything else clockwise. An interrupt on each pin notes
+// which moved first; the click counts once both pins rest at a new level for 3 ms.
+
+volatile bool moving = false;
+volatile bool dtFirst = false;
+volatile unsigned long lastChange = 0;
+volatile int restLevel = HIGH;
+
+void IRAM_ATTR onKnobPin() {
+  int clk = digitalRead(PIN_CLK);
+  int dt = digitalRead(PIN_DT);
+  if (!moving && (clk != restLevel || dt != restLevel)) {
+    moving = true;
+    dtFirst = (dt != restLevel) && (clk == restLevel);
+  }
+  lastChange = micros();
+}
+
+void readKnob() {
+  int clk = digitalRead(PIN_CLK);
+  int dt = digitalRead(PIN_DT);
+
+  noInterrupts();
+  bool isMoving = moving;
+  bool counterClockwise = dtFirst;
+  unsigned long quietFor = micros() - lastChange;
+  int rest = restLevel;
+  interrupts();
+
+  if (!isMoving || quietFor < 3000 || clk != dt) return;   // still turning or bouncing
+
+  noInterrupts();
+  moving = false;
+  restLevel = clk;
+  interrupts();
+
+  if (clk == rest) return;   // came back to where it was: no click
+
+  int step = counterClockwise ? -1 : 1;
+  if (REVERSE_KNOB) step = -step;
+  send(1, step, step > 0 ? "Knob +" : "Knob -");
+}
+
+// ---- Setup and loop ----
 void setup() {
-#if SERIAL_DEBUG
   Serial.begin(115200);
-  Serial.println();
-  Serial.printf("Memory Meter controller v4. Back %d, Left %d, Confirm %d, Right %d, knob %d/%d\n",
-                PIN_BACK, PIN_LEFT, PIN_CONFIRM, PIN_RIGHT, PIN_ENC_A, PIN_ENC_B);
-#endif
+  Serial.println("\nMemory Meter controller");
+
   for (Button& b : buttons) {
     pinMode(b.pin, INPUT_PULLUP);
-    b.stable = b.lastRead = digitalRead(b.pin);
+    b.down = digitalRead(b.pin) == LOW;
     b.changedAt = 0;
   }
 
-  pinMode(PIN_ENC_A, INPUT_PULLUP);
-  pinMode(PIN_ENC_B, INPUT_PULLUP);
-  if (digitalRead(PIN_ENC_A) == digitalRead(PIN_ENC_B)) restLevel = digitalRead(PIN_ENC_A);
-  attachInterrupt(digitalPinToInterrupt(PIN_ENC_A), onClk, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(PIN_ENC_B), onDt, CHANGE);
+  pinMode(PIN_CLK, INPUT_PULLUP);
+  pinMode(PIN_DT, INPUT_PULLUP);
+  restLevel = digitalRead(PIN_CLK);
+  attachInterrupt(digitalPinToInterrupt(PIN_CLK), onKnobPin, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PIN_DT), onKnobPin, CHANGE);
 
   NimBLEDevice::init(DEVICE_NAME);
   server = NimBLEDevice::createServer();
   server->setCallbacks(new ServerCallbacks());
-
   NimBLEService* service = server->createService(SERVICE_UUID);
   inputChar = service->createCharacteristic(INPUT_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
   service->start();
 
   NimBLEAdvertising* adv = NimBLEDevice::getAdvertising();
   adv->addServiceUUID(SERVICE_UUID);
-  adv->enableScanResponse(true);   // the name does not fit next to the long UUID, so it goes in the scan response
+  adv->enableScanResponse(true);
   adv->setName(DEVICE_NAME);
   adv->start();
-#if SERIAL_DEBUG
-  Serial.println("[BLE] advertising as " DEVICE_NAME ", waiting for the phone");
-#endif
+  Serial.println("[BLE] advertising as " DEVICE_NAME);
 }
 
 void loop() {
-  for (Button& b : buttons) {
-    if (pressed(b)) send(b.id, 1, b.name);
-  }
+  readButtons();
   readKnob();
-
-  // Knob: send the clicks turned since the last packet, as one signed number.
-  long now = detents();
-  if (now != lastDetent && millis() - lastKnobSend >= KNOB_SEND_MS) {
-    long delta = constrain(now - lastDetent, -127, 127);
-    send(ID_KNOB, (int8_t)delta, delta > 0 ? "Knob +" : "Knob -");
-    lastDetent += delta;
-    lastKnobSend = millis();
-  }
-
   delay(1);
 }

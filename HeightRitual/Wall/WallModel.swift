@@ -26,6 +26,9 @@ struct WallModel: Equatable {
         case settingsUnits
         /// Point colour: Black and the palette colours, the controller's choice outlined.
         case settingsPointColour
+        /// Family: the members and Add family member; a member's page; the controller test page;
+        /// the question before Load sample family or Delete everything.
+        case settingsFamily, settingsMember, settingsController, settingsQuestion
         /// S5 Permissions: each permission and whether it is allowed. Only shown.
         case settingsPermissions
         /// Setup guide: the two pictures the phone shows.
@@ -111,6 +114,9 @@ extension AppState {
         }
 
         switch route {
+        case .memberEdit(_?) where memberEditInSettings:
+            model.kind = .settingsMember
+
         case .memberEdit, .wizard(.welcome), .wizard(.permissions):
             model.kind = .idle
 
@@ -129,6 +135,15 @@ extension AppState {
 
         case .settings(.pointColour):
             model.kind = .settingsPointColour
+
+        case .settings(.family):
+            model.kind = .settingsFamily
+
+        case .settings(.controller):
+            model.kind = .settingsController
+
+        case .settings(.confirmSample), .settings(.confirmDelete):
+            model.kind = .settingsQuestion
 
         case .settings(.permissions):
             model.kind = .settingsPermissions

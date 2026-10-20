@@ -57,6 +57,8 @@ struct SettingsPageView: View {
         case .cameraPosition: return "Camera position"
         case .units: return "Units"
         case .pointColour: return "Point colour"
+        case .confirmSample: return "Sample family"
+        case .confirmDelete: return "Delete everything"
         case .controller: return "Controller"
         case .permissions: return "Permissions"
         }
@@ -71,6 +73,7 @@ struct SettingsPageView: View {
         case .cameraPosition: CameraPositionPage()
         case .units: UnitsPage()
         case .pointColour: PointColourPage()
+        case .confirmSample, .confirmDelete: SettingsQuestionPage()
         case .controller: ControllerPage()
         case .permissions: PermissionsPage()
         }
@@ -93,8 +96,6 @@ enum SettingsStyle {
 
 private struct SettingsList: View {
     @Environment(AppState.self) private var state
-    @State private var confirmSample = false
-    @State private var confirmDelete = false
 
     var body: some View {
         @Bindable var settings = state.settings
@@ -151,8 +152,9 @@ private struct SettingsList: View {
                         Image(systemName: "gamecontroller")
                     }
                 }
+                // Both ask first on a page of their own, so the projector asks the same question.
                 Button {
-                    confirmSample = true
+                    state.openSettingsPage(.confirmSample)
                 } label: {
                     Label {
                         Text("Load sample family")
@@ -162,7 +164,7 @@ private struct SettingsList: View {
                     }
                 }
                 Button(role: .destructive) {
-                    confirmDelete = true
+                    state.openSettingsPage(.confirmDelete)
                 } label: {
                     Label("Delete everything", systemImage: "trash")
                         .foregroundStyle(.red)
@@ -176,16 +178,6 @@ private struct SettingsList: View {
         .background(SettingsStyle.background)
         .tint(SettingsStyle.icon)
         .environment(\.colorScheme, .light)
-        .confirmationDialog("Load the sample family?", isPresented: $confirmSample, titleVisibility: .visible) {
-            Button("Replace with sample family", role: .destructive) { state.loadSampleFamily() }
-        } message: {
-            Text("Every member, record and clip on this phone is replaced by Nora and Leo.")
-        }
-        .confirmationDialog("Delete everything?", isPresented: $confirmDelete, titleVisibility: .visible) {
-            Button("Delete everything", role: .destructive) { state.deleteEverything() }
-        } message: {
-            Text("Removes every member, record and clip. Setup values are kept. This cannot be undone.")
-        }
     }
 
     /// A row with its title, one line on what it is for, and the current value.

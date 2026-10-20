@@ -10,7 +10,7 @@ final class WallModelTests: XCTestCase {
         h.state.openSettings()
         XCTAssertEqual(h.state.wallModel.kind, .settingsMenu)
         h.state.openSettingsPage(.family)
-        XCTAssertEqual(h.state.wallModel.kind, .idle, "pages without their own wall leave a faint ruler")
+        XCTAssertEqual(h.state.wallModel.kind, .settingsFamily, "every settings page has its own wall")
     }
 
     func testHomeShowsTheScreenItself() {

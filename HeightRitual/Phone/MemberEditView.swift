@@ -115,6 +115,10 @@ struct MemberEditView: View {
                 nameFocused = true
             }
         }
+        // A colour chosen with the controller on the projector shows here too.
+        .onChange(of: existing?.colorIndex) { _, new in
+            if let new { colorIndex = new }
+        }
     }
 
     private func save() {

@@ -310,8 +310,6 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.settingsHighlight, .setupGuide)
         s.handle(.right)
         XCTAssertEqual(s.settingsHighlight, .family)
-        s.handle(.confirm)
-        XCTAssertEqual(s.route, .settings(.list), "tiles without a projector page do nothing yet")
         s.handle(.knob(3))
         XCTAssertEqual(s.settingsHighlight, .units)
         s.handle(.left)
@@ -415,6 +413,117 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.wallModel.selection, Palette.color(0), "the outline takes the point colour")
         s.choosePointColour(nil)
         XCTAssertEqual(s.wallModel.selection, .white, "Black is drawn white on the wall")
+    }
+
+    func testSampleFamilyAsksFirst() {
+        let h = Harness()
+        let s = h.state
+        s.deleteEverything()
+        s.openSettings()
+        s.handle(.knob(SettingsTile.sampleFamily.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.confirmSample))
+        XCTAssertEqual(s.wallModel.kind, .settingsQuestion)
+        XCTAssertFalse(s.confirmChoice, "Cancel is chosen first")
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.list))
+        XCTAssertTrue(s.store.members.isEmpty, "Cancel loads nothing")
+        s.handle(.confirm)
+        s.handle(.right)
+        s.handle(.confirm)
+        XCTAssertEqual(s.store.members.map(\.name), ["Nora", "Leo"])
+        XCTAssertEqual(s.route, .settings(.list))
+    }
+
+    func testDeleteEverythingAsksTwice() {
+        let h = Harness()
+        let s = h.state
+        let members = s.store.members.count
+        s.openSettings()
+        s.handle(.knob(SettingsTile.deleteEverything.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.confirmDelete))
+        s.handle(.right)
+        s.handle(.confirm)
+        XCTAssertEqual(s.deleteStep, 2, "asks a second time")
+        XCTAssertFalse(s.confirmChoice, "Cancel is chosen first again")
+        XCTAssertEqual(s.store.members.count, members)
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.list))
+        XCTAssertEqual(s.store.members.count, members, "Cancel deletes nothing")
+        s.handle(.confirm)
+        s.handle(.right)
+        s.handle(.confirm)
+        s.handle(.knob(1))
+        s.handle(.confirm)
+        XCTAssertTrue(s.store.members.isEmpty)
+        XCTAssertEqual(s.route, .settings(.list))
+    }
+
+    func testControllerPageLeavesWithBackTwice() {
+        let h = Harness()
+        let s = h.state
+        s.openSettings()
+        s.handle(.knob(SettingsTile.controller.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.controller))
+        XCTAssertEqual(s.wallModel.kind, .settingsController)
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.controller), "one Back is only listed")
+        s.handle(.left)
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.controller), "Back twice must be in a row")
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.list))
+    }
+
+    func testFamilyFromTheGrid() {
+        let h = Harness()
+        let s = h.state
+        let nora = h.nora
+        let members = s.store.members.count
+        s.openSettings()
+        s.handle(.knob(SettingsTile.family.rawValue))
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .settings(.family))
+        XCTAssertEqual(s.wallModel.kind, .settingsFamily)
+        XCTAssertEqual(s.familyHighlight, 0)
+
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .memberEdit(nora.id))
+        XCTAssertEqual(s.wallModel.kind, .settingsMember)
+        XCTAssertEqual(s.memberStep, .choices)
+        s.handle(.confirm)
+        XCTAssertEqual(s.memberStep, .colour)
+        let colour = (nora.colorIndex + 1) % Palette.memberColors.count
+        s.handle(.knob(colour - nora.colorIndex % Palette.memberColors.count))
+        s.handle(.confirm)
+        XCTAssertEqual(s.store.member(nora.id)?.colorIndex, colour)
+        XCTAssertEqual(s.memberStep, .choices)
+
+        s.handle(.right)
+        s.handle(.confirm)
+        XCTAssertEqual(s.memberStep, .confirmDelete)
+        s.handle(.confirm)
+        XCTAssertEqual(s.memberStep, .choices, "Cancel is chosen first")
+        XCTAssertNotNil(s.store.member(nora.id))
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.family), "Back goes back to Family")
+
+        s.handle(.confirm)
+        s.handle(.right)
+        s.handle(.confirm)
+        s.handle(.right)
+        s.handle(.confirm)
+        XCTAssertNil(s.store.member(nora.id))
+        XCTAssertEqual(s.route, .settings(.family))
+
+        s.handle(.knob(20))
+        XCTAssertEqual(s.familyHighlight, members - 1, "the last place is Add family member")
+        s.handle(.confirm)
+        XCTAssertEqual(s.route, .addMember)
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .settings(.family), "the letter wheel goes back to Family")
     }
 
     func testFitToWallFromTheGrid() {

@@ -25,6 +25,10 @@ struct WallView: View {
                     case .settingsMenu: WallSettingsMenu()
                     case .settingsUnits: WallUnitsPage()
                     case .settingsPointColour: WallPointColourPage()
+                    case .settingsFamily: WallFamilyPage()
+                    case .settingsMember: WallMemberPage()
+                    case .settingsController: WallControllerPage()
+                    case .settingsQuestion: WallQuestionPage()
                     case .settingsPermissions: WallPermissionsPage()
                     case .settingsGuide: WallSetupGuidePage()
                     default: EmptyView()
@@ -97,7 +101,8 @@ struct WallCanvas: View {
             case .dark: drawNumber(ctx, g)
             case .cameraLines: drawCameraLines(ctx, g)
             case .screen: ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Theme.paper))
-            case .settingsMenu, .settingsUnits, .settingsPointColour, .settingsPermissions, .settingsGuide:
+            case .settingsMenu, .settingsUnits, .settingsPointColour, .settingsPermissions, .settingsGuide,
+                 .settingsFamily, .settingsMember, .settingsController, .settingsQuestion:
                 break    // views above the canvas: WallSettingsMenu and the settings pages below it
             }
         }
@@ -517,8 +522,12 @@ private struct WallChoice: Identifiable {
     let id: Int
     let title: Text
     var detail: String?
-    /// A colour dot before the title (Point colour).
+    /// A colour dot before the title (Point colour, members).
     var swatch: Color?
+    /// A symbol before the title when there is no colour dot (Add family member).
+    var systemImage: String?
+    /// Red, for an action that deletes.
+    var destructive = false
 }
 
 /// A projector settings page with options: back icon and title, the options as rows, the saved one
@@ -544,10 +553,15 @@ private struct WallChoicePage: View {
         HStack(spacing: unit * 3) {
             if let swatch = choice.swatch {
                 Circle().fill(swatch).frame(width: unit * 6, height: unit * 6)
+            } else if let systemImage = choice.systemImage {
+                Image(systemName: systemImage)
+                    .font(.system(size: unit * 4.6, weight: .semibold))
+                    .frame(width: unit * 6, height: unit * 6)
             }
             VStack(alignment: .leading, spacing: unit * 1) {
                 choice.title
                     .font(.system(size: unit * 5, weight: .semibold))
+                    .foregroundStyle(choice.destructive ? Color.red : Self.text)
                 if let detail = choice.detail {
                     Text(verbatim: detail)
                         .font(.system(size: unit * 3.6))
@@ -636,6 +650,124 @@ private struct WallPointColourPage: View {
             },
             saved: options.firstIndex(of: state.settings.accentIndex) ?? 0,
             highlighted: options.firstIndex(of: state.accentHighlight) ?? 0)
+    }
+}
+
+/// Settings > Family on the projector: the members, then Add family member. Select opens a
+/// member's page or the letter wheel; Back goes back to the grid.
+private struct WallFamilyPage: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        let members = state.store.members
+        WallChoicePage(
+            title: "Family", subtitle: "Add, rename or remove the people you measure",
+            choices: members.enumerated().map { index, member in
+                let count = state.store.records(for: member.id).count
+                return WallChoice(id: index, title: Text(verbatim: member.name),
+                                  detail: count == 1 ? "1 record" : "\(count) records",
+                                  swatch: Palette.color(member.colorIndex))
+            } + [WallChoice(id: members.count, title: Text("Add family member"), systemImage: "plus")],
+            saved: -1,
+            highlighted: min(state.familyHighlight, members.count))
+    }
+}
+
+/// A member opened from the projector's Family page: Change colour or Delete member, then the
+/// colours or the delete question. Renaming needs typing and stays on the phone.
+private struct WallMemberPage: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        if case .memberEdit(let id?) = state.route, let member = state.store.member(id) {
+            switch state.memberStep {
+            case .choices:
+                let count = state.store.records(for: member.id).count
+                WallChoicePage(
+                    title: LocalizedStringKey(member.name),
+                    subtitle: LocalizedStringKey("\(count == 1 ? "1 record" : "\(count) records"). Rename on the phone."),
+                    choices: [
+                        WallChoice(id: 0, title: Text("Change colour"), swatch: Palette.color(member.colorIndex)),
+                        WallChoice(id: 1, title: Text("Delete member"), systemImage: "trash", destructive: true),
+                    ],
+                    saved: -1, highlighted: state.memberChoice)
+            case .colour:
+                WallChoicePage(
+                    title: "Colour", subtitle: LocalizedStringKey("For \(member.name)'s card and marks"),
+                    choices: Palette.memberColors.indices.map { index in
+                        WallChoice(id: index, title: Text(verbatim: "Colour \(index + 1)"),
+                                   swatch: Palette.color(index))
+                    },
+                    saved: member.colorIndex % Palette.memberColors.count,
+                    highlighted: state.memberColourHighlight)
+            case .confirmDelete:
+                WallChoicePage(
+                    title: LocalizedStringKey("Delete \(member.name)?"),
+                    subtitle: "Their records and clips are deleted too. This cannot be undone.",
+                    choices: [
+                        WallChoice(id: 0, title: Text("Cancel")),
+                        WallChoice(id: 1, title: Text("Delete member"), systemImage: "trash", destructive: true),
+                    ],
+                    saved: -1, highlighted: state.confirmChoice ? 1 : 0)
+            }
+        }
+    }
+}
+
+/// Load sample family or Delete everything on the projector: the same question as the phone,
+/// Cancel chosen first. Delete everything asks twice.
+private struct WallQuestionPage: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        if let question = SettingsQuestion.current(state) {
+            WallChoicePage(
+                title: LocalizedStringKey(question.title), subtitle: LocalizedStringKey(question.message),
+                choices: [
+                    WallChoice(id: 0, title: Text("Cancel")),
+                    WallChoice(id: 1, title: Text(verbatim: question.action),
+                               systemImage: state.route == .settings(.confirmDelete) ? "trash" : "person.3",
+                               destructive: state.route == .settings(.confirmDelete)),
+                ],
+                saved: -1, highlighted: state.confirmChoice ? 1 : 0)
+        }
+    }
+}
+
+/// Settings > Controller on the projector: whether it is connected, the box with each control
+/// that has been received in colour, and a tick per control. Controls are only listed here, so
+/// the page is left with Back twice in a row.
+private struct WallControllerPage: View {
+    @Environment(AppState.self) private var state
+    private static let text = Color(red: 0.08, green: 0.10, blue: 0.08)
+
+    var body: some View {
+        let tested = state.testedControls
+        let status = state.controllerStatus == .connected ? L("Connected") : state.controllerStatus.label
+        WallSettingsPage(title: "Controller", subtitle: LocalizedStringKey(status)) { unit in
+            let scale = unit * 70 / 275
+            ControllerDiagram(active: Set(tested.compactMap(\.control)), interactive: false)
+                .scaleEffect(scale)
+                .frame(width: 275 * scale, height: 195 * scale)
+                .frame(maxWidth: .infinity)
+            VStack(alignment: .leading, spacing: unit * 1.8) {
+                ForEach(ControlCheck.allCases, id: \.self) { check in
+                    HStack(spacing: unit * 2.5) {
+                        Image(systemName: tested.contains(check) ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(tested.contains(check) ? Theme.success : Self.text.opacity(0.4))
+                        Text(verbatim: check.title)
+                    }
+                    .font(.system(size: unit * 4, weight: .semibold))
+                }
+            }
+            .foregroundStyle(Self.text)
+            .padding(unit * 4)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(SettingsStyle.row, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
+            Text("Press each control to test it. Press Back twice to go back.")
+                .font(.system(size: unit * 3.4))
+                .foregroundStyle(.white.opacity(0.75))
+        }
     }
 }
 

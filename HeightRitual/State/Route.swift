@@ -13,27 +13,39 @@ enum HeightState: Equatable {
 
 enum SettingsPage: Equatable {
     case list, family, setupGuide, fitToWall, cameraPosition, units, pointColour, controller, permissions
+    /// Load sample family and Delete everything ask first, on the phone and the projector.
+    case confirmSample, confirmDelete
 }
 
 /// What the controller moves through on the projector's settings grid, in order: Setup guide
-/// (beside the title), then the tiles row by row. Setup guide, Fit to wall, Camera position,
-/// Units, Point colour and Permissions open from the grid; Sound switches on the grid itself.
+/// (beside the title), then the tiles row by row. Every tile opens a page from the grid, except
+/// Sound, which switches on the grid itself.
 enum SettingsTile: Int, CaseIterable {
     case setupGuide, family, fitToWall, cameraPosition, units, pointColour, sound,
          controller, permissions, sampleFamily, deleteEverything
 
-    /// The page Select opens from the projector grid; nil until that page exists on the projector.
+    /// The page Select opens from the projector grid; nil for Sound, which switches on its tile.
     var page: SettingsPage? {
         switch self {
         case .setupGuide: return .setupGuide
+        case .family: return .family
         case .fitToWall: return .fitToWall
         case .cameraPosition: return .cameraPosition
         case .units: return .units
         case .pointColour: return .pointColour
+        case .sound: return nil
+        case .controller: return .controller
         case .permissions: return .permissions
-        default: return nil
+        case .sampleFamily: return .confirmSample
+        case .deleteEverything: return .confirmDelete
         }
     }
+}
+
+/// A family member opened from the projector's Family page: its choices, then the colour list or
+/// the delete question.
+enum MemberStep: Equatable {
+    case choices, colour, confirmDelete
 }
 
 /// First-start wizard: what the app is, then S5, S2, S3 in order.

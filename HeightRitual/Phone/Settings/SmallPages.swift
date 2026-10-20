@@ -73,7 +73,7 @@ struct ControllerPage: View {
             } header: {
                 Text("Received")
             } footer: {
-                Text("Use any control on the box. While this page is open, controls are only listed here.")
+                Text("Use any control on the box. While this page is open, controls are only listed here; Back twice on the box goes back.")
             }
 
             Section {
@@ -103,12 +103,7 @@ struct ControllerPage: View {
     }
 
     /// What the box has sent since the list was cleared, from the raw packets (SPEC 6).
-    private var testedControls: Set<ControlCheck> {
-        Set(state.controlLog.compactMap { entry in
-            guard entry.note == nil, entry.bytes.count >= 2 else { return nil }
-            return ControlCheck(id: entry.bytes[0], value: Int8(bitPattern: entry.bytes[1]))
-        })
-    }
+    private var testedControls: Set<ControlCheck> { state.testedControls }
 
     private func lightButton(_ title: LocalizedStringKey, _ recording: LightState.Recording) -> some View {
         Button(title) { state.testLight(recording) }
@@ -239,7 +234,7 @@ struct PointColourPage: View {
 }
 
 /// The six things to try on the box: four buttons and the knob in both directions.
-private enum ControlCheck: CaseIterable {
+enum ControlCheck: CaseIterable {
     case back, knobClockwise, knobCounterclockwise, left, confirm, right
 
     init?(id: UInt8, value: Int8) {
@@ -272,6 +267,68 @@ private enum ControlCheck: CaseIterable {
         case .left: return .left
         case .confirm: return .confirm
         case .right: return .right
+        }
+    }
+}
+
+extension AppState {
+    /// The controls the box has sent since the list was last cleared.
+    var testedControls: Set<ControlCheck> {
+        Set(controlLog.compactMap { entry in
+            guard entry.note == nil, entry.bytes.count >= 2 else { return nil }
+            return ControlCheck(id: entry.bytes[0], value: Int8(bitPattern: entry.bytes[1]))
+        })
+    }
+}
+
+/// What Load sample family and Delete everything ask, on the phone and the projector.
+struct SettingsQuestion {
+    let title: String
+    let message: String
+    let action: String
+
+    @MainActor static func current(_ state: AppState) -> SettingsQuestion? {
+        switch state.route {
+        case .settings(.confirmSample):
+            return SettingsQuestion(
+                title: "Load the sample family?",
+                message: "Every member, record and clip on this phone is replaced by Nora and Leo.",
+                action: "Replace with sample family")
+        case .settings(.confirmDelete) where state.deleteStep == 1:
+            return SettingsQuestion(
+                title: "Delete everything?",
+                message: "Removes every member, record and clip. Setup values are kept.",
+                action: "Delete everything")
+        case .settings(.confirmDelete):
+            return SettingsQuestion(
+                title: "Are you sure?",
+                message: "This cannot be undone. Every member, record and clip is deleted.",
+                action: "Delete everything")
+        default:
+            return nil
+        }
+    }
+}
+
+/// Settings > Load sample family or Delete everything on the phone: the question, the action and
+/// Cancel. The projector asks the same; the answer is the same from either.
+struct SettingsQuestionPage: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        if let question = SettingsQuestion.current(state) {
+            Form {
+                Section {
+                    Text(verbatim: question.title).font(.headline)
+                    Text(verbatim: question.message).foregroundStyle(.secondary)
+                }
+                Section {
+                    Button(role: .destructive) { state.answerQuestion(true) } label: {
+                        Text(verbatim: question.action)
+                    }
+                    Button("Cancel") { state.answerQuestion(false) }
+                }
+            }
         }
     }
 }

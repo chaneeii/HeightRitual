@@ -189,15 +189,17 @@ final class AppState {
         currentRecords.indices.contains(recordIndex) ? currentRecords[recordIndex] : nil
     }
 
-    /// Cards on the Home wheel: every member, then the Add card, then the Settings card (a gear),
-    /// so Settings can be opened with the controller.
-    var homeCardCount: Int { store.members.count + 2 }
+    /// Cards on the Home wheel: every member, then the Add card. Settings opens with Back on Home.
+    var homeCardCount: Int { store.members.count + 1 }
 
     /// The highlighted Home card is the Add card.
     var highlightsAddCard: Bool { highlight == store.members.count }
 
-    /// The highlighted Home card is the Settings card, after Add.
-    var highlightsSettingsCard: Bool { highlight >= store.members.count + 1 }
+    /// Back on Home opens Settings, but not right after arriving on Home: someone pressing Back
+    /// a few times to get home should not land in Settings.
+    private(set) var homeBackReady = true
+    @ObservationIgnored private var homeBackTimer: ScheduledTask?
+    static let homeBackDelay = 1.0
 
     /// The member on the highlighted Home card.
     var highlightedMember: Member? {
@@ -280,6 +282,7 @@ final class AppState {
         case .left: moveHighlight(by: -1)
         case .right: moveHighlight(by: 1)
         case .confirm: openHighlighted()
+        case .cancel: if homeBackReady { openSettings() }
         default: break
         }
     }
@@ -423,6 +426,11 @@ final class AppState {
         let onWall: (Route) -> Bool = { if case .record = $0 { return true }; return $0 == .memoryWall }
         if onWall(previous) && !onWall(next) { wallPlayer.stop() }
 
+        if next == .home && previous != .home {
+            homeBackReady = false
+            homeBackTimer?.cancel()
+            homeBackTimer = scheduler.after(Self.homeBackDelay) { [weak self] in self?.homeBackReady = true }
+        }
         if next == .home {
             highlight = memberID.flatMap { id in store.members.firstIndex { $0.id == id } }
                 ?? min(highlight, store.members.count)
@@ -450,10 +458,6 @@ final class AppState {
     }
 
     private func openHighlighted() {
-        if highlightsSettingsCard {
-            confirmThen { [weak self] in self?.openSettings() }
-            return
-        }
         if highlightsAddCard {
             confirmThen { [weak self] in self?.openAddMember() }
             return

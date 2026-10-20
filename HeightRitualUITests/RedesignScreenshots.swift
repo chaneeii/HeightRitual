@@ -42,6 +42,20 @@ final class RedesignScreenshots: XCTestCase {
         debug()
     }
 
+    /// Back on Home opens Settings on the wall; Back on the grid returns to Home.
+    func testCaptureSettingsEntry() {
+        app.launch()
+        if app.buttons["Set up later"].waitForExistence(timeout: 3) { app.buttons["Set up later"].tap() }
+        pause(1.5)
+        save("S0-home-phone")
+        debug(); save("S0-home-wall")
+        pad("Right"); pad("Right"); pad("Right"); pause(0.8); save("S0-home-wall-last-card")
+        pad("Back"); pause(1.2); save("S1-settings-wall")
+        pad("Back"); pause(0.3); save("S2-home-wall-just-back")
+        pause(1.2); save("S3-home-wall-ready")
+        debug()
+    }
+
     // MARK: Helpers
 
     private func debug() {

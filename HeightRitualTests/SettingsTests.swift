@@ -127,7 +127,7 @@ final class SettingsTests: XCTestCase {
 
         s.handle(.cancel)
         XCTAssertEqual(s.route, .home)
-        XCTAssertEqual(s.homeCardCount, 2, "only the Add card and the Settings card")
+        XCTAssertEqual(s.homeCardCount, 1, "only the Add card")
 
         s.loadSampleFamily()
         XCTAssertEqual(s.store.members.map(\.name), ["Nora", "Leo"])

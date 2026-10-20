@@ -32,7 +32,7 @@ struct MemberMenuOverlay: View {
                     .position(x: center.x + cardSize.width / 2 - 54 + 32, y: center.y + cardSize.height / 2 - 33 + 32)
 
                 caption(choice, name: name)
-                    .font(Theme.subtitle(33.3))
+                    .font(Theme.note(34))
                     .foregroundStyle(Theme.paper)
                     .position(x: w / 2, y: 766.7)
                     .id(choice)
@@ -46,8 +46,8 @@ struct MemberMenuOverlay: View {
                     .position(x: 24 + 37.7, y: 28 + 37.7)
             } else {
                 PhoneAppBar(back: .filled, onDark: true, onBack: { state.closeMemberMenu() },
-                            onGear: { state.openMemberEdit(state.currentMember?.id) },
-                            gearLabel: Text("Edit \(name)"))
+                            trailing: .edit(label: Text("Edit \(name)"),
+                                            action: { state.openMemberEdit(state.currentMember?.id) }))
             }
         }
         .frame(width: surface.canvas.width, height: surface.canvas.height)

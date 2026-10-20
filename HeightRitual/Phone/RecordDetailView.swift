@@ -21,37 +21,42 @@ struct RecordDetailView: View {
         let index = records.firstIndex { $0.id == record.id } ?? 0
         let previous = index > 0 ? records[index - 1] : nil
 
-        return VStack(spacing: 16) {
+        return VStack(spacing: 18) {
             if let url = state.clipURL(record) {
                 LoopingVideo(url: url)
                     .aspectRatio(CGFloat(state.settings.showBackground ? (record.rawAspect ?? 9.0 / 16.0)
                                                                         : (record.clipAspect ?? 9.0 / 16.0)),
                                  contentMode: .fit)
-                    .background(Color.black)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .frame(maxWidth: .infinity)
+                    .background(Theme.ink)
+                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                     .frame(maxHeight: .infinity)
             } else {
-                ContentUnavailableView {
-                    Label("No clip", systemImage: "figure.stand")
-                } description: {
+                VStack(spacing: 10) {
+                    Image(systemName: "figure.stand").font(.system(size: 44, weight: .light))
+                    Text("No clip").font(Theme.label(17))
                     Text("Sample records have no clip; the wall shows a soft outline.")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Theme.hint)
+                        .multilineTextAlignment(.center)
                 }
+                .foregroundStyle(Theme.ink)
+                .padding(24)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Theme.choice, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
             }
 
-            VStack(spacing: 4) {
+            VStack(spacing: 2) {
                 Text(verbatim: HeightFormatter.text(record.heightMM, unit: unit))
-                    .font(.system(size: 48, weight: .semibold, design: .rounded).monospacedDigit())
+                    .font(Theme.field(52).monospacedDigit())
+                    .foregroundStyle(Theme.ink)
                     .contentTransition(.numericText())
                     .animation(.snappy, value: record.heightMM)
                 Text(previous.map { HeightFormatter.difference(record.heightMM - $0.heightMM, unit: unit) }
                      ?? L("First record"))
-                    .foregroundStyle(.secondary)
+                    .font(Theme.subtitle(18))
+                    .foregroundStyle(Theme.hint)
             }
-
-            DatePicker("Date", selection: Binding(get: { record.date },
-                                                  set: { state.changeDate(of: record.id, to: $0) }),
-                       in: ...Date.now, displayedComponents: .date)
-                .environment(\.locale, .english)
 
             HStack(spacing: 8) {
                 step(unit == .cm ? "-1" : "-1 in") { state.stepHeight(of: record.id, by: -1, coarse: true) }
@@ -60,26 +65,51 @@ struct RecordDetailView: View {
                 step(unit == .cm ? "+1" : "+1 in") { state.stepHeight(of: record.id, by: 1, coarse: true) }
             }
 
-            BigButton(title: "Delete record", role: .destructive, tint: .red) { confirmDelete = true }
-                .confirmationDialog("Delete this record?", isPresented: $confirmDelete, titleVisibility: .visible) {
-                    Button("Delete record", role: .destructive) { state.deleteRecord(record.id) }
-                } message: {
-                    Text("The clip is deleted too. This cannot be undone.")
-                }
+            HStack {
+                Text("Date").font(Theme.label(17)).foregroundStyle(Theme.ink)
+                Spacer()
+                DatePicker("Date", selection: Binding(get: { record.date },
+                                                      set: { state.changeDate(of: record.id, to: $0) }),
+                           in: ...Date.now, displayedComponents: .date)
+                    .labelsHidden()
+                    .environment(\.locale, .english)
+            }
+            .padding(.leading, 18)
+            .padding(.trailing, 8)
+            .frame(minHeight: 56)
+            .background(Theme.choice, in: Capsule())
+
+            Button { confirmDelete = true } label: {
+                Text("Delete record")
+                    .font(Theme.label(17))
+                    .foregroundStyle(Theme.destructive)
+                    .frame(maxWidth: .infinity, minHeight: 56)
+                    .background(Theme.choice, in: Capsule())
+            }
+            .buttonStyle(PressStyle())
+            .confirmationDialog("Delete this record?", isPresented: $confirmDelete, titleVisibility: .visible) {
+                Button("Delete record", role: .destructive) { state.deleteRecord(record.id) }
+            } message: {
+                Text("The clip is deleted too. This cannot be undone.")
+            }
         }
-        .padding()
+        .padding(.horizontal, 16)
+        .padding(.bottom, 12)
         .readableColumn()
+        .background(Theme.paper)
         .navigationTitle(record.date.monthYear)
         .navigationBarTitleDisplayMode(.inline)
-        .screenChrome()
+        .screenChrome(statusInContent: true)
     }
 
     private func step(_ label: String, _ action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(verbatim: label)
-                .font(.headline.monospacedDigit())
-                .frame(maxWidth: .infinity, minHeight: 34)
+                .font(Theme.label(18).monospacedDigit())
+                .foregroundStyle(Theme.ink)
+                .frame(maxWidth: .infinity, minHeight: 48)
+                .background(Theme.choice, in: Capsule())
         }
-        .buttonStyle(.bordered)
+        .buttonStyle(PressStyle())
     }
 }

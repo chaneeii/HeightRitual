@@ -11,7 +11,7 @@ struct HomeScreen: View {
                 MemberMenuOverlay(surface: .phone)
                     .transition(.opacity)
             } else {
-                PhoneAppBar()
+                PhoneAppBar(trailing: .settings)
             }
         }
         .ignoresSafeArea()

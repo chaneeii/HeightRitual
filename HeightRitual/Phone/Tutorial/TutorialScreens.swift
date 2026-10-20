@@ -108,14 +108,15 @@ struct TutorialContent: View {
                 .position(x: w / 2, y: 380)
 
             if step != .ready {
+                ControllerDiagram(active: active, learned: state.tutorialLearned, interactive: !onWall)
+                    .position(x: w / 2, y: 660)
+                // The instruction sits under the box, next to the controls it names.
                 hint
                     .font(Theme.subtitle(19))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Theme.ink)
                     .frame(width: w - 32)
-                    .position(x: w / 2, y: 572)
-                ControllerDiagram(active: active, learned: state.tutorialLearned, interactive: !onWall)
-                    .position(x: w / 2, y: 697)
+                    .position(x: w / 2, y: 792)
             } else {
                 Button { state.handle(.confirm) } label: {
                     Text("Press \(inlineIcon(.confirm, size: 18)) to begin")
@@ -131,10 +132,11 @@ struct TutorialContent: View {
             }
 
             if let lesson = state.tutorialToast {
-                LessonToast(lesson: lesson)
+                LessonToast(lesson: lesson, learnedCount: state.tutorialLearned.count)
                     .id(lesson)
-                    .position(x: w / 2, y: 520)
-                    .transition(.scale(scale: 0.6).combined(with: .opacity))
+                    .frame(width: w - 32)
+                    .position(x: w / 2, y: onWall ? 60 : 122)
+                    .transition(.move(edge: .top).combined(with: .opacity))
             }
 
             if !onWall {
@@ -232,32 +234,23 @@ struct TutorialContent: View {
         }
     }
 
-    /// Like a page of a height chart: a margin with two pencil lines, then what the app does.
+    /// What the app does: an icon and a line of text each, nothing behind them.
     private var welcomeList: some View {
-        HStack(spacing: 0) {
-            HStack(spacing: 8) {
-                Rectangle().fill(Theme.card).frame(width: 26)
-                Rectangle().fill(Theme.track).frame(width: 1.5)
-                Rectangle().fill(Theme.track).frame(width: 1.5)
-            }
-            VStack(alignment: .leading, spacing: 14) {
-                row("video", "Film a few seconds")
-                row("ruler", "Check the height")
-                row("clock.arrow.circlepath", "Look back, life-size")
-                row("lock", "Stays on this phone")
-            }
-            .padding(.leading, 24)
-            Spacer(minLength: 0)
-            Rectangle().fill(Theme.track).frame(width: 1)
+        VStack(alignment: .leading, spacing: 22) {
+            row("video", "Film a few seconds")
+            row("ruler", "Check the height")
+            row("clock.arrow.circlepath", "Look back, life-size")
+            row("lock", "Stays on this phone")
         }
         .frame(width: 330, height: 260)
     }
 
     private func row(_ symbol: String, _ text: LocalizedStringKey) -> some View {
-        HStack(spacing: 12) {
-            Circle().fill(Theme.card).frame(width: 34, height: 34)
-                .overlay(Image(systemName: symbol).font(.system(size: 15, weight: .medium)))
-            Text(text).font(.system(size: 17, weight: .medium))
+        HStack(spacing: 16) {
+            Image(systemName: symbol)
+                .font(.system(size: 22, weight: .medium))
+                .frame(width: 32)
+            Text(text).font(.system(size: 19, weight: .medium))
         }
         .foregroundStyle(Theme.ink)
     }
@@ -425,22 +418,38 @@ struct TutorialContent: View {
     }
 }
 
-/// "You learned Confirm!": a little toast the first time a control is used.
+/// "You learned Confirm!": a banner that drops in at the top the first time a control is used,
+/// with the control in its colour and how many of the four are learned.
 private struct LessonToast: View {
     let lesson: TutorialLesson
+    let learnedCount: Int
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 14) {
             icon
-            Text(message)
-                .font(Theme.label(17))
-                .foregroundStyle(Theme.paper)
+                .frame(width: 52, height: 52)
+                .background(Theme.paper.opacity(0.12), in: Circle())
+            VStack(alignment: .leading, spacing: 3) {
+                Text(message)
+                    .font(Theme.label(19))
+                    .foregroundStyle(Theme.paper)
+                Text("\(min(learnedCount, TutorialLesson.allCases.count)) of \(TutorialLesson.allCases.count) controls learned")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Theme.paper.opacity(0.6))
+            }
+            Spacer(minLength: 0)
+            HStack(spacing: 5) {
+                ForEach(0..<TutorialLesson.allCases.count, id: \.self) { index in
+                    Circle()
+                        .fill(index < learnedCount ? Theme.success : Theme.paper.opacity(0.25))
+                        .frame(width: 8, height: 8)
+                }
+            }
         }
-        .padding(.leading, 10)
-        .padding(.trailing, 18)
-        .padding(.vertical, 9)
-        .background(Theme.ink, in: Capsule())
-        .shadow(color: .black.opacity(0.2), radius: 10, y: 4)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Theme.ink, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .shadow(color: .black.opacity(0.25), radius: 16, y: 8)
         .accessibilityElement(children: .combine)
     }
 
@@ -455,15 +464,15 @@ private struct LessonToast: View {
 
     @ViewBuilder private var icon: some View {
         switch lesson {
-        case .confirm: ControlIcon(glyph: .confirm, size: 26, confirmed: true)
-        case .knob: ControlIcon(glyph: .knob, size: 26).foregroundStyle(Theme.paper)
+        case .confirm: ControlIcon(glyph: .confirm, size: 30, confirmed: true)
+        case .knob: ControlIcon(glyph: .knob, size: 32).foregroundStyle(Theme.paper)
         case .arrows:
-            HStack(spacing: 2) {
-                ControlIcon(glyph: .left, size: 22)
-                ControlIcon(glyph: .right, size: 22)
+            HStack(spacing: 1) {
+                ControlIcon(glyph: .left, size: 20)
+                ControlIcon(glyph: .right, size: 20)
             }
             .foregroundStyle(Theme.controllerArrow)
-        case .back: ControlIcon(glyph: .back, size: 26).foregroundStyle(Theme.controllerBack)
+        case .back: ControlIcon(glyph: .back, size: 28).foregroundStyle(Theme.controllerBack)
         }
     }
 }

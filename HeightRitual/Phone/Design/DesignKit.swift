@@ -79,9 +79,21 @@ struct ConfirmCheck: View {
 
     var body: some View {
         ZStack {
-            ControlIcon(glyph: .confirmOutline, size: size)
-                .foregroundStyle(tint ?? Theme.success)
-                .opacity(confirmed ? 0 : 1)
+            Group {
+                if let tint {
+                    // A lighter outline where the check is only a hint (the member menu).
+                    ZStack {
+                        Circle().stroke(tint, lineWidth: size * 0.035).padding(size * 0.06)
+                        CheckShape()
+                            .stroke(tint, style: StrokeStyle(lineWidth: size * 0.05, lineCap: .round, lineJoin: .round))
+                            .frame(width: size * 0.4, height: size * 0.29)
+                    }
+                    .frame(width: size, height: size)
+                } else {
+                    ControlIcon(glyph: .confirmOutline, size: size).foregroundStyle(Theme.success)
+                }
+            }
+            .opacity(confirmed ? 0 : 1)
             Group {
                 if let tint {
                     ControlIcon(glyph: .confirm, size: size).foregroundStyle(tint)
@@ -130,17 +142,16 @@ struct DebugWallButton: View {
     }
 }
 
-/// The phone's own bar in the redesign: optional back on the left, debug and Settings on the right.
-/// Drawn inside a phone `DesignCanvas`, at Figma's position under the status bar.
+/// The phone's own bar in the redesign: optional back on the left, debug and one action on the
+/// right. Drawn inside a phone `DesignCanvas`, at Figma's position under the status bar.
 struct PhoneAppBar: View {
     enum Back { case none, arrow, filled }
+    /// Settings only on Home; a pencil to edit the member on the member menu; nothing elsewhere.
+    enum Trailing { case none, settings, edit(label: Text, action: () -> Void) }
     var back: Back = .none
     var onDark = false
     var onBack: () -> Void = {}
-    /// The gear opens app Settings unless a screen gives it its own job (the member menu: edit
-    /// this member).
-    var onGear: (() -> Void)?
-    var gearLabel: Text = Text("Settings")
+    var trailing: Trailing = .none
     @Environment(AppState.self) private var state
 
     var body: some View {
@@ -170,19 +181,32 @@ struct PhoneAppBar: View {
             }
             Spacer()
             DebugWallButton(color: color)
-            Button {
-                if let onGear { onGear() } else { state.openSettings() }
-            } label: {
-                Image("Gear")
-                    .resizable()
-                    .scaledToFit()
-                    .foregroundStyle(color)
-                    .frame(width: 30, height: 30)
-                    .frame(width: 44, height: 44)
-                    .contentShape(Rectangle())
+            switch trailing {
+            case .none:
+                EmptyView()
+            case .settings:
+                Button { state.openSettings() } label: {
+                    Image("Gear")
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundStyle(color)
+                        .frame(width: 30, height: 30)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(PressStyle())
+                .accessibilityLabel("Settings")
+            case .edit(let label, let action):
+                Button(action: action) {
+                    Image(systemName: "pencil")
+                        .font(.system(size: 24, weight: .medium))
+                        .foregroundStyle(color)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(PressStyle())
+                .accessibilityLabel(label)
             }
-            .buttonStyle(PressStyle())
-            .accessibilityLabel(gearLabel)
         }
         .padding(.horizontal, 14)
         .frame(width: Surface.phone.canvas.width, height: 44)

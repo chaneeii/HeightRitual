@@ -35,8 +35,8 @@ enum Theme {
     static let hint = Color(white: 0x6B / 255)
     /// The text cursor in the name field.
     @MainActor static var caret: Color { accent }
-    /// The selection on the member menu (Record or Lookback): the point colour, like every border.
-    @MainActor static var menuHighlight: Color { accent }
+    /// The selection on the member menu (Record or Lookback): a blue of its own.
+    static let menuHighlight = Palette.color(2)
     /// The outline to stand in and the foot marks, on the camera picture and the wall.
     static let guide = Color(white: 0.88)
     /// Record (the one coloured control: it films).
@@ -72,6 +72,8 @@ enum Theme {
     static func subtitle(_ size: CGFloat) -> Font { .system(size: size, weight: .light) }
     static func cardName(_ size: CGFloat) -> Font { .system(size: size, weight: .bold) }
     static func label(_ size: CGFloat) -> Font { .system(size: size, weight: .semibold) }
+    /// A warmer line under a choice ("Record today's height", "Watch Nora grow"): serif italic.
+    static func note(_ size: CGFloat) -> Font { .system(size: size, weight: .regular, design: .serif).italic() }
     static func key(_ size: CGFloat) -> Font { .system(size: size, weight: .medium) }
     static func field(_ size: CGFloat) -> Font { .system(size: size, weight: .bold) }
 }

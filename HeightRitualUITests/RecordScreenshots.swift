@@ -36,6 +36,7 @@ final class RecordScreenshots: XCTestCase {
         debug(); save("R2-lookback-wall")
         pad("Left"); pause(1.2); save("R2-lookback-wall-moved")
         debug()
+        tap(201, 437); pause(1.5); save("R3-record-phone")
     }
 
     private func debug() {

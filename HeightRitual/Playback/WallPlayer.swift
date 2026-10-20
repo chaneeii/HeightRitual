@@ -1,7 +1,7 @@
 import AVFoundation
 
 /// The one player for clips on the wall (SPEC 9). The projector and the phone's wall copy each
-/// show it in their own AVPlayerLayer. A clip plays once and holds its last frame.
+/// show it in their own AVPlayerLayer. A clip loops until another one is chosen.
 ///
 /// Not yet run on a device: alpha HEVC over the wall drawing, and two layers on one player.
 @MainActor
@@ -11,9 +11,18 @@ final class WallPlayer {
     private var soundURL: URL?
 
     init() {
-        player.actionAtItemEnd = .pause
+        // Lookback loops each clip until another record is chosen.
+        player.actionAtItemEnd = .none
         player.isMuted = true
         AudioRoute.start()
+        NotificationCenter.default.addObserver(forName: AVPlayerItem.didPlayToEndTimeNotification, object: nil,
+                                               queue: .main) { [weak self] note in
+            MainActor.assumeIsolated {
+                guard let self, let item = note.object as? AVPlayerItem, item === self.player.currentItem else { return }
+                self.player.seek(to: .zero)
+                self.player.play()
+            }
+        }
     }
 
     /// Plays `url` from the start; nil clears the picture (records without a clip).

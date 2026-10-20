@@ -160,7 +160,7 @@ The controller only reports what was used. The app decides what it means.
 
 | Screen | Knob | Left / Right | Confirm | Back |
 |---|---|---|---|---|
-| Home wheel | Turn the wheel | Previous / next member | Open the member menu | |
+| Home wheel | Turn the wheel (members, then Add, then the Settings gear) | Previous / next card | Open the member menu, the letter wheel or Settings | |
 | Member menu | Record or Lookback | Record / Lookback | Choose | Close the menu |
 | Add member (letter wheel) | Move through the keys | Previous / next key | Press the key (a letter, delete or done) | Back to home |
 | Film: ready | | | Start filming (3-2-1, then 5 s) | Back to the member menu |

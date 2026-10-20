@@ -189,11 +189,15 @@ final class AppState {
         currentRecords.indices.contains(recordIndex) ? currentRecords[recordIndex] : nil
     }
 
-    /// Cards on the Home wheel: every member, then the Add card.
-    var homeCardCount: Int { store.members.count + 1 }
+    /// Cards on the Home wheel: every member, then the Add card, then the Settings card (a gear),
+    /// so Settings can be opened with the controller.
+    var homeCardCount: Int { store.members.count + 2 }
 
     /// The highlighted Home card is the Add card.
-    var highlightsAddCard: Bool { highlight >= store.members.count }
+    var highlightsAddCard: Bool { highlight == store.members.count }
+
+    /// The highlighted Home card is the Settings card, after Add.
+    var highlightsSettingsCard: Bool { highlight >= store.members.count + 1 }
 
     /// The member on the highlighted Home card.
     var highlightedMember: Member? {
@@ -446,6 +450,10 @@ final class AppState {
     }
 
     private func openHighlighted() {
+        if highlightsSettingsCard {
+            confirmThen { [weak self] in self?.openSettings() }
+            return
+        }
         if highlightsAddCard {
             confirmThen { [weak self] in self?.openAddMember() }
             return

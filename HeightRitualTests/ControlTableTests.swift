@@ -6,17 +6,19 @@ import XCTest
 final class ControlTableTests: XCTestCase {
 
     // Row: H, the Home wheel — knob and Left / Right turn it, Confirm opens the card after the
-    // check has turned green. The Add card comes last.
+    // check has turned green. The Add card comes after the members, then the Settings card.
     func testHomeWheel() {
         let h = Harness()
         let s = h.state
 
         XCTAssertEqual(s.route, .home, "the app opens on Home")
-        XCTAssertEqual(s.homeCardCount, 3, "Nora, Leo and the Add card")
+        XCTAssertEqual(s.homeCardCount, 4, "Nora, Leo, the Add card and the Settings card")
         s.handle(.knob(1))
         XCTAssertEqual(s.highlight, 1)
         s.handle(.knob(5))
-        XCTAssertEqual(s.highlight, 2, "stops at the Add card")
+        XCTAssertEqual(s.highlight, 3, "stops at the Settings card")
+        XCTAssertTrue(s.highlightsSettingsCard)
+        s.handle(.left)
         XCTAssertTrue(s.highlightsAddCard)
         s.handle(.left)
         XCTAssertEqual(s.highlight, 1)
@@ -375,6 +377,24 @@ final class ControlTableTests: XCTestCase {
         s.handle(.cancel)
         XCTAssertEqual(s.route, .settings(.list))
         XCTAssertEqual(s.settingsHighlight, .cameraPosition)
+    }
+
+    func testSettingsCardOnHome() {
+        let h = Harness()
+        let s = h.state
+        XCTAssertEqual(s.route, .home)
+        let members = s.store.members.count
+        s.handle(.knob(members))
+        XCTAssertTrue(s.highlightsAddCard)
+        s.handle(.right)
+        XCTAssertTrue(s.highlightsSettingsCard, "the gear comes after Add")
+        s.handle(.right)
+        XCTAssertTrue(s.highlightsSettingsCard, "and is the last card")
+        h.confirm()
+        XCTAssertEqual(s.route, .settings(.list))
+        XCTAssertEqual(s.wallModel.kind, .settingsMenu)
+        s.handle(.cancel)
+        XCTAssertEqual(s.route, .home, "Back on the grid returns to Home")
     }
 
     func testSoundFromTheGrid() {

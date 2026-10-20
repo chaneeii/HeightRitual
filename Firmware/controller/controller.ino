@@ -23,8 +23,8 @@
 //   23 Back           1
 // No light: the box has no LED, so there is no light characteristic (the app skips it).
 
-// How the knob is read: each time CLK falls, DT gives the direction (one step per click).
-// CLK has to hold its new level this long before it counts, so contact bounce is ignored.
+// How the knob is read: whichever of CLK and DT moves first gives the direction (one step per
+// click). Both pins have to rest this long before a click counts, so contact bounce is ignored.
 #define KNOB_SETTLE_US 2000
 // Print every change of CLK or DT with the time in microseconds, to see what the knob sends: 1 = on
 #define KNOB_RAW_DEBUG 0
@@ -94,44 +94,52 @@ bool pressed(Button& b) {
   return false;
 }
 
-// ---- Knob: CLK falling edge, DT gives the direction ----
-// The box's knob moves DT only about 0.25 ms after CLK, too quick for loop(): an interrupt on
-// CLK reads DT within microseconds of the edge. Only the first edge after a quiet CLK counts;
-// the bounces after it must not overwrite the direction.
+// ---- Knob: which pin moves first ----
+// On the box's knob CLK and DT both change on every click, often within a fraction of a
+// millisecond; the one that moves first gives the direction (CLK first: clockwise). Both pins
+// have an interrupt. The first edge after a quiet knob is remembered, and once both pins have
+// rested for KNOB_SETTLE_US at the same level the click counts. Bounces never change the order.
 long encCount = 0;
-bool clkStable;
-volatile bool dtAtEdge;
-volatile unsigned long clkEdgeAt = 0;
+volatile uint8_t firstPin = 0;          // 1: CLK moved first, 2: DT moved first
+volatile unsigned long lastEdgeAt = 0;
+int restLevel = -1;                     // the level both pins rested at after the last click
 
 void IRAM_ATTR onClk() {
   unsigned long t = micros();
-  if (t - clkEdgeAt >= KNOB_SETTLE_US) dtAtEdge = digitalRead(PIN_ENC_B);
-  clkEdgeAt = t;
+  if (t - lastEdgeAt >= KNOB_SETTLE_US) firstPin = 1;
+  lastEdgeAt = t;
+}
+
+void IRAM_ATTR onDt() {
+  unsigned long t = micros();
+  if (t - lastEdgeAt >= KNOB_SETTLE_US) firstPin = 2;
+  lastEdgeAt = t;
 }
 
 void readKnob() {
   bool clk = digitalRead(PIN_ENC_A);
+  bool dt = digitalRead(PIN_ENC_B);
 #if SERIAL_DEBUG && KNOB_RAW_DEBUG
   static int rawClk = -1, rawDt = -1;
-  int dtNow = digitalRead(PIN_ENC_B);
-  if (clk != rawClk || dtNow != rawDt) {
-    Serial.printf("[KNOB] %10lu us  CLK %d  DT %d\n", micros(), clk, dtNow);
+  if (clk != rawClk || dt != rawDt) {
+    Serial.printf("[KNOB] %10lu us  CLK %d  DT %d\n", micros(), clk, dt);
     rawClk = clk;
-    rawDt = dtNow;
+    rawDt = dt;
   }
 #endif
   noInterrupts();
-  unsigned long edgeAt = clkEdgeAt;
-  bool dt = dtAtEdge;
+  uint8_t first = firstPin;
+  unsigned long edgeAt = lastEdgeAt;
   interrupts();
-  // CLK has to rest at its new level for KNOB_SETTLE_US before the step counts.
-  if (clk == clkStable || micros() - edgeAt < KNOB_SETTLE_US) return;
-  clkStable = clk;
-  if (clk == LOW) {
-    // DT still high when CLK falls: one way; DT already low: the other way.
-    if (dt != clk) encCount++;
-    else encCount--;
-  }
+  if (first == 0 || micros() - edgeAt < KNOB_SETTLE_US) return;   // still moving or bouncing
+  if (clk != dt) return;                                          // between two rests: wait
+  noInterrupts();
+  firstPin = 0;
+  interrupts();
+  if (clk == restLevel) return;                                   // back where it was: no click
+  restLevel = clk;
+  if (first == 1) encCount++;
+  else encCount--;
 }
 
 long lastDetent = 0;
@@ -184,9 +192,9 @@ void setup() {
 
   pinMode(PIN_ENC_A, INPUT_PULLUP);
   pinMode(PIN_ENC_B, INPUT_PULLUP);
-  clkStable = digitalRead(PIN_ENC_A);
-  dtAtEdge = digitalRead(PIN_ENC_B);
+  if (digitalRead(PIN_ENC_A) == digitalRead(PIN_ENC_B)) restLevel = digitalRead(PIN_ENC_A);
   attachInterrupt(digitalPinToInterrupt(PIN_ENC_A), onClk, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PIN_ENC_B), onDt, CHANGE);
 
   NimBLEDevice::init(DEVICE_NAME);
   server = NimBLEDevice::createServer();

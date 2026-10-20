@@ -377,17 +377,29 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.settingsHighlight, .cameraPosition)
     }
 
-    func testSoundSwitchesOnTheGrid() {
+    func testSoundFromTheGrid() {
         let h = Harness()
         let s = h.state
         s.settings.soundOn = false
         s.openSettings()
         s.handle(.knob(SettingsTile.sound.rawValue))
         s.handle(.confirm)
-        XCTAssertTrue(s.settings.soundOn)
-        XCTAssertEqual(s.route, .settings(.list), "Sound switches on the tile; no page")
+        XCTAssertEqual(s.route, .settings(.sound))
+        XCTAssertEqual(s.wallModel.kind, .settingsSound)
+        XCTAssertFalse(s.soundHighlight, "starts on the saved choice, Off")
+        s.handle(.left)
+        XCTAssertTrue(s.soundHighlight)
+        s.handle(.cancel)
+        XCTAssertFalse(s.settings.soundOn, "Back leaves sound unchanged")
         s.handle(.confirm)
-        XCTAssertFalse(s.settings.soundOn)
+        s.handle(.left)
+        s.handle(.confirm)
+        XCTAssertTrue(s.settings.soundOn)
+        XCTAssertEqual(s.route, .settings(.list), "back to the grid after choosing")
+        s.openSettingsPage(.sound)
+        s.chooseSound(false)
+        XCTAssertFalse(s.settings.soundOn, "the phone's page saves too")
+        XCTAssertEqual(s.route, .settings(.list))
     }
 
     func testPointColourFromTheGrid() {
@@ -519,11 +531,7 @@ final class ControlTableTests: XCTestCase {
         XCTAssertEqual(s.route, .settings(.family))
 
         s.handle(.knob(20))
-        XCTAssertEqual(s.familyHighlight, members - 1, "the last place is Add family member")
-        s.handle(.confirm)
-        XCTAssertEqual(s.route, .addMember)
-        s.handle(.cancel)
-        XCTAssertEqual(s.route, .settings(.family), "the letter wheel goes back to Family")
+        XCTAssertEqual(s.familyHighlight, members - 2, "stops at the last member; there is no Add")
     }
 
     func testFitToWallFromTheGrid() {

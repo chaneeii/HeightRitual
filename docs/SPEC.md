@@ -118,7 +118,7 @@ Each step can be reopened from Settings.
 | S3 | Camera position | Camera preview with two draggable lines: floor and 100 cm. Text: put them on the projected lines | Two bright lines at 0 and 100 cm |
 | S4 | Units | cm or feet and inches; choosing one saves it and goes back to the list | Back icon, "Units", the two units with the saved one ticked and the controller's choice outlined in the point colour (Black drawn white on the wall) |
 | S5 | Permissions | Camera, Bluetooth, Microphone (only if sound is on): state of each, button to open iOS Settings | Back icon, "Permissions", each permission with Allowed / Not asked yet / Not allowed (display only) |
-| S6 | Controller | Connected or searching, last control used (for testing), Forget this controller | Back icon, status, the box with each control received in colour, a tick per control; "Press Back twice to go back" |
+| S6 | Controller | Connected or searching, last control used (for testing), Forget this controller | Back icon, status, the box with the control just pressed lit for a moment, a tick per control received; "Press Back twice to go back" |
 | W | First-start wizard | S5, S2, S3 in order with Next and Skip | As in each step |
 
 States, not separate screens:
@@ -169,10 +169,10 @@ The controller only reports what was used. The app decides what it means.
 | Saved | | | See the growth (Lookback) | Return to home |
 | Lookback | Previous / next record | Previous / next record | Replay the clip | Back to the member menu |
 | Lookback, auto play on | Stop, then move | Stop, then move | Stop | Stop |
-| Settings on the wall (grid) | Move through Setup guide and the tiles | Previous / next | Open the tile's page; on Sound, switch it on or off | Close Settings |
-| Settings: Units, Point colour | Choose an option | Previous / next option | Save, back to the grid | Back to the grid |
+| Settings on the wall (grid) | Move through Setup guide and the tiles | Previous / next | Open the tile's page | Close Settings |
+| Settings: Units, Point colour, Sound | Choose an option | Previous / next option | Save, back to the grid | Back to the grid |
 | Settings: Permissions, Setup guide, Camera position | | | | Back to the grid |
-| Settings: Family | Move through the members and Add family member | Previous / next | Open the member, or the letter wheel (which comes back to Family) | Back to the grid |
+| Settings: Family | Move through the members | Previous / next | Open the member (members are added from Home) | Back to the grid |
 | Settings: a member (from Family) | Change colour / Delete member, then a colour or Cancel / Delete | Previous / next | Choose; a colour is saved at once; Delete asks first (Cancel chosen) | Back one step, then to Family |
 | Settings: Load sample family, Delete everything | Cancel / the action | Cancel / the action | Answer (Cancel chosen first); Delete everything asks twice | Back to the grid |
 | Settings: Controller | Listed only | Listed only | Listed only | Listed; Back twice in a row goes back to the grid |

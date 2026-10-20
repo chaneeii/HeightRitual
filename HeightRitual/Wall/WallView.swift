@@ -26,6 +26,7 @@ struct WallView: View {
                     case .settingsUnits: WallUnitsPage()
                     case .settingsPointColour: WallPointColourPage()
                     case .settingsFamily: WallFamilyPage()
+                    case .settingsSound: WallSoundPage()
                     case .settingsMember: WallMemberPage()
                     case .settingsController: WallControllerPage()
                     case .settingsQuestion: WallQuestionPage()
@@ -102,7 +103,7 @@ struct WallCanvas: View {
             case .cameraLines: drawCameraLines(ctx, g)
             case .screen: ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Theme.paper))
             case .settingsMenu, .settingsUnits, .settingsPointColour, .settingsPermissions, .settingsGuide,
-                 .settingsFamily, .settingsMember, .settingsController, .settingsQuestion:
+                 .settingsFamily, .settingsMember, .settingsController, .settingsQuestion, .settingsSound:
                 break    // views above the canvas: WallSettingsMenu and the settings pages below it
             }
         }
@@ -653,8 +654,8 @@ private struct WallPointColourPage: View {
     }
 }
 
-/// Settings > Family on the projector: the members, then Add family member. Select opens a
-/// member's page or the letter wheel; Back goes back to the grid.
+/// Settings > Family on the projector: the members. Select opens a member's page; Back goes back
+/// to the grid. Members are added from Home.
 private struct WallFamilyPage: View {
     @Environment(AppState.self) private var state
 
@@ -667,9 +668,25 @@ private struct WallFamilyPage: View {
                 return WallChoice(id: index, title: Text(verbatim: member.name),
                                   detail: count == 1 ? "1 record" : "\(count) records",
                                   swatch: Palette.color(member.colorIndex))
-            } + [WallChoice(id: members.count, title: Text("Add family member"), systemImage: "plus")],
+            },
             saved: -1,
-            highlighted: min(state.familyHighlight, members.count))
+            highlighted: min(state.familyHighlight, max(members.count - 1, 0)))
+    }
+}
+
+/// Settings > Sound on the projector, the same way as Units.
+private struct WallSoundPage: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        WallChoicePage(
+            title: "Sound", subtitle: "Record and play sound with each clip",
+            choices: [
+                WallChoice(id: 0, title: Text("On"), systemImage: "speaker.wave.2"),
+                WallChoice(id: 1, title: Text("Off"), systemImage: "speaker.slash"),
+            ],
+            saved: state.settings.soundOn ? 0 : 1,
+            highlighted: state.soundHighlight ? 0 : 1)
     }
 }
 
@@ -746,7 +763,7 @@ private struct WallControllerPage: View {
         let status = state.controllerStatus == .connected ? L("Connected") : state.controllerStatus.label
         WallSettingsPage(title: "Controller", subtitle: LocalizedStringKey(status)) { unit in
             let scale = unit * 70 / 275
-            ControllerDiagram(active: Set(tested.compactMap(\.control)), interactive: false)
+            PressedControllerDiagram()
                 .scaleEffect(scale)
                 .frame(width: 275 * scale, height: 195 * scale)
                 .frame(maxWidth: .infinity)

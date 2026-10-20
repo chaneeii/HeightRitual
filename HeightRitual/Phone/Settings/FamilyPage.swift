@@ -23,14 +23,9 @@ struct FamilyPage: View {
                 }
             } footer: {
                 if state.store.members.isEmpty {
-                    Text("Add the first family member")
+                    Text("Add family members from Home.")
                 } else {
                     Text("Tap a member to rename, recolour or delete them. Deleting a member deletes their records too.")
-                }
-            }
-            Section {
-                NavigationLink(value: SettingsStep.member(nil)) {
-                    Label("Add family member", systemImage: "plus")
                 }
             }
         }

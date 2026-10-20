@@ -37,7 +37,7 @@ struct ControllerPage: View {
             }
 
             Section {
-                ControllerDiagram(active: Set(testedControls.compactMap(\.control)), interactive: false)
+                PressedControllerDiagram()
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
                 ForEach(ControlCheck.allCases, id: \.self) { check in
@@ -197,6 +197,28 @@ private struct EnlargedPictureView: View {
     }
 }
 
+/// Settings > Sound: on or off. Choosing one saves it and goes back to the list, the same as
+/// Select on the projector's Sound page.
+struct SoundPage: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        Form {
+            Section {
+                Picker("Sound", selection: Binding(get: { state.settings.soundOn },
+                                                   set: { state.chooseSound($0) })) {
+                    Text("On").tag(true)
+                    Text("Off").tag(false)
+                }
+                .pickerStyle(.inline)
+                .labelsHidden()
+            } footer: {
+                Text("Record and play sound with each clip")
+            }
+        }
+    }
+}
+
 /// Settings > Point colour: Black or one of the palette colours, for borders, buttons and the dial on
 /// the phone and the wall. Choosing one saves it and goes back to the list, the same as Select on
 /// the projector's Point colour page.
@@ -329,6 +351,36 @@ struct SettingsQuestionPage: View {
                     Button("Cancel") { state.answerQuestion(false) }
                 }
             }
+        }
+    }
+}
+
+/// The controller box on the Controller test pages (phone and projector): the control just pressed
+/// lights up for a moment. The list below it keeps which controls have been received.
+struct PressedControllerDiagram: View {
+    @Environment(AppState.self) private var state
+    @State private var lit: ControllerDiagram.Control?
+
+    var body: some View {
+        ControllerDiagram(active: lit.map { [$0] } ?? [], interactive: false)
+            .onChange(of: state.inputCount) {
+                let pressed = state.lastControl.flatMap(Self.control)
+                lit = pressed
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(600))
+                    if lit == pressed { lit = nil }
+                }
+            }
+    }
+
+    private static func control(_ event: ControlEvent) -> ControllerDiagram.Control? {
+        switch event {
+        case .cancel: return .back
+        case .knob: return .knob
+        case .left: return .left
+        case .right: return .right
+        case .confirm: return .confirm
+        default: return nil
         }
     }
 }

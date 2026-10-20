@@ -26,9 +26,11 @@ struct WallModel: Equatable {
         case settingsUnits
         /// Point colour: Black and the palette colours, the controller's choice outlined.
         case settingsPointColour
-        /// Family: the members and Add family member; a member's page; the controller test page;
+        /// Family: the members; a member's page; the controller test page;
         /// the question before Load sample family or Delete everything.
         case settingsFamily, settingsMember, settingsController, settingsQuestion
+        /// Sound: On and Off, the controller's choice outlined.
+        case settingsSound
         /// S5 Permissions: each permission and whether it is allowed. Only shown.
         case settingsPermissions
         /// Setup guide: the two pictures the phone shows.
@@ -138,6 +140,9 @@ extension AppState {
 
         case .settings(.family):
             model.kind = .settingsFamily
+
+        case .settings(.sound):
+            model.kind = .settingsSound
 
         case .settings(.controller):
             model.kind = .settingsController

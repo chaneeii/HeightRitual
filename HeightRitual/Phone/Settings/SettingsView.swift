@@ -57,6 +57,7 @@ struct SettingsPageView: View {
         case .cameraPosition: return "Camera position"
         case .units: return "Units"
         case .pointColour: return "Point colour"
+        case .sound: return "Sound"
         case .confirmSample: return "Sample family"
         case .confirmDelete: return "Delete everything"
         case .controller: return "Controller"
@@ -73,6 +74,7 @@ struct SettingsPageView: View {
         case .cameraPosition: CameraPositionPage()
         case .units: UnitsPage()
         case .pointColour: PointColourPage()
+        case .sound: SoundPage()
         case .confirmSample, .confirmDelete: SettingsQuestionPage()
         case .controller: ControllerPage()
         case .permissions: PermissionsPage()
@@ -87,10 +89,10 @@ enum SettingsStyle {
     static let background = Color(red: 0.91, green: 0.95, blue: 1.00)   // light blue
     static let row = Color(red: 1.00, green: 1.00, blue: 1.00)          // white
     static let icon = Color(red: 0.20, green: 0.48, blue: 0.85)         // clear blue
-    /// The controller's choice outline: the point colour. Black (the default) is drawn white on the
-    /// projector, where the picture is black.
+    /// The controller's choice outline: the point colour (`Theme.pointColour`). Black (the default)
+    /// is drawn white on the projector, where the settings pages are black.
     static func selection(_ accentIndex: Int?, onWall: Bool) -> Color {
-        accentIndex.map(Palette.color) ?? (onWall ? .white : .black)
+        Theme.pointColour(accentIndex, onDark: onWall)
     }
 }
 
@@ -127,14 +129,8 @@ private struct SettingsList: View {
                 link(.pointColour, "Point colour", detail: "Borders, buttons and the dial, on the phone and the wall",
                      systemImage: "paintpalette",
                      value: settings.accentIndex.map { "Colour \($0 + 1)" } ?? "Black")
-                Toggle(isOn: $settings.soundOn) {
-                    Label {
-                        Text("Sound")
-                        Text("Record and play sound with each clip")
-                    } icon: {
-                        Image(systemName: "speaker.wave.2")
-                    }
-                }
+                link(.sound, "Sound", detail: "Record and play sound with each clip",
+                     systemImage: "speaker.wave.2", value: settings.soundOn ? "On" : "Off")
                 link(.controller, "Controller", detail: "Connection, and a test of every button",
                      systemImage: "gamecontroller", value: controllerText)
                 link(.permissions, "Permissions", detail: "Camera, Bluetooth and microphone",

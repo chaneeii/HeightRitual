@@ -44,16 +44,21 @@ struct HomeContent: View {
             }
 
             if surface == .wall && state.route == .home {
-                // Back has nothing to go back to on Home, so it opens Settings.
-                HStack(spacing: 12) {
-                    ControlIcon(glyph: .back, size: 48)
-                    Text("Settings").font(Theme.label(24))
+                // Back has nothing to go back to on Home, so it opens Settings (Figma 405:827).
+                HStack(spacing: 5.13) {
+                    ControlIcon(glyph: .back, size: 26.5)
+                    Text("Settings").font(.system(size: 17.95, weight: .bold))
                 }
-                .foregroundStyle(Theme.ink)
+                .foregroundStyle(Theme.paper)
+                .padding(.leading, 16.24)
+                .padding(.trailing, 19.29)
+                .padding(.vertical, 10.15)
+                .background(Theme.ink, in: Capsule())
                 .opacity(state.homeBackReady ? 1 : 0.35)
                 .animation(.easeOut(duration: 0.25), value: state.homeBackReady)
                 .fixedSize()
-                .position(x: 24 + 80, y: 28 + 24)
+                .padding(.leading, 24)
+                .padding(.top, 28)
                 .accessibilityElement(children: .combine)
             }
         }

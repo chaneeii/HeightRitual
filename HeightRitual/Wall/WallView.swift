@@ -373,7 +373,7 @@ private struct WallSettingsMenu: View {
         var destructive = false
     }
 
-    private static let text = Color(red: 0.08, green: 0.10, blue: 0.08)
+    private static let text = Theme.paper
 
     private var rows: [[Tile]] {
         let settings = state.settings
@@ -405,28 +405,27 @@ private struct WallSettingsMenu: View {
     var body: some View {
         GeometryReader { geo in
             let unit = geo.size.width / 100
-            let rowCount = CGFloat(rows.count)
-            // Padding, the title and the gaps, then six rows of the same height.
-            let tileHeight = (geo.size.height - unit * 8 - unit * 7.5 - unit * 2.5 - unit * 2.5 * (rowCount - 1)) / rowCount
-            VStack(alignment: .leading, spacing: unit * 2.5) {
-                HStack(alignment: .center, spacing: unit * 3) {
-                    WallBackIcon(unit: unit)
-                    Text("Settings")
-                        .font(.system(size: unit * 6, weight: .bold))
-                        .foregroundStyle(.white)
+            VStack(alignment: .leading, spacing: unit * 2) {
+                HStack(alignment: .center) {
+                    WallBackPill(unit: unit)
                     Spacer(minLength: unit * 2)
                     setupGuide(unit: unit)
                 }
-                Grid(horizontalSpacing: unit * 2.5, verticalSpacing: unit * 2.5) {
+                Text("Settings")
+                    .font(.system(size: unit * 7, weight: .bold))
+                    .foregroundStyle(Self.text)
+                    .padding(.bottom, unit * 1)
+                Grid(horizontalSpacing: unit * 2, verticalSpacing: unit * 2) {
                     ForEach(rows.indices, id: \.self) { row in
                         GridRow {
                             ForEach(rows[row]) { tile in
                                 tileView(tile, unit: unit)
-                                    .frame(height: max(0, tileHeight))
+                                    .frame(maxHeight: .infinity)
                             }
                         }
                     }
                 }
+                .frame(maxHeight: .infinity)
             }
             .padding(unit * 4)
             .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
@@ -446,71 +445,76 @@ private struct WallSettingsMenu: View {
         .foregroundStyle(Self.text)
         .padding(.horizontal, unit * 3)
         .padding(.vertical, unit * 1.6)
-        .background(SettingsStyle.row, in: Capsule())
+        .background(Theme.wallPanel, in: Capsule())
         .overlay {
             if state.settingsHighlight == .setupGuide {
-                Capsule().stroke(SettingsStyle.selection(state.settings.accentIndex, onWall: true), lineWidth: unit * 1.2)
-                    .padding(-unit * 0.9)
+                Capsule().stroke(SettingsStyle.selection(state.settings.accentIndex, onWall: true), lineWidth: unit * 0.7)
+                    .padding(-unit * 0.6)
             }
         }
     }
 
     private func tileView(_ tile: Tile, unit: CGFloat) -> some View {
-        VStack(alignment: .leading, spacing: unit * 0.8) {
-            HStack(alignment: .top) {
+        let selected = state.settingsHighlight == tile.id
+        return VStack(alignment: .leading, spacing: unit * 0.8) {
+            HStack(alignment: .center) {
                 Image(systemName: tile.systemImage)
-                    .font(.system(size: unit * 4.5))
-                    .foregroundStyle(tile.destructive ? Color.red : SettingsStyle.icon)
+                    .font(.system(size: unit * 4, weight: .medium))
+                    .foregroundStyle(tile.destructive ? Theme.destructive : Self.text.opacity(0.9))
+                    .frame(height: unit * 5)
                 Spacer(minLength: unit)
                 if let value = tile.value {
                     Text(verbatim: value)
-                        .font(.system(size: unit * 3, weight: .semibold))
-                        .foregroundStyle(Self.text.opacity(0.75))
+                        .font(.system(size: unit * 2.5, weight: .medium))
+                        .foregroundStyle(Self.text.opacity(0.55))
                         .lineLimit(1)
-                        .minimumScaleFactor(0.5)
+                        .minimumScaleFactor(0.6)
                 }
             }
             Spacer(minLength: 0)
             Text(tile.title)
-                .font(.system(size: unit * 3.8, weight: .semibold))
-                .foregroundStyle(tile.destructive ? Color.red : Self.text)
+                .font(.system(size: unit * 3.6, weight: .semibold))
+                .foregroundStyle(tile.destructive ? Theme.destructive : Self.text)
                 .lineLimit(1)
-                .fixedSize(horizontal: false, vertical: true)
+                .minimumScaleFactor(0.8)
             if let detail = tile.detail {
                 Text(detail)
-                    .font(.system(size: unit * 2.6))
-                    .foregroundStyle(Self.text.opacity(0.65))
+                    .font(.system(size: unit * 2.4))
+                    .foregroundStyle(Self.text.opacity(0.55))
                     .lineLimit(2, reservesSpace: true)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .padding(unit * 2.5)
+        .padding(unit * 3)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(SettingsStyle.row, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
+        .background(selected ? Theme.wallPanelSelected : Theme.wallPanel,
+                    in: RoundedRectangle(cornerRadius: unit * 3.5, style: .continuous))
         .overlay {
-            if state.settingsHighlight == tile.id {
-                // Drawn around the tile, so a white outline (Black chosen) shows on the black wall.
-                RoundedRectangle(cornerRadius: unit * 4.6, style: .continuous)
-                    .stroke(SettingsStyle.selection(state.settings.accentIndex, onWall: true), lineWidth: unit * 1.2)
-                    .padding(-unit * 0.9)
+            if selected {
+                RoundedRectangle(cornerRadius: unit * 4, style: .continuous)
+                    .stroke(SettingsStyle.selection(nil, onWall: true), lineWidth: unit * 0.7)
+                    .padding(-unit * 0.6)
             }
         }
     }
 }
 
-/// The back icon on the projector's settings pages: the controller's Back button goes back.
-/// Only shown; the projector cannot be touched.
-private struct WallBackIcon: View {
+/// Back on the projector's settings pages: the controller's Back icon in a quiet pill. Only shown;
+/// the projector cannot be touched.
+private struct WallBackPill: View {
     let unit: CGFloat
-    /// The orange of the back icon, also used to outline the controller's choice.
-    static let orange = Color(red: 0.93, green: 0.42, blue: 0.18)
 
     var body: some View {
-        Image(systemName: "arrowshape.turn.up.left.fill")
-            .font(.system(size: unit * 4.6, weight: .bold))
-            .foregroundStyle(.white)
-            .frame(width: unit * 9.5, height: unit * 9.5)
-            .background(Self.orange, in: RoundedRectangle(cornerRadius: unit * 2.6, style: .continuous))
+        HStack(spacing: unit * 1.2) {
+            ControlIcon(glyph: .back, size: unit * 4.2)
+            Text("Back")
+                .font(.system(size: unit * 3, weight: .semibold))
+        }
+        .foregroundStyle(Theme.paper)
+        .padding(.leading, unit * 2)
+        .padding(.trailing, unit * 2.8)
+        .padding(.vertical, unit * 1.4)
+        .background(Theme.wallPill, in: Capsule())
     }
 }
 
@@ -536,7 +540,7 @@ private struct WallChoicePage: View {
     let choices: [WallChoice]
     let saved: Int
     let highlighted: Int
-    private static let text = Color(red: 0.08, green: 0.10, blue: 0.08)
+    private static let text = Theme.paper
 
     var body: some View {
         WallSettingsPage(title: title, subtitle: subtitle) { unit in
@@ -558,7 +562,7 @@ private struct WallChoicePage: View {
             VStack(alignment: .leading, spacing: unit * 1) {
                 choice.title
                     .font(.system(size: unit * 5, weight: .semibold))
-                    .foregroundStyle(choice.destructive ? Color.red : Self.text)
+                    .foregroundStyle(choice.destructive ? Theme.destructive : Self.text)
                 if let detail = choice.detail {
                     Text(verbatim: detail)
                         .font(.system(size: unit * 3.6))
@@ -574,13 +578,13 @@ private struct WallChoicePage: View {
         .foregroundStyle(Self.text)
         .padding(unit * 4)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(SettingsStyle.row, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
+        .background(Theme.wallPanel, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
         .overlay {
             if choice.id == highlighted {
                 // Drawn around the tile, so a white outline (Black chosen) shows on the black wall.
                 RoundedRectangle(cornerRadius: unit * 4.6, style: .continuous)
-                    .stroke(SettingsStyle.selection(state.settings.accentIndex, onWall: true), lineWidth: unit * 1.2)
-                    .padding(-unit * 0.9)
+                    .stroke(SettingsStyle.selection(state.settings.accentIndex, onWall: true), lineWidth: unit * 0.7)
+                    .padding(-unit * 0.6)
             }
         }
     }
@@ -595,16 +599,17 @@ private struct WallSettingsPage<Content: View>: View {
     var body: some View {
         GeometryReader { geo in
             let unit = geo.size.width / 100
-            VStack(alignment: .leading, spacing: unit * 4) {
-                HStack(alignment: .center, spacing: unit * 3) {
-                    WallBackIcon(unit: unit)
+            VStack(alignment: .leading, spacing: unit * 2) {
+                WallBackPill(unit: unit)
+                VStack(alignment: .leading, spacing: unit * 1) {
                     Text(title)
-                        .font(.system(size: unit * 6, weight: .bold))
-                        .foregroundStyle(.white)
+                        .font(.system(size: unit * 7, weight: .bold))
+                        .foregroundStyle(Theme.paper)
+                    Text(subtitle)
+                        .font(.system(size: unit * 3))
+                        .foregroundStyle(Theme.paper.opacity(0.6))
                 }
-                Text(subtitle)
-                    .font(.system(size: unit * 3.4))
-                    .foregroundStyle(.white.opacity(0.75))
+                .padding(.bottom, unit * 1)
                 content(unit)
                 Spacer(minLength: 0)
             }
@@ -747,7 +752,7 @@ private struct WallQuestionPage: View {
 /// the page is left with Back twice in a row.
 private struct WallControllerPage: View {
     @Environment(AppState.self) private var state
-    private static let text = Color(red: 0.08, green: 0.10, blue: 0.08)
+    private static let text = Theme.paper
 
     var body: some View {
         let tested = state.testedControls
@@ -771,7 +776,7 @@ private struct WallControllerPage: View {
             .foregroundStyle(Self.text)
             .padding(unit * 4)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(SettingsStyle.row, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
+            .background(Theme.wallPanel, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
             Text("Press each control to test it. Press Back twice to go back.")
                 .font(.system(size: unit * 3.4))
                 .foregroundStyle(.white.opacity(0.75))
@@ -783,7 +788,7 @@ private struct WallControllerPage: View {
 /// permissions are changed on the phone, where iOS asks. Back goes back to the grid.
 private struct WallPermissionsPage: View {
     @Environment(AppState.self) private var state
-    private static let text = Color(red: 0.08, green: 0.10, blue: 0.08)
+    private static let text = Theme.paper
 
     var body: some View {
         // iOS does not report changes, so look again every second.
@@ -826,12 +831,12 @@ private struct WallPermissionsPage: View {
                 }
             }
             .font(.system(size: unit * 3.8, weight: .semibold))
-            .foregroundStyle(access == .refused ? Color.red : Self.text)
+            .foregroundStyle(access == .refused ? Theme.destructive : Self.text)
         }
         .foregroundStyle(Self.text)
         .padding(unit * 4)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(SettingsStyle.row, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
+        .background(Theme.wallPanel, in: RoundedRectangle(cornerRadius: unit * 4, style: .continuous))
     }
 }
 

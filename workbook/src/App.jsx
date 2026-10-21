@@ -4,6 +4,7 @@ import { PAGES, SECTIONS, CONTENTS_LINKS, PAGE_W, PAGE_H } from './pages.js'
 
 const RATIO = PAGE_W / PAGE_H
 const TOTAL = PAGES.length
+const PDF_URL = '/Memory-Meter-Workbook.pdf'
 // 이보다 좁은 화면(폰 세로)에서만 자동으로 한 쪽 보기
 const AUTO_SPREAD_MIN_W = 520
 // StPageFlip goes portrait when the block is narrower than 2 × minWidth
@@ -259,12 +260,23 @@ export default function App() {
           ))}
         </nav>
         <div className="tools">
+          {/* 워크북 PDF 원본 전체 다운로드 */}
+          <a
+            className="download-btn"
+            href={PDF_URL}
+            download="Memory-Meter-Workbook.pdf"
+            aria-label="Download the workbook as PDF (34 MB)"
+            title="Download PDF (34 MB)"
+          >
+            <svg viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14" /></svg>
+            <span>PDF</span>
+          </a>
           <button type="button" className="icon-btn" onClick={() => setZoom(index)} aria-label="Read this page up close (Z)" title="Zoom (Z)">
             <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6" /></svg>
           </button>
           <button
             type="button"
-            className="icon-btn"
+            className="icon-btn layout-btn"
             onClick={toggleLayout}
             aria-label={spread ? 'Show one page (D)' : 'Show two pages (D)'}
             title={spread ? 'One page (D)' : 'Two pages (D)'}

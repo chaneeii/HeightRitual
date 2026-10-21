@@ -115,6 +115,18 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
   transition: background 0.2s;
 }
 .icon-btn:hover { background: var(--chip-bg); }
+.download-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 44px; padding: 0 16px 0 12px; margin-right: 4px;
+  border-radius: var(--radius);
+  background: var(--text); color: var(--bg);
+  font-size: 13px; font-weight: 700; letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+.download-btn svg { width: 18px; height: 18px; stroke-width: 2.2; }
+.download-btn:hover { background: var(--ruler); color: var(--ink); transform: translateY(-1px); }
+.download-btn:focus-visible { outline: 2px solid var(--ruler); outline-offset: 2px; }
 
 /* ---------- stage + book ---------- */
 .stage {
@@ -363,6 +375,8 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 /* ---------- small screens ---------- */
 @media (max-width: 900px) {
   .brand-sub, .hide-sm { display: none; }
+  .download-btn { width: 44px; padding: 0; justify-content: center; margin-right: 0; }
+  .download-btn span { display: none; }
   .topbar { flex-wrap: wrap; padding: 12px 16px; gap: 8px; }
   .sections { order: 3; width: 100%; overflow-x: auto; margin: 0; scrollbar-width: none; }
   .tools { margin-left: auto; }
@@ -376,6 +390,12 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
   .dock-page { font-size: 20px; }
   .ruler-label { display: none; }
   .ruler { height: 30px; }
+}
+
+/* 폰 폭에서는 툴바를 한 줄로 — 2쪽 보기는 폰 세로에선 너무 작아서 토글을 숨김 */
+@media (max-width: 480px) {
+  .layout-btn { display: none; }
+  .tools { gap: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

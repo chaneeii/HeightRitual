@@ -243,7 +243,7 @@ export default function App() {
     <div className={`app ${opened ? 'is-open' : ''}`}>
       <header className="topbar">
         <a className="brand" href="#" onClick={(e) => { e.preventDefault(); go(0) }}>
-          <span className="brand-mark" aria-hidden="true" />
+          <img className="brand-mark" src="/mm-icon.png" alt="" width="28" height="28" />
           <span>Memory Meter</span>
           <span className="brand-sub">Workbook · Group 6</span>
         </a>

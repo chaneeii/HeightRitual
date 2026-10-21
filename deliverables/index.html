@@ -8,8 +8,8 @@
   <meta property="og:title" content="Memory Meter, DM2601 Group 6" />
   <meta property="og:description" content="People move, memories stay. The app, source code, controller, demo video and workbook." />
   <meta property="og:image" content="/page-30.jpg" />
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/app-icon.png" />
+  <link rel="icon" href="/mm-favicon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Poppins:wght@600;800&display=swap" rel="stylesheet" />
@@ -25,7 +25,8 @@
       --muted: #6b6860;
       --line: rgba(17, 17, 17, 0.1);
       --gap: 12px;
-      --radius: 22px;
+      --pad: 24px;
+      --radius: 20px;
       --font-display: 'Poppins', system-ui, sans-serif;
       --font-body: 'DM Sans', system-ui, sans-serif;
       color-scheme: light;
@@ -36,7 +37,7 @@
         --tile: #1c1c1a;
         --text: #f3f1ec;
         --muted: #9a978f;
-        --line: rgba(255, 255, 255, 0.1);
+        --line: rgba(255, 255, 255, 0.12);
         color-scheme: dark;
       }
     }
@@ -45,7 +46,7 @@
       --tile: #1c1c1a;
       --text: #f3f1ec;
       --muted: #9a978f;
-      --line: rgba(255, 255, 255, 0.1);
+      --line: rgba(255, 255, 255, 0.12);
       color-scheme: dark;
     }
 
@@ -61,8 +62,10 @@
     }
     a { color: inherit; }
     img { display: block; max-width: 100%; }
-    svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+    svg.i { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
     h1, h2 { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.02em; margin: 0; }
+    p { margin: 0; }
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--ruler); outline-offset: 2px; }
 
     /* ---------- bento grid ---------- */
     .bento {
@@ -70,14 +73,14 @@
       gap: var(--gap);
       padding: var(--gap);
       grid-template-columns: repeat(12, minmax(0, 1fr));
-      grid-template-rows: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-rows: repeat(3, minmax(0, 1fr));
       grid-template-areas:
         "hero hero hero hero video video video video video video video video"
-        "app  app  app  app  video video video video video video video video"
+        "hero hero hero hero video video video video video video video video"
         "app  app  app  app  ctrl  ctrl  ctrl  code  code  book  book  book";
     }
     /* 큰 화면: 스크롤 없이 한 화면에 */
-    @media (min-width: 1024px) and (min-height: 660px) {
+    @media (min-width: 1024px) and (min-height: 640px) {
       html, body { height: 100%; overflow: hidden; }
       .bento { height: 100dvh; }
     }
@@ -88,7 +91,7 @@
       background: var(--tile);
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      padding: clamp(16px, 2vw, 26px);
+      padding: var(--pad);
       overflow: hidden;
       display: flex; flex-direction: column;
     }
@@ -102,135 +105,132 @@
       background: var(--ruler); color: var(--ink);
       border-radius: 5px; padding: 1px 6px;
     }
-    .tile h2 { font-size: clamp(20px, 1.9vw, 26px); line-height: 1.15; margin-top: 8px; }
-    .tile p { margin: 8px 0 0; }
+    .tile h2 { font-size: 20px; line-height: 1.2; margin-top: 8px; }
     .muted { color: var(--muted); }
-    .spacer { flex: 1; min-height: 8px; }
+    .push { margin-top: auto; }
 
-    .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      min-height: 44px; padding: 10px 16px;
-      border-radius: 999px;
-      font-weight: 700; font-size: 14px; text-decoration: none;
-      overflow-wrap: anywhere;
-      transition: background 0.2s, color 0.2s, transform 0.2s, border-color 0.2s;
-    }
-    .btn:hover { transform: translateY(-1px); }
-    .btn.dark { background: var(--ink); color: #fff; }
-    .btn.dark:hover { background: #000; }
-    @media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .book .btn.dark { background: #f3f1ec; color: var(--ink); } }
-    :root[data-theme='dark'] .book .btn.dark { background: #f3f1ec; color: var(--ink); }
-    .btn.light { background: #fff; color: var(--ink); }
-    .btn.line { border: 1px solid var(--line); }
-    .btn.line:hover { border-color: var(--text); }
-    a:focus-visible { outline: 2px solid var(--ruler); outline-offset: 2px; }
-
-    /* hero */
-    .hero { grid-area: hero; padding-left: calc(clamp(16px, 2vw, 26px) + 22px); }
+    /* ---------- hero (tall, left) ---------- */
+    .hero { grid-area: hero; padding-left: calc(var(--pad) + 24px); }
     /* 키 재는 벽 눈금 — 워크북 목차 페이지 모티프 */
     .hero::before {
-      content: ''; position: absolute; inset: 0 auto 0 0; width: 22px;
+      content: ''; position: absolute; inset: 0 auto 0 0; width: 24px;
       background:
         repeating-linear-gradient(to bottom, var(--ink) 0 1px, transparent 1px 9px) right / 7px 100% no-repeat,
-        repeating-linear-gradient(to bottom, var(--ink) 0 2px, transparent 2px 45px) right / 13px 100% no-repeat,
+        repeating-linear-gradient(to bottom, var(--ink) 0 2px, transparent 2px 45px) right / 14px 100% no-repeat,
         var(--ruler);
     }
-    .hero-top { display: flex; align-items: center; gap: 14px; }
-    .icon-link { display: block; flex: none; border-radius: 22%; }
+    .icon-link { display: inline-block; width: fit-content; border-radius: 24%; }
     .app-icon {
-      width: clamp(52px, 5vw, 68px); height: auto; aspect-ratio: 1;
-      border-radius: 22%;
+      width: 88px; height: 88px;
+      border-radius: 24%;
       background: #fff;
-      box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.12), 0 10px 20px -12px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.1), 0 12px 24px -14px rgba(0, 0, 0, 0.5);
       transition: transform 0.25s;
     }
     .icon-link:hover .app-icon { transform: translateY(-2px) rotate(-6deg); }
-    .hero h1 { font-size: clamp(28px, 2.5vw, 40px); line-height: 1; white-space: nowrap; }
-    .tagline { font-family: var(--font-display); font-weight: 800; font-size: clamp(17px, 1.6vw, 22px); letter-spacing: -0.01em; line-height: 1.2; margin-top: 14px; }
-    .lede { font-size: 14px; }
-    .tagline mark { background: var(--ruler); color: var(--ink); border-radius: 5px; padding: 0 6px; white-space: nowrap; }
+    .hero .label { margin-top: 22px; }
+    .hero h1 { font-size: clamp(36px, 3.6vw, 54px); line-height: 1; margin-top: 6px; }
+    .tagline { font-family: var(--font-display); font-weight: 800; font-size: clamp(20px, 1.9vw, 27px); letter-spacing: -0.01em; line-height: 1.25; margin-top: 14px; }
+    .tagline mark { background: var(--ruler); color: var(--ink); border-radius: 6px; padding: 0 6px; white-space: nowrap; }
+    .lede { margin-top: 14px; color: var(--muted); max-width: 34ch; }
     .team { font-size: 13px; color: var(--muted); }
-    .team b { color: var(--text); }
+    .team b { color: var(--text); font-weight: 700; }
 
-    /* video */
-    .video { grid-area: video; padding: 0; background: #000; border-color: transparent; }
+    /* ---------- video ---------- */
+    .tile.video { grid-area: video; padding: 0; background: #000; border-color: transparent; }
     .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 
-    /* app — yellow tile */
+    /* ---------- app — yellow tile ---------- */
     .app { grid-area: app; background: var(--ruler); color: var(--ink); border-color: transparent; }
     .app .label { color: rgba(17, 17, 17, 0.6); }
     .app .label .num { background: var(--ink); color: var(--ruler); }
-    .app .muted { color: rgba(17, 17, 17, 0.65); }
-    .app-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-    .app-head .app-icon { width: clamp(56px, 5.6vw, 80px); }
-    ol.steps { margin: 12px 0 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 8px; }
-    ol.steps li { counter-increment: s; display: grid; grid-template-columns: 24px 1fr; gap: 10px; align-items: start; }
+    ol.steps { margin: 12px 0 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 6px; }
+    ol.steps li { counter-increment: s; display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: baseline; }
     ol.steps li::before {
-      content: counter(s, lower-alpha);
-      width: 24px; height: 24px; border-radius: 50%;
+      content: counter(s);
+      width: 22px; height: 22px; border-radius: 50%;
       display: grid; place-items: center;
       background: var(--ink); color: var(--ruler);
       font-weight: 700; font-size: 12px;
+      transform: translateY(-1px);
     }
-    .tip { margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.55); font-size: 13.5px; }
+    ol.steps a { font-weight: 700; }
+    .invite {
+      display: flex; align-items: center; gap: 6px;
+      margin-top: 14px; padding: 5px 5px 5px 14px;
+      background: #fff; border-radius: 999px;
+    }
+    .invite a {
+      flex: 1; min-width: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      text-decoration: none;
+    }
+    .invite a:hover { text-decoration: underline; }
+    .copy {
+      flex: none;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      min-width: 92px; min-height: 40px; padding: 0 14px;
+      border: 0; border-radius: 999px;
+      background: var(--ink); color: #fff;
+      font: inherit; font-size: 13px; font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .copy:hover { background: #000; }
+    .copy.done { background: #2f6f3a; }
 
-    /* controller — photo tile */
-    .ctrl { grid-area: ctrl; padding: 0; background: #d9d7d2; border-color: transparent; text-decoration: none; color: #fff; }
-    .ctrl img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 62%; transition: transform 0.5s; }
+    /* ---------- controller — photo fills the tile ---------- */
+    .tile.ctrl { grid-area: ctrl; padding: 0; background: #d9d7d2; border-color: transparent; text-decoration: none; color: #fff; }
+    .ctrl img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; transition: transform 0.5s; }
     .ctrl:hover img { transform: scale(1.04); }
     .ctrl .over {
-      position: relative; margin-top: auto;
-      padding: clamp(14px, 1.6vw, 20px);
-      background: linear-gradient(transparent, rgba(0, 0, 0, 0.62));
+      position: absolute; left: 0; right: 0; bottom: 0;
+      padding: 40px var(--pad) var(--pad);
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
     }
-    .ctrl .label { color: rgba(255, 255, 255, 0.85); }
-    .ctrl h2 { font-size: clamp(18px, 1.6vw, 22px); }
-    .ctrl p { font-size: 13px; color: rgba(255, 255, 255, 0.85); margin-top: 4px; }
+    .ctrl .label { color: rgba(255, 255, 255, 0.9); }
+    .ctrl h2 { font-size: 18px; margin-top: 6px; }
 
-    /* code — ink tile */
+    /* ---------- code — ink tile ---------- */
     .code { grid-area: code; background: var(--ink); color: #f3f1ec; border-color: transparent; text-decoration: none; }
     .code .label { color: rgba(243, 241, 236, 0.6); }
-    @media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .code { border-color: rgba(255, 255, 255, 0.14); background: #050505; } }
-    :root[data-theme='dark'] .code { border-color: rgba(255, 255, 255, 0.14); background: #050505; }
-    .code h2 { font-size: clamp(18px, 1.6vw, 22px); }
-    .code p { font-size: 13px; color: rgba(243, 241, 236, 0.7); }
+    .code h2 { font-size: 18px; }
+    .code p { margin-top: 6px; font-size: 13px; color: rgba(243, 241, 236, 0.7); }
     .code code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--ruler); }
-    .code .go { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; color: #fff; }
-    .code .go svg { transition: transform 0.2s; }
-    .code:hover .go svg { transform: translateX(3px); }
+    .go { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14px; }
+    .go svg { transition: transform 0.2s; }
+    a:hover .go svg { transform: translateX(3px); }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .code { background: #050505; border-color: var(--line); } }
+    :root[data-theme='dark'] .code { background: #050505; border-color: var(--line); }
 
-    /* workbook */
-    .book { grid-area: book; flex-direction: row; gap: 14px; }
+    /* ---------- workbook ---------- */
+    .book { grid-area: book; flex-direction: row; gap: 16px; text-decoration: none; }
     .book-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-    .book h2 { font-size: clamp(18px, 1.6vw, 22px); }
-    .book p { font-size: 13px; }
-    .cover-link { flex: none; width: 38%; align-self: center; }
-    .cover { width: 100%; height: auto; border-radius: 6px; box-shadow: 0 0 0 1px var(--line), 0 14px 24px -14px rgba(0, 0, 0, 0.5); transition: transform 0.3s; }
+    .book h2 { font-size: 18px; }
+    .book p { margin-top: 6px; font-size: 13px; }
+    .book .links { display: flex; gap: 14px; flex-wrap: wrap; }
+    .book .links a { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; font-weight: 700; font-size: 14px; text-decoration: none; }
+    .book .links a:hover { text-decoration: underline; }
+    .cover-link { flex: none; width: 36%; align-self: center; }
+    .cover { width: 100%; height: auto; border-radius: 6px; box-shadow: 0 0 0 1px var(--line), 0 12px 22px -14px rgba(0, 0, 0, 0.5); transition: transform 0.3s; }
     .cover-link:hover .cover { transform: rotate(-3deg) translateY(-3px); }
-    .book .btns { margin-top: 10px; }
-    .book .btn { min-height: 40px; padding: 8px 12px; font-size: 13px; }
 
-    /* 높이가 낮은 노트북 화면: 한 화면에 들어가도록 촘촘하게 */
-    @media (min-width: 1024px) and (max-height: 860px) {
-      :root { --gap: 10px; --radius: 18px; }
-      body { font-size: 13.5px; line-height: 1.4; }
-      .tile { padding: 14px 16px; }
-      .hero { padding-left: 38px; }
-      .hero .lede, .app > .muted, .book .muted { display: none; }
-      .tagline { margin-top: 10px; }
-      .tile h2 { font-size: 19px; margin-top: 6px; }
-      .ctrl h2, .code h2, .book h2 { font-size: 17px; }
-      .tile p { margin-top: 6px; }
-      ol.steps { gap: 5px; margin-top: 8px; }
-      .tip { margin-top: 8px; padding: 8px 10px; font-size: 12.5px; }
-      .btns { margin-top: 8px; }
-      .btn { min-height: 40px; padding: 8px 14px; font-size: 13px; }
-      .ctrl .over p, .code p { font-size: 12px; }
-      .app-head .app-icon { width: 56px; }
+    /* 높이가 낮은 노트북 화면 */
+    @media (min-width: 1024px) and (max-height: 820px) {
+      :root { --gap: 10px; --pad: 18px; --radius: 18px; }
+      body { font-size: 14px; line-height: 1.4; }
+      .app-icon { width: 68px; height: 68px; }
+      .hero .label { margin-top: 16px; }
+      .tile h2 { font-size: 18px; margin-top: 6px; }
+      ol.steps { margin-top: 8px; gap: 3px; }
+      .bento { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr); }
+      .invite { margin-top: 10px; padding-left: 12px; }
+      .invite a { font-size: 12px; }
+      .copy { min-height: 36px; min-width: 0; padding: 0 12px; }
     }
 
-    /* ---------- smaller screens: stacked bento, scrolls ---------- */
+    /* ---------- tablets and phones: stacked, scrolls ---------- */
     @media (max-width: 1023px) {
       .bento {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -242,14 +242,19 @@
           "ctrl  code"
           "book  book";
       }
-      .video { aspect-ratio: 16 / 9; }
-      .ctrl { min-height: 240px; }
+      .tile.video { aspect-ratio: 16 / 9; }
+      .tile.ctrl { min-height: 240px; }
+      .hero .team { margin-top: 24px; }
       .cover-link { width: 120px; }
     }
     @media (max-width: 560px) {
-      :root { --gap: 10px; --radius: 18px; }
+      :root { --gap: 10px; --pad: 18px; --radius: 18px; }
       .bento { grid-template-areas: "hero hero" "video video" "app app" "ctrl ctrl" "code code" "book book"; }
-      .ctrl { min-height: 220px; }
+      .app-icon { width: 72px; height: 72px; }
+      .invite { padding-left: 12px; }
+      .invite a { font-size: 12px; }
+      .copy { min-width: 40px; width: 40px; padding: 0; }
+      .copy span { display: none; }
       .cover-link { width: 96px; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -261,19 +266,14 @@
   <main class="bento">
     <!-- 소개 -->
     <section class="tile hero" aria-label="About">
-      <div class="hero-top">
-        <a class="icon-link" href="https://testflight.apple.com/join/jr5mjxu7" target="_blank" rel="noopener" aria-label="Install Memory Meter on TestFlight">
-          <img class="app-icon" src="/app-icon.png" alt="Memory Meter app icon" width="68" height="68" />
-        </a>
-        <div>
-          <span class="label">DM2601 · Group 6</span>
-          <h1>Memory Meter</h1>
-        </div>
-      </div>
+      <a class="icon-link" href="https://testflight.apple.com/join/jr5mjxu7" target="_blank" rel="noopener" aria-label="Install Memory Meter on TestFlight">
+        <img class="app-icon" src="/mm-icon.png" alt="Memory Meter app icon" width="88" height="88" />
+      </a>
+      <span class="label">DM2601 · Group 6</span>
+      <h1>Memory Meter</h1>
       <p class="tagline">People move. <mark>Memories stay.</mark></p>
-      <p class="muted lede">An iOS app, a Bluetooth controller and a projector that show every past height record life-size on any wall.</p>
-      <div class="spacer"></div>
-      <p class="team"><b>Anna Nolden, Chanhee Jeong, Montana Eriksson, Szu-Yi Ho</b><br />DM2601 Media Technology and Interaction Design, KTH</p>
+      <p class="lede">An iOS app, a Bluetooth controller and a projector that show every past height record life-size on any wall.</p>
+      <p class="team push"><b>Anna Nolden, Chanhee Jeong, Montana Eriksson, Szu-Yi Ho</b><br />DM2601 Media Technology and Interaction Design, KTH</p>
     </section>
 
     <!-- 04 데모 영상: 페이지에서 바로 재생 -->
@@ -286,32 +286,23 @@
         allowfullscreen></iframe>
     </section>
 
-    <!-- 01 앱 설치 -->
+    <!-- 01 앱 설치: 초대 링크 + 복사 -->
     <section class="tile app" aria-label="Install the app">
-      <div class="app-head">
-        <div>
-          <span class="label"><span class="num">01</span> Install the app</span>
-          <h2>Try it on an iPhone</h2>
-        </div>
-        <a class="icon-link" href="https://testflight.apple.com/join/jr5mjxu7" target="_blank" rel="noopener" aria-label="Install Memory Meter on TestFlight">
-          <img class="app-icon" src="/app-icon.png" alt="" width="80" height="80" />
-        </a>
-      </div>
-      <p class="muted">iPhone with iOS 17 or later. No account needed besides your Apple ID.</p>
+      <span class="label"><span class="num">01</span> Install the app · iOS 17+</span>
+      <h2>Try it on an iPhone</h2>
       <ol class="steps">
-        <li><span>Install <b>TestFlight</b> from the App Store.</span></li>
+        <li><span>Install <a href="https://apps.apple.com/app/testflight/id899247664" target="_blank" rel="noopener">TestFlight</a> from the App Store.</span></li>
         <li><span>Open the invite link on the iPhone.</span></li>
         <li><span>Tap <b>Accept</b>, then <b>Install</b>. The app appears as <b>Memory Meter</b>.</span></li>
       </ol>
-      <p class="tip">No projector or controller? The app shows a copy of the wall on the phone. Try <b>Settings › Load sample family</b>, then open <b>Memory</b>.</p>
-      <div class="spacer"></div>
-      <div class="btns">
-        <a class="btn dark" href="https://testflight.apple.com/join/jr5mjxu7" target="_blank" rel="noopener">
-          <svg class="i" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 20h14" /></svg>
-          Join on TestFlight
-        </a>
-        <a class="btn light" href="https://apps.apple.com/app/testflight/id899247664" target="_blank" rel="noopener">Get TestFlight</a>
+      <div class="invite push">
+        <a id="invite-link" href="https://testflight.apple.com/join/jr5mjxu7" target="_blank" rel="noopener">testflight.apple.com/join/jr5mjxu7</a>
+        <button type="button" class="copy" id="copy-invite" data-url="https://testflight.apple.com/join/jr5mjxu7" aria-label="Copy invite link">
+          <svg class="i" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" /></svg>
+          <span>Copy</span>
+        </button>
       </div>
+      <span class="sr-status" id="copy-status" role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"></span>
     </section>
 
     <!-- 03 컨트롤러 -->
@@ -320,7 +311,6 @@
       <div class="over">
         <span class="label"><span class="num">03</span> Controller</span>
         <h2>The controller box</h2>
-        <p>Design, components and wiring in the workbook. Shown live at the exhibition.</p>
       </div>
     </a>
 
@@ -328,11 +318,8 @@
     <a class="tile code" href="https://github.com/chaneeii/HeightRitual" target="_blank" rel="noopener" aria-label="Source code on GitHub">
       <span class="label"><span class="num">02</span> Source</span>
       <h2>Code and build guide</h2>
-      <p>Build with Xcode on a Mac: <code>xcodegen</code>, then run on a device. ESP32 firmware in <code>Firmware/</code>.</p>
-      <div class="spacer"></div>
-      <span class="go">GitHub
-        <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-      </span>
+      <p>Xcode on a Mac: <code>xcodegen</code>, then run on a device. ESP32 firmware in <code>Firmware/</code>.</p>
+      <span class="go push">GitHub <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>
     </a>
 
     <!-- 05 워크북 -->
@@ -340,14 +327,10 @@
       <div class="book-text">
         <span class="label"><span class="num">05</span> Workbook</span>
         <h2>Process and user testing</h2>
-        <p class="muted">Discover, Define, Develop and Deliver. User test on page 29.</p>
-        <div class="spacer"></div>
-        <div class="btns">
-          <a class="btn dark" href="https://memory-meter-workbook.vercel.app/" target="_blank" rel="noopener">Open</a>
-          <a class="btn line" href="https://memory-meter-workbook.vercel.app/Memory-Meter-Workbook.pdf" download aria-label="Download the workbook PDF, 34 MB">
-            <svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14" /></svg>
-            PDF
-          </a>
+        <p class="muted">The full design process. User test on page 29.</p>
+        <div class="links push">
+          <a href="https://memory-meter-workbook.vercel.app/" target="_blank" rel="noopener">Open <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+          <a href="https://memory-meter-workbook.vercel.app/Memory-Meter-Workbook.pdf" download aria-label="Download the workbook PDF, 34 MB"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14" /></svg> PDF</a>
         </div>
       </div>
       <a class="cover-link" href="https://memory-meter-workbook.vercel.app/" target="_blank" rel="noopener" aria-label="Open the workbook">
@@ -355,5 +338,38 @@
       </a>
     </section>
   </main>
+
+  <script>
+    // 초대 링크 복사 — clipboard API가 막힌 환경은 textarea로 대체
+    (() => {
+      const btn = document.getElementById('copy-invite')
+      const label = btn.querySelector('span')
+      const status = document.getElementById('copy-status')
+      let timer
+      btn.addEventListener('click', async () => {
+        const url = btn.dataset.url
+        let ok = false
+        try {
+          await navigator.clipboard.writeText(url)
+          ok = true
+        } catch {
+          const ta = document.createElement('textarea')
+          ta.value = url
+          ta.setAttribute('readonly', '')
+          ta.style.position = 'fixed'
+          ta.style.opacity = '0'
+          document.body.append(ta)
+          ta.select()
+          try { ok = document.execCommand('copy') } catch { ok = false }
+          ta.remove()
+        }
+        label.textContent = ok ? 'Copied' : 'Press ⌘C'
+        status.textContent = ok ? 'Invite link copied' : 'Could not copy. Select the link and copy it.'
+        btn.classList.toggle('done', ok)
+        clearTimeout(timer)
+        timer = setTimeout(() => { label.textContent = 'Copy'; btn.classList.remove('done') }, 1800)
+      })
+    })()
+  </script>
 </body>
 </html>

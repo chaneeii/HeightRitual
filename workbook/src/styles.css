@@ -82,14 +82,9 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
   white-space: nowrap;
 }
 .brand-mark {
-  width: 22px; height: 22px; border-radius: 50%;
-  background: var(--text);
-  position: relative;
-}
-.brand-mark::after {
-  content: ''; position: absolute; left: 50%; top: 50%;
-  width: 14px; height: 4px; border-radius: 2px; background: var(--bg);
-  transform: translate(-50%, -50%) rotate(-45deg);
+  width: 28px; height: 28px; border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--line);
 }
 .brand-sub { font-family: var(--font-body); font-weight: 500; font-size: 13px; color: var(--muted); }
 .sections { display: flex; gap: 6px; margin: 0 auto; }

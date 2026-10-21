@@ -51,7 +51,10 @@ function buildPages(root) {
     img.src = p.src
     img.alt = `Page ${p.n}: ${p.title}`
     img.draggable = false
-    if (p.n >= 6) img.loading = 'lazy'
+    // No lazy loading: StPageFlip only shows a page mid-flip, so a lazy image lands blank.
+    // The whole book is ~5 MB, so fetch it all, the first spreads first.
+    img.decoding = 'async'
+    if (p.n > 6) img.fetchPriority = 'low'
     page.append(img)
     if (p.n === 3) {
       const links = document.createElement('div')

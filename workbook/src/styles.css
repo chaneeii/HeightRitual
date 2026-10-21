@@ -126,7 +126,6 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 }
 .book-wrap {
   transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
-  filter: drop-shadow(0 24px 30px rgba(30, 20, 0, 0.22));
 }
 /* 표지/뒷표지 단독일 때 책을 가운데로 */
 .book-wrap.at-cover { transform: translateX(-25%); }
@@ -142,6 +141,8 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 .page {
   background: var(--paper);
   overflow: hidden;
+  /* shadow per page, not a filter on the wrapper: filters rasterize the book and blur the pages */
+  box-shadow: 0 22px 30px -16px rgba(30, 20, 0, 0.32);
 }
 .page img {
   width: 100%; height: 100%;

@@ -2,7 +2,7 @@
 
 Flip-through web version of the Group 6 workbook (Figma `Ritual` → page `workbook-export`, 32 A4 frames).
 
-- Pages: `public/pages/01.png … 32.png`, exported from Figma in reading order. Replace a file to update a page.
+- Pages: `public/pages/01.webp … 32.webp`, exported from Figma at 2x (1588×2246) in reading order. Replace a file to update a page.
 - Titles, sections and the contents-page links: `src/pages.js`.
 - Page flip: [StPageFlip](https://github.com/Nodlik/StPageFlip) (`page-flip`).
 

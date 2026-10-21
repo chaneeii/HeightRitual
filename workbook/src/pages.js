@@ -1,4 +1,4 @@
-// Figma "workbook-export" page (Ritual file) — one PNG per A4 frame, in reading order.
+// Figma "workbook-export" page (Ritual file) — one 2x WebP per A4 frame (1588×2246), in reading order.
 export const PAGE_W = 794
 export const PAGE_H = 1123
 
@@ -26,7 +26,7 @@ export const PAGES = titles.map((title, i) => {
   return {
     n,
     title,
-    src: `/pages/${String(n).padStart(2, '0')}.png`,
+    src: `/pages/${String(n).padStart(2, '0')}.webp`,
     section: SECTIONS.find((s) => n >= s.start && n <= s.end).id,
   }
 })

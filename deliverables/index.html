@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Memory Meter Deliverables</title>
+  <meta name="description" content="Memory Meter, DM2601 Group 6: the iOS app, source code, controller hardware, demo video and workbook in one place." />
+  <meta property="og:title" content="Memory Meter, DM2601 Group 6" />
+  <meta property="og:description" content="People move, memories stay. The app, source code, controller, demo video and workbook." />
+  <meta property="og:image" content="/page-30.jpg" />
+  <link rel="icon" href="/app-icon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/app-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Poppins:wght@600;800&display=swap" rel="stylesheet" />
+  <style>
+    /* Same tokens as the workbook site: ink, ruler yellow, paper */
+    :root {
+      --ink: #111111;
+      --paper: #ffffff;
+      --ruler: #ffe58f;
+      --bg: #f3f1ec;
+      --surface: #ffffff;
+      --text: #111111;
+      --muted: #6b6860;
+      --line: rgba(17, 17, 17, 0.12);
+      --shadow: 0 18px 40px -24px rgba(40, 30, 10, 0.35);
+      --font-display: 'Poppins', system-ui, sans-serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme='light']) {
+        --bg: #151514;
+        --surface: #1e1e1c;
+        --text: #f3f1ec;
+        --muted: #9a978f;
+        --line: rgba(255, 255, 255, 0.12);
+        --shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.8);
+        color-scheme: dark;
+      }
+    }
+    :root[data-theme='dark'] {
+      --bg: #151514;
+      --surface: #1e1e1c;
+      --text: #f3f1ec;
+      --muted: #9a978f;
+      --line: rgba(255, 255, 255, 0.12);
+      --shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.8);
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    img { display: block; max-width: 100%; }
+    svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+    /* 키 재는 벽 눈금 — 왼쪽 가장자리 장식 (워크북 목차 페이지 모티프) */
+    .ruler {
+      position: fixed; inset: 0 auto 0 0; width: 28px;
+      background:
+        repeating-linear-gradient(to bottom, var(--ink) 0 1px, transparent 1px 10px) right / 8px 100% no-repeat,
+        repeating-linear-gradient(to bottom, var(--ink) 0 2px, transparent 2px 50px) right / 16px 100% no-repeat,
+        var(--ruler);
+      z-index: 0;
+    }
+
+    .wrap { position: relative; z-index: 1; max-width: 980px; margin: 0 auto; padding: 0 24px 0 56px; }
+
+    header.hero { padding: 72px 0 40px; }
+    .hero-top { display: flex; align-items: center; gap: 18px; }
+    .app-icon { width: 76px; height: 76px; border-radius: 18px; box-shadow: var(--shadow); transition: transform 0.25s; }
+    .icon-link { display: block; text-decoration: none; border-radius: 18px; }
+    .icon-link:hover .app-icon { transform: translateY(-3px) rotate(-3deg); }
+    .icon-link:focus-visible { outline: 2px solid var(--ruler); outline-offset: 3px; }
+    .app-split { grid-template-columns: 1fr 160px; }
+    .app-tile { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; font-weight: 700; font-size: 14px; }
+    .app-tile small { display: block; font-weight: 500; color: var(--muted); }
+    .app-icon.big { width: 140px; height: 140px; border-radius: 32px; }
+    a:has(> img[src^="/page-"]) img { transition: transform 0.25s, box-shadow 0.25s; }
+    a:hover > img[src^="/page-"] { transform: translateY(-4px) rotate(-1deg); box-shadow: var(--shadow); }
+    .eyebrow { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    h1 {
+      margin: 2px 0 0;
+      font-family: var(--font-display); font-weight: 800;
+      font-size: clamp(40px, 7vw, 64px); line-height: 1; letter-spacing: -0.03em;
+    }
+    .tagline {
+      margin: 28px 0 0;
+      font-family: var(--font-display); font-weight: 800;
+      font-size: clamp(22px, 3.4vw, 32px); line-height: 1.15; letter-spacing: -0.02em;
+    }
+    .tagline mark { background: var(--ruler); color: var(--ink); padding: 0 8px; border-radius: 6px; -webkit-box-decoration-break: clone; box-decoration-break: clone; white-space: nowrap; }
+    .lede { margin: 14px 0 0; max-width: 620px; color: var(--muted); font-size: 17px; }
+    .team { margin: 18px 0 0; font-size: 14px; color: var(--muted); }
+    .team b { color: var(--text); font-weight: 700; }
+
+    nav.jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+    nav.jump a {
+      display: inline-flex; align-items: center; gap: 8px;
+      min-height: 40px; padding: 8px 14px;
+      border: 1px solid var(--line); border-radius: 999px;
+      background: var(--surface);
+      font-size: 14px; font-weight: 500; text-decoration: none;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    nav.jump a:hover { border-color: var(--text); transform: translateY(-1px); }
+    nav.jump span { font-family: var(--font-display); font-weight: 800; font-size: 12px; color: var(--muted); }
+
+    main { padding-bottom: 72px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      scroll-margin-top: 24px;
+    }
+    .card-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 14px; }
+    .num {
+      font-family: var(--font-display); font-weight: 800; font-size: 14px;
+      background: var(--ruler); color: var(--ink);
+      border-radius: 6px; padding: 2px 8px;
+    }
+    h2 { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 24px; letter-spacing: -0.02em; line-height: 1.2; }
+    .card p { margin: 0 0 12px; }
+    .card p:last-child { margin-bottom: 0; }
+    .muted { color: var(--muted); }
+    .split { display: grid; grid-template-columns: 1fr 220px; gap: 28px; align-items: start; }
+    .split img { border-radius: 8px; border: 1px solid var(--line); background: var(--paper); }
+
+    ol.steps { margin: 4px 0 16px; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 10px; }
+    ol.steps li { counter-increment: s; display: grid; grid-template-columns: 28px 1fr; gap: 10px; }
+    ol.steps li::before {
+      content: counter(s, lower-alpha);
+      width: 28px; height: 28px; border-radius: 50%;
+      display: grid; place-items: center;
+      border: 1.5px solid var(--text);
+      font-weight: 700; font-size: 13px;
+    }
+    .note {
+      border-left: 4px solid var(--ruler);
+      padding: 10px 14px; border-radius: 0 8px 8px 0;
+      background: color-mix(in srgb, var(--ruler) 18%, transparent);
+      font-size: 15px;
+    }
+    code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; }
+    kbd { padding: 1px 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      min-height: 44px; padding: 10px 18px;
+      border-radius: 999px;
+      font-weight: 700; font-size: 15px; text-decoration: none;
+      overflow-wrap: anywhere;
+      transition: background 0.2s, color 0.2s, transform 0.2s;
+    }
+    .btn.primary { background: var(--text); color: var(--bg); }
+    .btn.primary:hover { background: var(--ruler); color: var(--ink); transform: translateY(-1px); }
+    .btn.ghost { border: 1px solid var(--line); background: transparent; }
+    .btn.ghost:hover { border-color: var(--text); transform: translateY(-1px); }
+    .btn:focus-visible, nav.jump a:focus-visible { outline: 2px solid var(--ruler); outline-offset: 2px; }
+
+    .photo { margin: 4px 0 18px; }
+    .photo img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; object-position: 50% 65%; border-radius: 12px; background: #e9e8e4; }
+    .photo figcaption { margin-top: 8px; font-size: 13px; color: var(--muted); }
+    .video {
+      position: relative; aspect-ratio: 16 / 9; width: 100%;
+      border-radius: 12px; overflow: hidden; background: #000;
+      margin: 4px 0 16px;
+    }
+    .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+    footer { padding: 0 0 48px; font-size: 13px; color: var(--muted); }
+
+    @media (max-width: 720px) {
+      .ruler { width: 14px; }
+      .wrap { padding: 0 16px 0 30px; }
+      header.hero { padding: 48px 0 28px; }
+      .app-icon { width: 60px; height: 60px; border-radius: 14px; }
+      .card { padding: 22px 18px; border-radius: 16px; }
+      .split { grid-template-columns: 1fr; gap: 18px; }
+      .split img { max-width: 200px; }
+      .app-split { grid-template-columns: 1fr; }
+      .app-tile { flex-direction: row; text-align: left; }
+      .app-icon.big { width: 72px; height: 72px; border-radius: 16px; }
+      h2 { font-size: 21px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ruler" aria-hidden="true"></div>
+  <div class="wrap">
+    <header class="hero">
+      <div class="hero-top">
+        <a class="icon-link" href="https://testflight.apple.com/join/jr5mjxu7" target="_blank" rel="noopener" aria-label="Install Memory Meter on TestFlight">
+          <img class="app-icon" src="/app-icon.png" alt="Memory Meter app icon" width="76" height="76" />
+        </a>
+        <div>
+          <p class="eyebrow">DM2601 · Group 6</p>
+          <h1>Memory Meter</h1>
+        </div>
+      </div>
+      <p class="tagline">People move. <mark>Memories stay.</mark></p>
+      <p class="lede">An interactive hi-fi prototype for the ritual of measuring height: an iOS app, a Bluetooth controller box and a projector that shows every past record life-size on any wall.</p>
+      <p class="team"><b>Anna Nolden, Chanhee Jeong, Montana Eriksson, Szu-Yi Ho</b> · DM2601 Media Technology and Interaction Design, KTH</p>
+      <nav class="jump" aria-label="Deliverables">
+        <a href="#app"><span>01</span> Install the app</a>
+        <a href="#code"><span>02</span> Source code</a>
+        <a href="#hardware"><span>03</span> Controller hardware</a>
+        <a href="#video"><span>04</span> Demo video</a>
+        <a href="#workbook"><span>05</span> Workbook</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="card" id="app">
+        <div class="card-head"><span class="num">01</span><h2>Install the app on an iPhone</h2></div>
+        <div class="split app-split">
+          <div>
+        <p class="muted">Requires an iPhone with iOS 17 or later. No account needed besides your Apple ID.</p>
+        <ol class="steps">
+          <li><span>Install <b>TestFlight</b> from the App Store.</span></li>
+          <li><span>Open the invite link below on the iPhone.</span></li>
+          <li><span>Tap <b>Accept</b>, then <b>Install</b>. The app appears as <b>Memory Meter</b>.</span></li>
+        </ol>
+        <p class="note">Without the projector and controller, the app runs on the phone alone and shows a copy of the wall. To try it quickly: <b>Settings › Load sample family</b>, then open <b>Memory</b>.</p>
+        <div class="actions">
+          <a class="btn primary" href="https://testflight.apple.com/join/jr5mjxu7" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 20h14" /></svg>
+            Join on TestFlight
+          </a>
+          <a class="btn ghost" href="https://apps.apple.com/app/testflight/id899247664" target="_blank" rel="noopener">Get TestFlight</a>
+        </div>
+          </div>
+          <a class="icon-link app-tile" href="https://testflight.apple.com/join/jr5mjxu7" target="_blank" rel="noopener" aria-label="Install Memory Meter on TestFlight">
+            <img class="app-icon big" src="/app-icon.png" alt="Memory Meter app icon" width="140" height="140" loading="lazy" />
+            <span>Memory Meter<small>on TestFlight</small></span>
+          </a>
+        </div>
+      </section>
+
+      <section class="card" id="code">
+        <div class="card-head"><span class="num">02</span><h2>Source code and build instructions</h2></div>
+        <p>The README explains how to build with Xcode on a Mac: run <code>xcodegen</code>, then run on a device. The ESP32 controller firmware is in the <code>Firmware</code> folder.</p>
+        <div class="actions">
+          <a class="btn primary" href="https://github.com/chaneeii/HeightRitual" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24"><path d="m8 7-5 5 5 5M16 7l5 5-5 5" /></svg>
+            github.com/chaneeii/HeightRitual
+          </a>
+          <a class="btn ghost" href="https://github.com/chaneeii/HeightRitual#readme" target="_blank" rel="noopener">Read the README</a>
+        </div>
+      </section>
+
+      <section class="card" id="hardware">
+        <div class="card-head"><span class="num">03</span><h2>Controller hardware</h2></div>
+        <figure class="photo">
+          <img src="/controller.jpg" alt="The Memory Meter controller: a grey 3D-printed box with a square back button, left and right triangle buttons, a round confirm button and a knob" width="1600" height="1200" loading="lazy" />
+          <figcaption>The printed controller box: back, left, confirm and right buttons, and a knob. An ESP32 inside talks to the phone over Bluetooth.</figcaption>
+        </figure>
+        <p>The controller box (design, components and wiring) is documented in the workbook.</p>
+        <p class="muted">The full setup with projector and controller will be shown at the exhibition.</p>
+        <div class="actions">
+          <a class="btn primary" href="https://memory-meter-workbook.vercel.app/#/27" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5v13c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5z" /><path d="M12 6v13.5" /></svg>
+            Controller pages in the workbook
+          </a>
+          <a class="btn ghost" href="https://github.com/chaneeii/HeightRitual/tree/main/Firmware" target="_blank" rel="noopener">Firmware</a>
+        </div>
+      </section>
+
+      <section class="card" id="video">
+        <div class="card-head"><span class="num">04</span><h2>Demo video</h2></div>
+        <div class="video">
+          <iframe
+            src="https://www.youtube-nocookie.com/embed/tsYzJeKkXXA?rel=0"
+            title="Memory Meter demo video"
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen></iframe>
+        </div>
+        <p>Shows the full setup in use: filming a record, correcting the height, and looking back through records on the wall with the controller.</p>
+        <p class="muted">The video supplements the interactive prototype above.</p>
+        <div class="actions">
+          <a class="btn ghost" href="https://youtu.be/tsYzJeKkXXA" target="_blank" rel="noopener">Watch on YouTube</a>
+        </div>
+      </section>
+
+      <section class="card" id="workbook">
+        <div class="card-head"><span class="num">05</span><h2>Workbook, including user testing</h2></div>
+        <div class="split">
+          <div>
+            <p>Our process through the four phases of the Double Diamond: Discover, Define, Develop and Deliver. Flip through it in the browser, or download the PDF.</p>
+            <p class="muted">User testing is on page 29.</p>
+            <div class="actions">
+              <a class="btn primary" href="https://memory-meter-workbook.vercel.app/" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5v13c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5z" /><path d="M12 6v13.5" /></svg>
+                Open the workbook
+              </a>
+              <a class="btn ghost" href="https://memory-meter-workbook.vercel.app/Memory-Meter-Workbook.pdf" download>
+                <svg viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14" /></svg>
+                PDF (34 MB)
+              </a>
+              <a class="btn ghost" href="https://memory-meter-workbook.vercel.app/#/29" target="_blank" rel="noopener">User test page</a>
+            </div>
+          </div>
+          <a href="https://memory-meter-workbook.vercel.app/" target="_blank" rel="noopener" aria-label="Open the workbook">
+            <img src="/page-01.jpg" alt="Workbook cover: People move, memories stay" width="220" height="311" loading="lazy" />
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Memory Meter · DM2601 Group 6 · KTH Royal Institute of Technology, 2026
+    </footer>
+  </div>
+</body>
+</html>

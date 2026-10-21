@@ -157,7 +157,7 @@
     ol.steps a { font-weight: 700; }
     .invite {
       display: flex; align-items: center; gap: 6px;
-      margin-top: 14px; padding: 5px 5px 5px 14px;
+      margin-top: 12px; padding: 4px 4px 4px 14px;
       background: #fff; border-radius: 999px;
     }
     .invite a {
@@ -167,18 +167,33 @@
       text-decoration: none;
     }
     .invite a:hover { text-decoration: underline; }
+    /* 복사: 보조 아이콘 버튼 / 설치: 주 버튼 (TestFlight 초대 링크로 바로) */
     .copy {
       flex: none;
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      min-width: 92px; min-height: 40px; padding: 0 14px;
-      border: 0; border-radius: 999px;
-      background: var(--ink); color: #fff;
-      font: inherit; font-size: 13px; font-weight: 700;
+      display: grid; place-items: center;
+      width: 40px; height: 40px;
+      border: 0; border-radius: 50%;
+      background: rgba(17, 17, 17, 0.07); color: var(--ink);
       cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .copy:hover { background: rgba(17, 17, 17, 0.14); }
+    .copy .ok { display: none; }
+    .copy.done { background: #2f6f3a; color: #fff; }
+    .copy.done .ok { display: block; }
+    .copy.done .cp { display: none; }
+    .app-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    a.install {
+      flex: none;
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 44px; padding: 0 18px;
+      border-radius: 999px;
+      background: var(--ink); color: #fff;
+      font-family: var(--font-body); font-size: 13px; font-weight: 700;
+      text-decoration: none;
       transition: background 0.2s;
     }
-    .copy:hover { background: #000; }
-    .copy.done { background: #2f6f3a; }
+    a.install:hover { background: #000; }
 
     /* ---------- controller — photo fills the tile ---------- */
     .tile.ctrl { grid-area: ctrl; padding: 0; background: #d9d7d2; border-color: transparent; text-decoration: none; color: #fff; }
@@ -227,7 +242,8 @@
       .bento { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr); }
       .invite { margin-top: 10px; padding-left: 12px; }
       .invite a { font-size: 12px; }
-      .copy { min-height: 36px; min-width: 0; padding: 0 12px; }
+      .copy { width: 36px; height: 36px; }
+      a.install { height: 40px; padding: 0 14px; }
     }
 
     /* ---------- tablets and phones: stacked, scrolls ---------- */
@@ -253,8 +269,6 @@
       .app-icon { width: 72px; height: 72px; }
       .invite { padding-left: 12px; }
       .invite a { font-size: 12px; }
-      .copy { min-width: 40px; width: 40px; padding: 0; }
-      .copy span { display: none; }
       .cover-link { width: 96px; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -288,8 +302,16 @@
 
     <!-- 01 앱 설치: 초대 링크 + 복사 -->
     <section class="tile app" aria-label="Install the app">
-      <span class="label"><span class="num">01</span> Install the app · iOS 17+</span>
-      <h2>Try it on an iPhone</h2>
+      <div class="app-head">
+        <div>
+          <span class="label"><span class="num">01</span> Install the app · iOS 17+</span>
+          <h2>Try it on an iPhone</h2>
+        </div>
+          <a class="install" href="https://testflight.apple.com/join/jr5mjxu7" target="_blank" rel="noopener" aria-label="Install Memory Meter: open the TestFlight invite">
+            Install
+            <svg class="i" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8" /></svg>
+          </a>
+      </div>
       <ol class="steps">
         <li><span>Install <a href="https://apps.apple.com/app/testflight/id899247664" target="_blank" rel="noopener">TestFlight</a> from the App Store.</span></li>
         <li><span>Open the invite link on the iPhone.</span></li>
@@ -297,9 +319,9 @@
       </ol>
       <div class="invite push">
         <a id="invite-link" href="https://testflight.apple.com/join/jr5mjxu7" target="_blank" rel="noopener">testflight.apple.com/join/jr5mjxu7</a>
-        <button type="button" class="copy" id="copy-invite" data-url="https://testflight.apple.com/join/jr5mjxu7" aria-label="Copy invite link">
-          <svg class="i" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" /></svg>
-          <span>Copy</span>
+        <button type="button" class="copy" id="copy-invite" data-url="https://testflight.apple.com/join/jr5mjxu7" aria-label="Copy invite link" title="Copy link">
+          <svg class="i cp" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" /></svg>
+          <svg class="i ok" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
         </button>
       </div>
       <span class="sr-status" id="copy-status" role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"></span>
@@ -343,7 +365,6 @@
     // 초대 링크 복사 — clipboard API가 막힌 환경은 textarea로 대체
     (() => {
       const btn = document.getElementById('copy-invite')
-      const label = btn.querySelector('span')
       const status = document.getElementById('copy-status')
       let timer
       btn.addEventListener('click', async () => {
@@ -363,11 +384,18 @@
           try { ok = document.execCommand('copy') } catch { ok = false }
           ta.remove()
         }
-        label.textContent = ok ? 'Copied' : 'Press ⌘C'
-        status.textContent = ok ? 'Invite link copied' : 'Could not copy. Select the link and copy it.'
+        if (!ok) {
+          // 복사가 막히면 링크 텍스트를 선택해 둬서 ⌘C 로 바로 복사
+          const range = document.createRange()
+          range.selectNodeContents(document.getElementById('invite-link'))
+          getSelection().removeAllRanges()
+          getSelection().addRange(range)
+        }
+        btn.title = ok ? 'Copied' : 'Press ⌘C to copy'
+        status.textContent = ok ? 'Invite link copied' : 'Could not copy. The link is selected, press Command C.'
         btn.classList.toggle('done', ok)
         clearTimeout(timer)
-        timer = setTimeout(() => { label.textContent = 'Copy'; btn.classList.remove('done') }, 1800)
+        timer = setTimeout(() => { btn.title = 'Copy link'; btn.classList.remove('done') }, 1800)
       })
     })()
   </script>

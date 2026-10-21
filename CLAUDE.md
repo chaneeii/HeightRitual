@@ -29,7 +29,7 @@ controller light. P1 live foot check and the camera position auto-detect are not
 - English only (localization removed 17 Oct). Strings built in code still go through `L(_:)`,
   dates use `Locale.english`.
 - The controller connects on a device. The v4 box (Back, knob encoder, Left, Confirm, Right; power bank) runs `Firmware/controller/`; it compiles but has not run on the box yet. `Firmware/controller_buttons/` is the old breadboard build.
-- 56 unit tests in `HeightRitualTests/` pass in the simulator (scheme runs them in English).
+- 70 unit tests in `HeightRitualTests/` pass in the simulator (scheme runs them in English).
 
 ## Commands
 

@@ -13,40 +13,42 @@
 Families mark a child's height on a doorframe. The marks belong to that doorframe. The child
 outgrows the house, the family moves or repaints, and the marks are gone.
 
-**Height Ritual keeps the ritual and makes the record portable.** Someone stands at the wall and
+**Memory Meter keeps the ritual and makes the record portable.** Someone stands at the wall and
 is filmed for five seconds. The app suggests their height from the video and a parent corrects it.
 Later, every past record comes back on the wall: the person cut out of their clip, **life-size, at
 their real height**, with a pencil-like mark for each year.
 
+The app is called Memory Meter; the project and code keep the working name Height Ritual.
 Hi-fi prototype for KTH DM2601 (Media Technology and Interaction Design), Group 6.
 
 ---
 
 ## How it works
 
-| | Make | Memory |
-|---|---|---|
-| **What you do** | Choose who it is, stand with your heels on the line, film 5 seconds. Check the height, save. | Choose who to look back on. Step through the records with the knob, or let them play from the first to the newest. |
-| **On the wall** | Foot marks and an outline where to stand, then a 3-2-1 countdown. | Every mark, and the selected clip playing life-size at its real height. |
-| **In your hands** | A wireless box with a mode switch, a knob, Record, Cancel, Left / Confirm / Right and a red recording light. Every control also works on the phone. | |
+Everything starts from a person. Home is a wheel of family members with an Add card at the end;
+choosing someone opens a small menu with two actions.
 
-<p align="center">
-  <img src="docs/images/screens-main.png" alt="Make: choose a family member, film. Memory: choose a family member, memory wall, record detail" width="100%">
-  <br>
-  <sub>Make: choose a member · film with the foot guide &nbsp;|&nbsp; Memory: choose a member · memory wall · record detail</sub>
-</p>
+| | Record | Lookback |
+|---|---|---|
+| **What you do** | Stand with your heels on the line, press Confirm, film 5 seconds. Check the height on the dial, save. | Step through the records with the knob, or let them play from the first to the newest. |
+| **On the wall** | Foot marks and an outline where to stand, then a 3-2-1 countdown. | Every mark, and the selected clip playing life-size at its real height. |
+| **In your hands** | A wireless box with Back, a knob, Left, Confirm and Right. Every control also works on the phone. | |
+
+New members get their name from a letter wheel, so the whole app can be used from the controller.
+Every phone page has a matching wall version, and Settings opens on the wall as a grid of tiles.
+On first launch a short onboarding walks through the controls with the box in hand.
 
 ### One-time setup
 
 A projected centimetre has to be a real centimetre. Two steps, guided by a wizard on first launch:
 
-1. **Fit to wall**: move and scale the projected ruler until 0 and 100 sit on a tape measure.
+1. **Fit to wall**: move the floor line and change the size until the projected 0 and 100 sit on
+   a tape measure.
 2. **Camera position**: drag two lines in the camera picture onto the projected 0 and 100 cm
    lines, so heights can be read from the video.
 
-<p align="center">
-  <img src="docs/images/screens-setup.png" alt="Welcome, projector placement, fit to wall, camera position, settings" width="100%">
-</p>
+The Setup guide in Settings shows where the projector and phone go (2.5 m from the wall, lens at
+0.97 m). The wall image is always turned -90 degrees, because the group's projector lies on its side.
 
 ---
 
@@ -55,8 +57,8 @@ A projected centimetre has to be a real centimetre. Two steps, guided by a wizar
 ```mermaid
 flowchart LR
     subgraph Box["Controller box (ESP32)"]
-        K["Knob · Record · Cancel<br/>Left · Confirm · Right<br/>Mode switch · Auto play"]
-        L["Recording light"]
+        K["Back · Knob<br/>Left · Confirm · Right"]
+        P["USB power bank"]
     end
     subgraph Phone["iPhone or iPad on a stand"]
         App["Height Ritual app"]
@@ -67,7 +69,6 @@ flowchart LR
     Wall["The wall<br/>floor to 170+ cm"]
 
     K -- "Bluetooth LE<br/>what was pressed" --> App
-    App -- "light on / blink / off" --> L
     Cam -- "5 s clip" --> App
     App <--> Store
     App -- "USB-C to HDMI<br/>second screen" --> Proj
@@ -84,14 +85,14 @@ changes the route.
 
 ```mermaid
 flowchart TB
-    Tap["Phone buttons, back button, tabs"] --> E
+    Tap["Phone buttons, back button"] --> E
     BLE["ControllerManager<br/>(CoreBluetooth)"] --> E
-    E["ControlEvent<br/>knob · left · right · confirm · cancel · record · mode · autoPlay"]
+    E["ControlEvent<br/>knob · left · right · confirm · cancel"]
     E --> S["AppState.handle(_:)<br/>@MainActor @Observable"]
-    S -- "go(to:)" --> R["Route<br/>makeWho · makeFilm · makeHeight<br/>memoryWho · memoryWall · record<br/>memberEdit · settings · wizard"]
+    S -- "go(to:)" --> R["Route<br/>home · memberMenu · addMember<br/>makeFilm · makeHeight · makeSaved<br/>memoryWall · record · settings · tutorial"]
     R --> N["Navigation paths<br/>(NavigationStack drawn from the route)"]
     R --> WM["WallModel<br/>positions in real centimetres"]
-    N --> PhoneUI["Phone UI<br/>TabView · Forms · sheets"]
+    N --> PhoneUI["Phone UI<br/>Home wheel · Record · Lookback"]
     WM --> WallView["WallView"]
     WallView --> Ext["External display<br/>(projector)"]
     WallView --> Copy["Copy of the wall<br/>on the phone"]
@@ -104,6 +105,8 @@ flowchart TB
   in millimetres and only formatted through `HeightFormatter`, so cm and ft/in apply everywhere.
 - **Two screens, one model.** The projector scene and the phone's copy of the wall draw the same
   `WallModel` and share one `AVPlayer`.
+- **One look.** Colours and fonts come only from `Theme` (black and white for now, Black Han Sans
+  for titles); controller buttons are always drawn with `ControlIcon`.
 
 ## From clip to life-size record
 
@@ -113,7 +116,7 @@ flowchart LR
     B --> C["Cut-out with alpha<br/>HEVC + poster image"]
     B --> D["Head top over the first 0.5 s<br/>+ camera position lines"]
     D --> E["Suggested height"]
-    E --> F["Parent corrects<br/>-1 · -0.5 · +0.5 · +1 cm"]
+    E --> F["Parent corrects on the dial<br/>knob 0.1 cm · Left / Right 1 cm"]
     C --> G["Saved record<br/>clip · height · date"]
     F --> G
     G --> H["Played back life-size<br/>at its real height"]
@@ -128,33 +131,40 @@ height set by hand.
 
 | | Screen | |
 |---|---|---|
-| **W** | Welcome (3 pages) and the setup wizard | first launch |
-| **M1 → M2 → M3** | Choose a member → Film → Height | Make tab |
-| **R1 → R2 → R3** | Choose a member → Memory wall → Record detail | Memory tab (the app opens here) |
-| **A1** | Add or edit a family member | sheet |
-| **S, S2 to S6** | Settings: family, fit to wall, camera position, units, permissions, controller | sheet |
+| **T** | Onboarding with the controller: add someone, film, check, look back | first launch |
+| **H** | Home: wheel of members, Add card at the end | the app opens here |
+| **H1** | Member menu: Record or Lookback | overlay above Home |
+| **A2** | Add a member: name from the letter wheel | from the Add card |
+| **M2 → M3 → M4** | Film → Height check on the dial → Saved | Record |
+| **R2 → R3** | Lookback (the memory wall) → one record | Lookback |
+| **S** | Settings: setup guide, family, fit to wall, camera position, units, sound, controller, permissions, sample family, delete everything | Back on Home |
 
-Every screen, captured: [`docs/images/screens/`](docs/images/screens). The full spec with the
-controller table per screen: [`docs/SPEC.md`](docs/SPEC.md).
+The full spec with the controller table per screen: [`docs/SPEC.md`](docs/SPEC.md).
 
-Design rules: one decision per screen, one obvious next action, system controls, targets of at
-least 44 pt, no hidden gestures. Follows the phone's light or dark appearance. English only.
+Design rules: one decision per screen, one obvious next action, targets of at least 44 pt, no
+hidden gestures. English only.
 
 ## Controller
 
-| Control | On the choose screens | Film | Height | Memory wall |
-|---|---|---|---|---|
-| Knob | Move highlight | | ±0.5 cm | Previous / next record |
-| Left / Right | Move highlight | | ±1 cm | Previous / next record |
-| Confirm | Open | Start countdown | Save | Replay |
-| Cancel | | Back | Retake | Back |
-| Record / Stop | | Start / stop early | | |
-| Auto play | | | | Start / stop |
-| Mode switch | Make or Memory, on any screen | | | |
+```
+ [ Back ]                    ( Knob )
 
-Firmware: [`Firmware/controller/`](Firmware/controller) (full box),
-[`Firmware/controller_buttons/`](Firmware/controller_buttons) (buttons only, for the current
-breadboard), [`Firmware/wiring_test/`](Firmware/wiring_test) (serial check of every input).
+ < Left       ( Confirm )      Right >
+```
+
+| Control | Home | Film | Height check | Lookback |
+|---|---|---|---|---|
+| Knob | Turn the wheel | | ±0.1 cm per click | Previous / next record |
+| Left / Right | Previous / next card | | ±1 cm | Previous / next record |
+| Confirm | Open the member menu | Start (3-2-1, 5 s) / stop early | Save | Replay |
+| Back | Open Settings | Back to the member menu | Retake | Back to the member menu |
+
+Auto play is a setting; in ft/in the steps are 1/4 inch and 1 inch.
+Bluetooth LE device name `MemoryMeter`, packets `[controlId, value]` (SPEC section 6).
+
+Firmware: [`Firmware/controller/`](Firmware/controller) (the v4 box, NimBLE + ESP32Encoder),
+[`Firmware/controller_buttons/`](Firmware/controller_buttons) (old breadboard build),
+[`Firmware/wiring_test/`](Firmware/wiring_test) (serial check of every input).
 
 ---
 
@@ -169,10 +179,16 @@ HeightRitual/
 ├── Playback/     WallPlayer (one AVPlayer for wall and phone)
 ├── Wall/         WallModel, WallView, WallGeometry
 ├── Model/        Store, SettingsStore, HeightFormatter, models
-├── Phone/        SwiftUI screens; Settings/ holds S1 to S6 and the wizard
-└── Resources/    Localizable.xcstrings (en, ko, zh-Hans, sv), assets
+├── Phone/        SwiftUI screens, each with its wall version
+│   ├── Home/       wheel, member menu, letter wheel
+│   ├── Record/     film, foot guide, height dial, saved
+│   ├── Playback/   Lookback
+│   ├── Settings/   phone list and projector grid pages, wizard
+│   ├── Tutorial/   onboarding with the controller
+│   └── Design/     Theme (colours, fonts), DesignKit
+└── Resources/    assets, fonts
 HeightRitualTests/    unit tests: state machine, controller table, protocol, wall model, store
-HeightRitualUITests/  random navigation stress test, README screenshots
+HeightRitualUITests/  random navigation stress test, screenshot runs
 Firmware/             ESP32 sketches
 docs/                 SPEC.md (what), IMPLEMENTATION.md (how), images
 ```
@@ -188,26 +204,28 @@ open HeightRitual.xcodeproj
 ```
 
 Set your own team in `project.yml` (`DEVELOPMENT_TEAM`) before running on a device.
-"Load sample family" in Settings fills Memory with Nora and Leo, so the app can be tried without
-filming anyone.
+"Load sample family" in Settings adds Nora and Leo with past records, so Lookback can be tried
+without filming anyone. In Debug builds the projector button on every page shows the wall version
+on the phone with the controller's buttons, and the `-DebugFakeClip` launch argument fakes a filmed
+clip in the simulator.
 
 ```bash
 # unit tests
 xcodebuild test -project HeightRitual.xcodeproj -scheme HeightRitual \
   -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:HeightRitualTests
 
-# 60 random steps through the app, checking the tab bar after every step
+# random steps through the app
 xcodebuild test -project HeightRitual.xcodeproj -scheme HeightRitual \
   -destination 'platform=iOS Simulator,name=iPhone 16' \
-  -only-testing:HeightRitualUITests/NavigationStressTests/testRandomNavigationKeepsTheTabBarRight
+  -only-testing:HeightRitualUITests/NavigationStressTests
 ```
 
 ## Status
 
 | Part | State |
 |---|---|
-| State machine, navigation, all phone screens, wall drawing, settings, wizard | Done, 56 unit tests pass in the simulator |
-| Controller over Bluetooth LE | Connects on a device; button input still being checked on the breadboard |
+| State machine, Home wheel, Record and Lookback, settings, onboarding, wall versions of every page | Done, 70 unit tests pass in the simulator |
+| Controller v4 over Bluetooth LE | Connects on a device; firmware for the soldered box, knob read with ESP32Encoder |
 | Camera, cut-out, alpha video playback, projector scene | Written; needs testing on a device with a projector |
 | Live foot check while filming, automatic camera position | Not built |
 

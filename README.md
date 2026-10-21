@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/hero.svg" alt="Height Ritual: a projected wall with pencil-like height marks and two life-size figures" width="100%">
+  <img src="docs/images/hero.svg" alt="Memory Meter app icon beside a measuring ruler and pencil height marks. People move. Memories stay." width="100%">
 </p>
 
 <p align="center">
